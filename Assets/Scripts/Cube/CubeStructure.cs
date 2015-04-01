@@ -12,6 +12,7 @@ namespace NeonShooter.Cube
     public class CubeStructure
     {
         GameObject cube;
+        GameObject part;
 
         TwoWayList<TwoWayList<TwoWayList<CubeCell>>> cells;
         List<int> layersCellCount;
@@ -27,12 +28,13 @@ namespace NeonShooter.Cube
         /// Creates new CubeStructure with given initial radius, and sets all cells are set.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
-        public CubeStructure(GameObject cube, int initialRadius)
+        public CubeStructure(GameObject cube, int initialRadius, GameObject part)
         {
             if (initialRadius < 0)
                 throw new ArgumentException("Argument initialRadius must not be lower than 0.");
 
             this.cube = cube;
+            this.part = part;
             Radius = initialRadius;
 
             cells = CreateCellXYZCube(Radius);
@@ -85,6 +87,9 @@ namespace NeonShooter.Cube
 
             UpdateSides(x, y, z);
             UpdateNeighboursSides(x, y, z);
+
+            //Add our lovely Life-Cube
+            UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
 
             int layerIndex = MathHelper.Max(x, y, z);
             int dLayerCellCount = hasCellThere ? 1 : -1;
