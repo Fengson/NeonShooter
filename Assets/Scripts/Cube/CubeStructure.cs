@@ -91,7 +91,7 @@ namespace NeonShooter.Cube
             //Add our lovely Life-Cube
             UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
 
-            int layerIndex = MathHelper.Max(x, y, z);
+			int layerIndex = MathHelper.Max(Math.Abs(x), Math.Abs(y), Math.Abs(z));
             int dLayerCellCount = hasCellThere ? 1 : -1;
             layersCellCount[layerIndex] += dLayerCellCount;
         }
