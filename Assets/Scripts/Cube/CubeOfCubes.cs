@@ -9,7 +9,11 @@ namespace NeonShooter.Cube
         public CubeStructure Structure { get; private set; }
         public int radius;
         public GameObject part;
-        int x, y, z;
+        public int x, y, z;
+
+		public float rotationSpeed;
+
+		public GameObject aim;
 
         void Start()
         {
@@ -30,35 +34,38 @@ namespace NeonShooter.Cube
         }
 
         void Update()
-        {
-            if (Input.GetKey(KeyCode.Z))
-            {
-                if (x != radius && y != radius && z != radius)
-                {
-                    Structure.SetCell(x, y, z, false);
-                    if (z != (radius - 1) * (-1))
-                        z = z - 1;
-                    else
-                    {
-                        z = radius - 1;
-                        if (x != (radius - 1) * (-1))
-                            x = x - 1;
-                        else
-                        {
-                            x = radius - 1;
-                            if (y != (radius - 1) * (-1))
-                            {
-                                y = y - 1;
-                            }
-                            else
-                            {
+		{
+			this.aim.transform.Rotate (new Vector3 (0,0,rotationSpeed * Time.deltaTime));
 
-                                Destroy(gameObject);
-                            }
-                        }
-                    }
-                }
-            }
+            if (Input.GetKey (KeyCode.Z)) {
+				
+				if (rotationSpeed > -2000) 
+					rotationSpeed -= Time.deltaTime * 200;
+
+				if (x != radius && y != radius && z != radius) {
+					Structure.SetCell (x, y, z, false);
+					if (z != (radius - 1) * (-1))
+						z = z - 1;
+					else {
+						z = radius - 1;
+						if (x != (radius - 1) * (-1))
+							x = x - 1;
+						else {
+							x = radius - 1;
+							if (y != (radius - 1) * (-1)) {
+								y = y - 1;
+							} else {
+
+								Destroy (gameObject);
+							}
+						}
+					}
+				}
+			} else {
+				
+				if(rotationSpeed<-90) 
+					rotationSpeed+=Time.deltaTime*200;
+			}
         }
     }
 }
