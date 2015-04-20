@@ -10,7 +10,7 @@ namespace NeonShooter
 
         void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.CompareTag("Cell"))
+            if (other.gameObject.CompareTag("Cubeling"))
             {
                 Destroy(other.gameObject);
                 amount++;
