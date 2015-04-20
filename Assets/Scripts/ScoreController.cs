@@ -2,18 +2,21 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class ScoreController : MonoBehaviour {
+namespace NeonShooter
+{
+    public class ScoreController : MonoBehaviour
+    {
+        public Text lifeText;
+        int life = 125;
 
-	public Text lifeText;
-	int life = 100;
+        void Start()
+        {
+            lifeText = GetComponent<Text>();
+        }
 
-	// Use this for initialization
-	void Start () {
-		lifeText = GetComponent<Text> ();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		lifeText.text = "Life: " + (life + DestroyCublingsAndCountTheShit.amount);
-	}
+        void Update()
+        {
+            lifeText.text = "Life: " + (life + CellsIncorporator.amount);
+        }
+    }
 }

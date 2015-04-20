@@ -35,7 +35,7 @@ namespace NeonShooter.Cube
 
         void Update()
 		{
-			this.aim.transform.Rotate (new Vector3 (0,0,rotationSpeed * Time.deltaTime));
+			//this.aim.transform.Rotate (new Vector3 (0,0,rotationSpeed * Time.deltaTime));
 
             if (Input.GetKey (KeyCode.Z)) {
 				
