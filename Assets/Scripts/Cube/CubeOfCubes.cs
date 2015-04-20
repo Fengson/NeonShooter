@@ -21,7 +21,7 @@ namespace NeonShooter.Cube
             x = radius - 1;
             y = radius - 1;
             z = radius - 1;
-            /*Structure.SetCell(2, -2, 2, false);
+            Structure.SetCell(2, -2, 2, false);
             Structure.SetCell(-2, -2, 2, false);
             Structure.SetCell(-1, 2, -2, false);
             Structure.SetCell(0, 2, 2, false);
@@ -30,7 +30,7 @@ namespace NeonShooter.Cube
             Structure.SetCell(2, 0, 0, false);
             Structure.SetCell(2, -2, 1, false);
             Structure.SetCell(1, -2, -1, false);
-            */
+            
         }
 
         void Update()

@@ -10,7 +10,8 @@ namespace NeonShooter
 
         void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.CompareTag("Cubeling"))
+
+			if (other.gameObject.CompareTag("Cubeling") && other.gameObject.GetComponent<IsCubelingPickabe>().pickable)
             {
                 Destroy(other.gameObject);
                 amount++;
