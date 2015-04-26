@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using NeonShooter.Utils;
+﻿using NeonShooter.Utils;
+using UnityEngine;
 
 namespace NeonShooter.PlayerControl
 {
@@ -12,15 +11,29 @@ namespace NeonShooter.PlayerControl
         public NotifyingProperty<Vector2> Rotations { get; private set; }
         public NotifyingProperty<Vector3> Direction { get; private set; }
 
+        public InvokableAction<object> OnShootStart { get; private set; }
+        public InvokableAction<object> OnShootEnd { get; private set; }
+
         public GameObject TEMP_enemy;
+        IPlayer TEMP_enemyScript;
 
         public Player()
         {
-            access = new System.Object();
+            access = new object();
 
             Position = new NotifyingProperty<Vector3>(access, true, false);
             Rotations = new NotifyingProperty<Vector2>(access, true, false);
             Direction = new NotifyingProperty<Vector3>(access, true, false);
+
+            OnShootStart = new InvokableAction<object>(access);
+            OnShootEnd = new InvokableAction<object>(access);
+        }
+
+        void Start()
+        {
+            TEMP_enemyScript = TEMP_enemy.GetComponent<EnemyPlayer>();
+            OnShootStart.Action += TEMP_OnShootStart_Action;
+            OnShootEnd.Action += TEMP_OnShootEnd_Action;
         }
 
         void Update()
@@ -33,9 +46,25 @@ namespace NeonShooter.PlayerControl
                 cameraObject.transform.eulerAngles.y);
             Direction[access] = Quaternion.Euler(Rotations.Value.x, Rotations.Value.y, 0) * Vector3.forward;
 
-            var script = TEMP_enemy.GetComponent<EnemyPlayer>();
-            script.Position.Value = Position.Value + new Vector3(5, 0, 0);
-            script.Rotations.Value = new Vector2(Rotations.Value.x, -Rotations.Value.y);
+            if (Input.GetMouseButtonDown(0))
+                if (OnShootStart != null)
+                    OnShootStart.Invoke(null, access);
+            if (Input.GetMouseButtonUp(0))
+                if (OnShootEnd != null)
+                    OnShootEnd.Invoke(null, access);
+
+            TEMP_enemyScript.Position.Value = Position.Value + new Vector3(5, 0, 0);
+            TEMP_enemyScript.Rotations.Value = new Vector2(Rotations.Value.x, -Rotations.Value.y);
+        }
+
+        void TEMP_OnShootStart_Action(object obj)
+        {
+            TEMP_enemyScript.OnShootStart.Invoke(null);
+        }
+
+        void TEMP_OnShootEnd_Action(object obj)
+        {
+            TEMP_enemyScript.OnShootEnd.Invoke(null);
         }
     }
 }

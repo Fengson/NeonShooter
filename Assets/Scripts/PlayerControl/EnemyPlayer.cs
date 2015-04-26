@@ -11,11 +11,17 @@ namespace NeonShooter.PlayerControl
         public NotifyingProperty<Vector2> Rotations { get; private set; }
         public NotifyingProperty<Vector3> Direction { get; private set; }
 
+        public InvokableAction<object> OnShootStart { get; private set; }
+        public InvokableAction<object> OnShootEnd { get; private set; }
+
         public EnemyPlayer()
         {
             Position = new NotifyingProperty<Vector3>();
             Rotations = new NotifyingProperty<Vector2>();
             Direction = new NotifyingProperty<Vector3>();
+
+            OnShootStart = new InvokableAction<object>();
+            OnShootEnd = new InvokableAction<object>();
         }
 
         void Start()
@@ -30,6 +36,8 @@ namespace NeonShooter.PlayerControl
 
             Position.OnValueChanged += Position_OnValueChanged;
             Rotations.OnValueChanged += Rotations_OnValueChanged;
+            OnShootStart.Action += OnShootStart_Action;
+            OnShootEnd.Action += OnShootEnd_Action;
         }
 
         void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
@@ -44,6 +52,16 @@ namespace NeonShooter.PlayerControl
 
             rot = TEMP_nose.transform.localEulerAngles;
             TEMP_nose.transform.localEulerAngles = new Vector3(newValue.x, rot.y, rot.z);
+        }
+
+        void OnShootStart_Action(object arg)
+        {
+            TEMP_nose.GetComponent<Renderer>().material.color = Color.red;
+        }
+
+        void OnShootEnd_Action(object arg)
+        {
+            TEMP_nose.GetComponent<Renderer>().material.color = Color.white;
         }
     }
 }

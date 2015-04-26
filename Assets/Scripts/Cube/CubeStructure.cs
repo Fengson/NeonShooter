@@ -1,7 +1,7 @@
-﻿using System;
+﻿using NeonShooter.Utils;
+using NeonShooter.Utils.Collections;
+using System;
 using System.Collections.Generic;
-using NeonShooter.Collections;
-using NeonShooter.Utils;
 using UnityEngine;
 
 namespace NeonShooter.Cube

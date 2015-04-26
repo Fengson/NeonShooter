@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NeonShooter.Collections
+namespace NeonShooter.Utils.Collections
 {
     /// <summary>
     /// List that is bi-directional. It consists of two parts: forward and backward. Forward part starts at index 0 and goes positive, backward part at -1 and goes negative. When using methods with "Forward" or "Backward" in their names, apropriate parts will be used. When using indices, there will be used a part, that is indicated by the sign of a given index.

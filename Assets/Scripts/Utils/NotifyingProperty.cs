@@ -6,26 +6,26 @@ namespace NeonShooter.Utils
 {
     public class NotifyingProperty<T>
     {
-        public event NotifyingPropertyEventHandler<T> OnValueChanged;
+        private object access;
 
-        public Object Owner { get; private set; }
+        public event NotifyingPropertyEventHandler<T> OnValueChanged;
 
         public bool PublicGet { get; private set; }
         public bool PublicSet { get; private set; }
 
         T value;
-        public T this[Object owner]
+        public T this[object access]
         {
             get
             {
-                if (!PublicGet && (owner == null || !owner.Equals(Owner)))
-                    throw new InvalidOperationException("Cannot get property value - it is defined as private and given object is not its owner.");
+                if (!PublicGet && (access == null || !access.Equals(this.access)))
+                    throw new InvalidOperationException("Cannot get property value - it is defined as private and given access object does not match the required one.");
                 return value;
             }
             set
             {
-                if (!PublicSet && (owner == null || !owner.Equals(Owner)))
-                    throw new InvalidOperationException("Cannot set property value - it is defined as private and given object is not its owner.");
+                if (!PublicSet && (access == null || !access.Equals(this.access)))
+                    throw new InvalidOperationException("Cannot set property value - it is defined as private and given access object does not match the required one.");
                 if (this.value == null && value == null ||
                     this.value.Equals(value)) return;
 
@@ -37,8 +37,8 @@ namespace NeonShooter.Utils
         }
         public T Value
         {
-            get { return this[new Object()]; }
-            set { this[new Object()] = value; }
+            get { return this[new object()]; }
+            set { this[new object()] = value; }
         }
 
         public NotifyingProperty()
@@ -51,14 +51,9 @@ namespace NeonShooter.Utils
         {
         }
 
-        public NotifyingProperty(Object owner, bool publicGet, bool publicSet)
-            : this(owner, publicGet, publicSet, default(T))
+        public NotifyingProperty(object access, bool publicGet, bool publicSet, T value = default(T))
         {
-        }
-
-        public NotifyingProperty(Object owner, bool publicGet, bool publicSet, T value)
-        {
-            Owner = owner;
+            this.access = access;
             PublicGet = publicGet;
             PublicSet = publicSet;
             this.value = value;
