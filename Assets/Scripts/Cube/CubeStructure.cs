@@ -23,13 +23,15 @@ namespace NeonShooter.Cube
         /// </summary>
         public int Radius { get; private set; }
 
+        public ICellRetriever CellRetriever { get; set; }
+
         public SizeChangeBehaviour UnwantedSizeChangeBehaviour { get; set; }
 
         /// <summary>
         /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
-        public CubeStructure(GameObject cube, int initialRadius)//, GameObject part)
+        public CubeStructure(GameObject cube, int initialRadius, ICellRetriever cellRetriever)//, GameObject part)
         {
             if (initialRadius < 0)
                 throw new ArgumentException("Argument initialRadius must not be lower than 0.");
@@ -37,6 +39,7 @@ namespace NeonShooter.Cube
             this.cube = cube;
             //this.part = part;
             Radius = initialRadius;
+            CellRetriever = cellRetriever;
 
             cells = CreateCellXYZCube(Radius);
             cellLayers = new List<CellLayer>();
@@ -140,6 +143,11 @@ namespace NeonShooter.Cube
         public CellLayer GetLayer(int index)
         {
             return cellLayers[index];
+        }
+
+        public CellLayer GetLastLayer()
+        {
+            return cellLayers.LastOrDefault();
         }
 
         public CellLayer GetLayer(int x, int y, int z)
@@ -294,30 +302,17 @@ namespace NeonShooter.Cube
             return 0;
         }
         
-        public IVector3? RemoveCell()
+        public IVector3? RetrieveCell()
         {
-            var cells = RemoveCells(1);
+            var cells = RetrieveCells(1);
             if (cells.Count == 0) return null;
             return cells[0];
         }
 
-        public List<IVector3> RemoveCells(int count)
+        public List<IVector3> RetrieveCells(int count)
         {
-            var removedCells = new List<IVector3>();
-
-            for (int i = 0; i < count; i++)
-            {
-                var layer = cellLayers.LastOrDefault();
-                if (layer == null) break;
-
-                CubeCell cell = layer.GetRandomCell();
-                SetCell(cell.X, cell.Y, cell.Z, false);
-                removedCells.Add(new IVector3(cell.X, cell.Y, cell.Z));
-
-                if (CanShrink()) Shrink();
-            }
-
-            return removedCells;
+            if (CellRetriever == null) return new List<IVector3>();
+            else return CellRetriever.RetrieveCells(this, count);
         }
 
         private void UpdateSides(int x, int y, int z)
