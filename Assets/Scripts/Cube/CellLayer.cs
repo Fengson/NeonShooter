@@ -32,13 +32,15 @@ namespace NeonShooter.Cube
             return true;
         }
 
-        public CubeCell ExtractCell()
+        public CubeCell GetRandomCell()
         {
             if (Count == 0) return null;
+            return cells.ElementAt(new Random().Next(Count));
+        }
 
-            CubeCell cell = cells.ElementAt(new Random().Next(Count));
+        public void RemoveCell(CubeCell cell)
+        {
             cells.Remove(cell);
-            return cell;
         }
 
         private static int CalculateCapacity(int index)

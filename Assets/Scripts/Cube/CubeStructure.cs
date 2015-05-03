@@ -2,6 +2,7 @@
 using NeonShooter.Utils.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace NeonShooter.Cube
@@ -12,7 +13,7 @@ namespace NeonShooter.Cube
     public class CubeStructure
     {
         GameObject cube;
-        GameObject part;
+        //GameObject part;
 
         TwoWayList<TwoWayList<TwoWayList<CubeCell>>> cells;
         List<CellLayer> cellLayers;
@@ -28,13 +29,13 @@ namespace NeonShooter.Cube
         /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
-        public CubeStructure(GameObject cube, int initialRadius, GameObject part)
+        public CubeStructure(GameObject cube, int initialRadius)//, GameObject part)
         {
             if (initialRadius < 0)
                 throw new ArgumentException("Argument initialRadius must not be lower than 0.");
 
             this.cube = cube;
-            this.part = part;
+            //this.part = part;
             Radius = initialRadius;
 
             cells = CreateCellXYZCube(Radius);
@@ -81,14 +82,18 @@ namespace NeonShooter.Cube
         /// <param name="x">X coord of the cell.</param>
         /// <param name="y">Y coord of the cell.</param>
         /// <param name="z">Z coord of the cell.</param>
-        /// <param name="hasCellThere">If true, the cell will be created at given coords. If false, it will be erased.</param>
-        public void SetCell(int x, int y, int z, bool hasCellThere)
+        /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
+        public void SetCell(int x, int y, int z, bool cellValue)
         {
             CubeCell oldValue = cells[x][y][z];
-            if (hasCellThere == (oldValue != null)) return;
+            if (cellValue == (oldValue != null)) return;
 
-            cells[x][y][z] = hasCellThere ? new CubeCell(cube, x, y, z) : null;
-            if (!hasCellThere) oldValue.ClearSides();
+            cells[x][y][z] = cellValue ? new CubeCell(cube, x, y, z) : null;
+            if (!cellValue) oldValue.ClearSides();
+
+            int layerIndex = GetLayerIndex(x, y, z);
+            if (cellValue) cellLayers[layerIndex].AddCell(cells[x][y][z]);
+            else cellLayers[layerIndex].RemoveCell(oldValue);
 
             UpdateSides(x, y, z);
             UpdateNeighboursSides(x, y, z);
@@ -96,11 +101,7 @@ namespace NeonShooter.Cube
             //Add our lovely Life-Cube
             // ORLY? it will instantiate with every change - regardless of whether cell is added or removed.
             // Also it breaks SRP
-            UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
-
-            int layerIndex = GetLayerIndex(x, y, z);
-            if (hasCellThere) cellLayers[layerIndex].AddCell(cells[x][y][z]);
-            else cellLayers[layerIndex].ExtractCell();
+            //UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
         }
 
         /// <summary>
@@ -292,7 +293,32 @@ namespace NeonShooter.Cube
             }
             return 0;
         }
+        
+        public IVector3? RemoveCell()
+        {
+            var cells = RemoveCells(1);
+            if (cells.Count == 0) return null;
+            return cells[0];
+        }
 
+        public List<IVector3> RemoveCells(int count)
+        {
+            var removedCells = new List<IVector3>();
+
+            for (int i = 0; i < count; i++)
+            {
+                var layer = cellLayers.LastOrDefault();
+                if (layer == null) break;
+
+                CubeCell cell = layer.GetRandomCell();
+                SetCell(cell.X, cell.Y, cell.Z, false);
+                removedCells.Add(new IVector3(cell.X, cell.Y, cell.Z));
+
+                if (CanShrink()) Shrink();
+            }
+
+            return removedCells;
+        }
 
         private void UpdateSides(int x, int y, int z)
         {
