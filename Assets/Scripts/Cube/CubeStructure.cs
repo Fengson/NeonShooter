@@ -23,6 +23,8 @@ namespace NeonShooter.Cube
         /// </summary>
         public int Radius { get; private set; }
 
+        public int Count { get; private set; }
+
         public ICellRetriever CellRetriever { get; set; }
 
         public SizeChangeBehaviour UnwantedSizeChangeBehaviour { get; set; }
@@ -39,6 +41,7 @@ namespace NeonShooter.Cube
             this.cube = cube;
             //this.part = part;
             Radius = initialRadius;
+            Count = MathHelper.IntPow(Radius + 1, 3);
             CellRetriever = cellRetriever;
 
             cells = CreateCellXYZCube(Radius);
