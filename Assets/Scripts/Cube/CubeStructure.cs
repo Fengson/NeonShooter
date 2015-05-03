@@ -15,7 +15,7 @@ namespace NeonShooter.Cube
         GameObject part;
 
         TwoWayList<TwoWayList<TwoWayList<CubeCell>>> cells;
-        List<int> layersCellCount;
+        List<CellLayer> cellLayers;
 
         /// <summary>
         /// Current radius of this CubeStructure. It cannot be changed explicitly. Instead use Expand() and Shrink() methods.
@@ -25,7 +25,7 @@ namespace NeonShooter.Cube
         public SizeChangeBehaviour UnwantedSizeChangeBehaviour { get; set; }
 
         /// <summary>
-        /// Creates new CubeStructure with given initial radius, and sets all cells are set.
+        /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
         public CubeStructure(GameObject cube, int initialRadius, GameObject part)
@@ -38,12 +38,17 @@ namespace NeonShooter.Cube
             Radius = initialRadius;
 
             cells = CreateCellXYZCube(Radius);
-            ForEveryCell((x, y, z) => cells[x][y][z] = new CubeCell(cube, x, y, z));
-            UpdateLastLayersSides();
-
-            layersCellCount = new List<int>();
+            cellLayers = new List<CellLayer>();
             for (int i = 0; i < Radius; i++)
-                layersCellCount.Add(GetLayerMaxCapacity(i));
+                cellLayers.Add(new CellLayer(i));
+
+            ForEveryCell((x, y, z) =>
+                {
+                    var cell = new CubeCell(cube, x, y, z);
+                    cells[x][y][z] = cell;
+                    cellLayers[GetLayerIndex(x, y, z)].AddCell(cell);
+                });
+            UpdateLastLayersSides();
 
             UnwantedSizeChangeBehaviour = SizeChangeBehaviour.Exception;
         }
@@ -89,11 +94,13 @@ namespace NeonShooter.Cube
             UpdateNeighboursSides(x, y, z);
 
             //Add our lovely Life-Cube
+            // ORLY? it will instantiate with every change - regardless of whether cell is added or removed.
+            // Also it breaks SRP
             UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
 
-			int layerIndex = MathHelper.Max(Math.Abs(x), Math.Abs(y), Math.Abs(z));
-            int dLayerCellCount = hasCellThere ? 1 : -1;
-            layersCellCount[layerIndex] += dLayerCellCount;
+            int layerIndex = GetLayerIndex(x, y, z);
+            if (hasCellThere) cellLayers[layerIndex].AddCell(cells[x][y][z]);
+            else cellLayers[layerIndex].ExtractCell();
         }
 
         /// <summary>
@@ -124,17 +131,28 @@ namespace NeonShooter.Cube
             return true;
         }
 
+        public int GetLayerIndex(int x, int y, int z)
+        {
+            return MathHelper.Max(Math.Abs(x), Math.Abs(y), Math.Abs(z));
+        }
+
+        public CellLayer GetLayer(int index)
+        {
+            return cellLayers[index];
+        }
+
+        public CellLayer GetLayer(int x, int y, int z)
+        {
+            return GetLayer(GetLayerIndex(x, y, z));
+        }
+
         /// <summary>
         /// Retrieves the information, whether the most outer layer of this CubeStructure is full, i.e. all of the cells are set. If CubeStructure has to grow and this method returns true, then Expand() method should be called to enable further growth.
         /// </summary>
         public bool LastLayerFull()
         {
             if (Radius == 0) return true;
-
-            int lastLayerIdx = Radius - 1;
-            int lastLayerCellCount = layersCellCount[lastLayerIdx];
-            bool result = lastLayerCellCount == GetLayerMaxCapacity(lastLayerIdx);
-            return result;
+            return cellLayers[Radius - 1].Full;
         }
 
         /// <summary>
@@ -151,11 +169,7 @@ namespace NeonShooter.Cube
         public bool LastLayerEmpty()
         {
             if (Radius == 0) return false;
-
-            int lastLayerIdx = Radius - 1;
-            int lastLayerCellCount = layersCellCount[lastLayerIdx];
-            bool result = lastLayerCellCount == 0;
-            return result;
+            return cellLayers[Radius - 1].Empty;
         }
 
         /// <summary>
@@ -218,7 +232,7 @@ namespace NeonShooter.Cube
                 cells[0].AddForward(new TwoWayList<CubeCell>());
                 cells[0][0].AddForward(null);
             }
-            layersCellCount.Add(0);
+            cellLayers.Add(new CellLayer(cellLayers.Count));
             return Radius;
         }
 
@@ -263,7 +277,7 @@ namespace NeonShooter.Cube
                 cells.RemoveForward();
                 cells.RemoveBackward();
 
-                layersCellCount.RemoveAt(layersCellCount.Count - 1);
+                cellLayers.RemoveAt(cellLayers.Count - 1);
                 return Radius;
             }
             else if (Radius == 1)
@@ -274,10 +288,11 @@ namespace NeonShooter.Cube
                 cells[0].RemoveForward();
                 cells.RemoveForward();
 
-                layersCellCount.RemoveAt(0);
+                cellLayers.RemoveAt(0);
             }
             return 0;
         }
+
 
         private void UpdateSides(int x, int y, int z)
         {
@@ -410,17 +425,6 @@ namespace NeonShooter.Cube
                     coordList.AddBackward(createItem(radius));
                 }
             }
-        }
-
-        private static int GetLayerMaxCapacity(int layerIndex)
-        {
-            int diameter = layerIndex * 2 + 1;
-            int capacity = diameter * diameter * diameter;
-            if (layerIndex == 0) return capacity;
-
-            int prevDiameter = diameter - 2;
-            capacity -= prevDiameter * prevDiameter * prevDiameter;
-            return capacity;
         }
 
         public enum SizeChangeBehaviour
