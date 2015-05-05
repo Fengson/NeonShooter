@@ -14,13 +14,13 @@ namespace NeonShooter.PlayerControl
         public InvokableAction<object> OnShootStart { get; private set; }
         public InvokableAction<object> OnShootEnd { get; private set; }
 
-        public GameObject TEMP_enemy;
-        IPlayer TEMP_enemyScript;
+        //public GameObject TEMP_enemy;
+        //IPlayer TEMP_enemyScript;
 
         public Player()
         {
             access = new object();
-
+			Application.runInBackground = true;
             Position = new NotifyingProperty<Vector3>(access, true, false);
             Rotations = new NotifyingProperty<Vector2>(access, true, false);
             Direction = new NotifyingProperty<Vector3>(access, true, false);
@@ -31,9 +31,9 @@ namespace NeonShooter.PlayerControl
 
         void Start()
         {
-            TEMP_enemyScript = TEMP_enemy.GetComponent<EnemyPlayer>();
-            OnShootStart.Action += TEMP_OnShootStart_Action;
-            OnShootEnd.Action += TEMP_OnShootEnd_Action;
+            //TEMP_enemyScript = TEMP_enemy.GetComponent<EnemyPlayer>();
+            //OnShootStart.Action += TEMP_OnShootStart_Action;
+            //OnShootEnd.Action += TEMP_OnShootEnd_Action;
         }
 
         void Update()
@@ -53,18 +53,18 @@ namespace NeonShooter.PlayerControl
                 if (OnShootEnd != null)
                     OnShootEnd.Invoke(null, access);
 
-            TEMP_enemyScript.Position.Value = Position.Value + new Vector3(5, 0, 0);
-            TEMP_enemyScript.Rotations.Value = new Vector2(Rotations.Value.x, -Rotations.Value.y);
+            //TEMP_enemyScript.Position.Value = Position.Value + new Vector3(5, 0, 0);
+            //TEMP_enemyScript.Rotations.Value = new Vector2(Rotations.Value.x, -Rotations.Value.y);
         }
 
-        void TEMP_OnShootStart_Action(object obj)
-        {
-            TEMP_enemyScript.OnShootStart.Invoke(null);
-        }
+        //void TEMP_OnShootStart_Action(object obj)
+        //{
+        //    TEMP_enemyScript.OnShootStart.Invoke(null);
+        //}
 
-        void TEMP_OnShootEnd_Action(object obj)
-        {
-            TEMP_enemyScript.OnShootEnd.Invoke(null);
-        }
+        //void TEMP_OnShootEnd_Action(object obj)
+        //{
+        //    TEMP_enemyScript.OnShootEnd.Invoke(null);
+        //}
     }
 }
