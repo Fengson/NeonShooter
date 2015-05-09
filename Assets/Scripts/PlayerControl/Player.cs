@@ -30,7 +30,7 @@ namespace NeonShooter.PlayerControl
             OnShootStart = new InvokableAction<object>(access);
             OnShootEnd = new InvokableAction<object>(access);
 
-			selectedWeapon = new Weapon (100, 0, 10);
+			selectedWeapon = new Weapon (100, 0, (float)(4.0/18.0*Mathf.PI), 10);
         }
 
         void Start()
@@ -64,7 +64,7 @@ namespace NeonShooter.PlayerControl
         void TEMP_OnShootStart_Action(object obj)
         {
 			CellsIncorporator.amount -= this.selectedWeapon.AmmoCost;
-			if(this.selectedWeapon.shoot()){ CellsIncorporator.amount += this.selectedWeapon.Damage; }
+			if(this.selectedWeapon.shoot(this, this.TEMP_enemyScript)){ CellsIncorporator.amount += this.selectedWeapon.Damage; }
             TEMP_enemyScript.OnShootStart.Invoke(null);
         }
 
