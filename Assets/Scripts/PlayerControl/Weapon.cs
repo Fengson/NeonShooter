@@ -25,9 +25,10 @@ namespace NeonShooter.PlayerControl
 			double angle_cos = Vector3.Dot(heading, shooter.Direction[null].normalized);
 			if(angle_cos > this.ConeAngleCos)
 			{
-				//if(Physics.Raycast(shooter.Position[null], heading, this.Reach))
+				RaycastHit hit = new RaycastHit();
+				if(Physics.Raycast(shooter.Position[null], heading, out hit))
 				{
-					return true;
+					if(hit.distance <= this.Reach){ return true; }
 				}
 			}
 			return false;
