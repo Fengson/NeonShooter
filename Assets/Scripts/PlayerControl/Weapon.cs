@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NeonShooter.PlayerControl
 {
-	public class Weapon
+	abstract public class Weapon
 	{
 		public int Damage { get; private set; }
 		public float Reach { get; private set; }
@@ -19,18 +19,13 @@ namespace NeonShooter.PlayerControl
 			this.ConeAngleCos = Mathf.Cos(cone_angle_radians);
 		}
 
-		public bool shoot(Player shooter, IPlayer target)
+		abstract public void shoot(Player shooter, IPlayer target);
+
+		abstract public string getWeaponName();
+
+		protected bool shootLine(Vector3 rayStart, Vector3 rayEnd, out RaycastHit hitInfo)
 		{
-			Vector3 heading = (target.Position[null] - shooter.Position[null]).normalized;
-			double angle_cos = Vector3.Dot(heading, shooter.Direction[null].normalized);
-			if(angle_cos > this.ConeAngleCos)
-			{
-				//if(Physics.Raycast(shooter.Position[null], heading, this.Reach))
-				{
-					return true;
-				}
-			}
-			return false;
+			return Physics.Linecast(rayStart, rayEnd, out hitInfo);
 		}
 	}
 }

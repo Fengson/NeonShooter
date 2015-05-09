@@ -16,7 +16,11 @@ namespace NeonShooter
 
         void Update()
         {
-            lifeText.text = "Life: " + (life + CellsIncorporator.amount);
+            string weaponText = "";
+            if(CellsIncorporator.selectedWeapon!=null) {
+                weaponText="\nWeapon:\n"+ CellsIncorporator.selectedWeapon.getWeaponName();
+            }
+            lifeText.text = "Life: " + (life + CellsIncorporator.amount)+ weaponText;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using NeonShooter.Utils;
 using UnityEngine;
+using System.Collections;
 
 namespace NeonShooter.PlayerControl
 {
@@ -17,8 +18,6 @@ namespace NeonShooter.PlayerControl
         public GameObject TEMP_enemy;
         IPlayer TEMP_enemyScript;
 
-		protected Weapon selectedWeapon;
-
         public Player()
         {
             access = new object();
@@ -29,8 +28,6 @@ namespace NeonShooter.PlayerControl
 
             OnShootStart = new InvokableAction<object>(access);
             OnShootEnd = new InvokableAction<object>(access);
-
-			selectedWeapon = new Weapon (100, 0, (float)(4.0/18.0*Mathf.PI), 10);
         }
 
         void Start()
@@ -50,6 +47,7 @@ namespace NeonShooter.PlayerControl
                 cameraObject.transform.eulerAngles.y);
             Direction[access] = Quaternion.Euler(Rotations.Value.x, Rotations.Value.y, 0) * Vector3.forward;
 
+            //TODO talk about this with Sushi & Arek - Grzesiek
             if (Input.GetMouseButtonDown(0))
                 if (OnShootStart != null)
                     OnShootStart.Invoke(null, access);
@@ -57,20 +55,82 @@ namespace NeonShooter.PlayerControl
                 if (OnShootEnd != null)
                     OnShootEnd.Invoke(null, access);
 
+            if (Input.GetKey(KeyCode.X)) {
+                StartCoroutine(changeToNextWeapon());
+            }
+
             TEMP_enemyScript.Position.Value = Position.Value + new Vector3(5, 0, 0);
             TEMP_enemyScript.Rotations.Value = new Vector2(Rotations.Value.x, -Rotations.Value.y);
         }
 
         void TEMP_OnShootStart_Action(object obj)
         {
-			CellsIncorporator.amount -= this.selectedWeapon.AmmoCost;
-			if(this.selectedWeapon.shoot(this, this.TEMP_enemyScript)){ CellsIncorporator.amount += this.selectedWeapon.Damage; }
-            TEMP_enemyScript.OnShootStart.Invoke(null);
+            StartCoroutine(onShoot());
         }
 
         void TEMP_OnShootEnd_Action(object obj)
         {
             TEMP_enemyScript.OnShootEnd.Invoke(null);
+        }
+
+        bool shooting = false;
+        IEnumerator onShoot() {
+            if(!shooting) {
+                shooting=true;
+                CellsIncorporator.amount -= CellsIncorporator.selectedWeapon.AmmoCost;
+
+                CellsIncorporator.selectedWeapon.shoot(this, this.TEMP_enemyScript);
+                //this will switch weapon if theres not enough ammo for current weapon
+                changeWeapon(CellsIncorporator.selectedWeapon);
+                TEMP_enemyScript.OnShootStart.Invoke(null);
+                yield return new WaitForSeconds(0.1f);
+                shooting=false;
+            }
+        }
+
+        public void enemyShot(Weapon weapon, Collider target, int damage) {
+		    CellsIncorporator.amount += damage;
+
+			Debug.Log(target.name+" got shot with "+weapon.getWeaponName() + " for "+damage+" damage");
+            GameObject enemy = target.gameObject;
+           //TODO take enemy life, play sound and cast animations
+        }
+
+        bool changingWeapon = false;
+        IEnumerator changeToNextWeapon() {
+            if(!changingWeapon) {
+                changingWeapon=true;
+                if(CellsIncorporator.selectedWeapon is VacuumWeapon) {
+                    changeWeapon(new RailGun());
+                } else if(CellsIncorporator.selectedWeapon is RailGun) {
+                    changeWeapon(new RocketLauncher());
+                } else {
+                    changeWeapon(new VacuumWeapon());
+                }
+                yield return new WaitForSeconds(0.1f);
+                changingWeapon=false;
+            }
+        }
+
+        /**
+        changes weapon to set, or next if not available
+        */
+        void changeWeapon(Weapon weapon) {
+            if(weapon is RocketLauncher) {
+                if(CellsIncorporator.amount>300) {
+                    CellsIncorporator.selectedWeapon=weapon;
+                } else {
+                    changeWeapon(new VacuumWeapon());
+                }
+            } else if(weapon is RailGun) {
+                if(CellsIncorporator.amount>5) {
+                    CellsIncorporator.selectedWeapon=weapon;
+                } else {
+                    changeWeapon(new RocketLauncher());
+                }
+            } else if(weapon is VacuumWeapon) {
+                CellsIncorporator.selectedWeapon = new VacuumWeapon();
+            }
         }
     }
 }
