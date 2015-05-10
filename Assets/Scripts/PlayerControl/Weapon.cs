@@ -29,5 +29,9 @@ namespace NeonShooter.PlayerControl
 		}
 
 		abstract public float missileFlightDuration();
+
+		abstract public int lifeRequiredToOwn();
+
+		abstract public Weapon nextWeapon();
 	}
 }

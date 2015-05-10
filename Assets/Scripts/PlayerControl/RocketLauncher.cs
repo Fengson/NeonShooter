@@ -80,6 +80,14 @@ public class RocketLauncher : Weapon {
 			return Reach/FlySpeed;
 		}
 
+		public override int lifeRequiredToOwn() {
+			return 300;
+		}
+
+		public override Weapon nextWeapon() {
+			return new VacuumWeapon();
+		}
+
 		public override string getWeaponName() {
 		    return "Rocket Launcher";
 		}

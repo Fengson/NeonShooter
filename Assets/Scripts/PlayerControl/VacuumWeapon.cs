@@ -32,6 +32,14 @@ public class VacuumWeapon : Weapon {
      	return 0;
      }
 
+   	public override int lifeRequiredToOwn() {
+     	return 0;
+    }
+
+   	public override Weapon nextWeapon() {
+     	return new RailGun();
+    }
+
 	public override string getWeaponName() {
 		return "Vacuum";
 	}

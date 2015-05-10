@@ -23,6 +23,14 @@ public class RailGun : Weapon {
 			return 0.01f;
 		}
 
+		public override int lifeRequiredToOwn() {
+			return 100;
+		}
+
+		public override Weapon nextWeapon() {
+			return new RocketLauncher();
+		}
+
     	public override string getWeaponName() {
     	    return "Rail Gun";
     	}

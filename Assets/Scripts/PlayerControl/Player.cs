@@ -112,13 +112,7 @@ namespace NeonShooter.PlayerControl
         IEnumerator changeToNextWeapon() {
             if(!changingWeapon) {
                 changingWeapon=true;
-                if(CellsIncorporator.selectedWeapon is VacuumWeapon) {
-                    changeWeapon(new RailGun());
-                } else if(CellsIncorporator.selectedWeapon is RailGun) {
-                    changeWeapon(new RocketLauncher());
-                } else {
-                    changeWeapon(new VacuumWeapon());
-                }
+                changeWeapon(CellsIncorporator.selectedWeapon.nextWeapon());
                 yield return new WaitForSeconds(0.1f);
                 changingWeapon=false;
             }
@@ -128,20 +122,10 @@ namespace NeonShooter.PlayerControl
         changes weapon to set, or next if not available
         */
         void changeWeapon(Weapon weapon) {
-            if(weapon is RocketLauncher) {
-                if(CellsIncorporator.amount>300) {
-                    CellsIncorporator.selectedWeapon=weapon;
-                } else {
-                    changeWeapon(new VacuumWeapon());
-                }
-            } else if(weapon is RailGun) {
-                if(CellsIncorporator.amount>5) {
-                    CellsIncorporator.selectedWeapon=weapon;
-                } else {
-                    changeWeapon(new RocketLauncher());
-                }
-            } else if(weapon is VacuumWeapon) {
-                CellsIncorporator.selectedWeapon = new VacuumWeapon();
+            if(CellsIncorporator.amount>weapon.lifeRequiredToOwn()) {
+                CellsIncorporator.selectedWeapon=weapon;
+            } else {
+                changeWeapon(weapon.nextWeapon());
             }
         }
     }
