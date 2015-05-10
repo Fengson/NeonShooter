@@ -82,7 +82,7 @@ namespace NeonShooter.PlayerControl
         IEnumerator onShoot() {
             if(!shooting) {
                 shooting=true;
-                int costPayed = CellsIncorporator.selectedWeapon.AmmoCost*(int)Mathf.Sqrt(CellsIncorporator.amount)/3;
+                int costPayed = (int)(CellsIncorporator.selectedWeapon.AmmoCost*Mathf.Max(1,Mathf.Sqrt(CellsIncorporator.amount/100)));
                 CellsIncorporator.amount -= costPayed;
 
                 CellsIncorporator.selectedWeapon.shoot(this, this.TEMP_enemyScript, costPayed);
@@ -99,7 +99,7 @@ namespace NeonShooter.PlayerControl
 
         public void enemyShot(Weapon weapon, Collider target, int damage, int costPayed) {
             //damage bonus for being big
-            damage += 4*(int)Mathf.Sqrt(costPayed);
+            damage += (int)(8*Mathf.Sqrt(costPayed));
             //return lost cost and add what was taken
 		    CellsIncorporator.amount += damage + costPayed;
 
