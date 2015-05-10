@@ -15,6 +15,8 @@ namespace NeonShooter.PlayerControl
         public InvokableAction<object> OnShootStart { get; private set; }
         public InvokableAction<object> OnShootEnd { get; private set; }
 
+        float aimRotationSpeed = -90;
+        public GameObject aim;
         public GameObject TEMP_enemy;
         IPlayer TEMP_enemyScript;
 
@@ -39,6 +41,9 @@ namespace NeonShooter.PlayerControl
 
         void Update()
         {
+			this.aim.transform.Rotate (new Vector3 (0,0,aimRotationSpeed * Time.deltaTime));
+            if(aimRotationSpeed<-90)
+                aimRotationSpeed+=Time.deltaTime*200;
             Position[access] = transform.position;
 
             var cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
@@ -77,23 +82,30 @@ namespace NeonShooter.PlayerControl
         IEnumerator onShoot() {
             if(!shooting) {
                 shooting=true;
-                CellsIncorporator.amount -= CellsIncorporator.selectedWeapon.AmmoCost;
+                int costPayed = CellsIncorporator.selectedWeapon.AmmoCost*(int)Mathf.Sqrt(CellsIncorporator.amount)/3;
+                CellsIncorporator.amount -= costPayed;
 
-                CellsIncorporator.selectedWeapon.shoot(this, this.TEMP_enemyScript);
+                CellsIncorporator.selectedWeapon.shoot(this, this.TEMP_enemyScript, costPayed);
+			    if (aimRotationSpeed > -3000)
+				    aimRotationSpeed -= Time.deltaTime*30*CellsIncorporator.selectedWeapon.Damage;
                 //this will switch weapon if theres not enough ammo for current weapon
                 changeWeapon(CellsIncorporator.selectedWeapon);
                 TEMP_enemyScript.OnShootStart.Invoke(null);
+                //TODO play sound and cast animations depending on weapon
                 yield return new WaitForSeconds(0.1f);
                 shooting=false;
             }
         }
 
-        public void enemyShot(Weapon weapon, Collider target, int damage) {
-		    CellsIncorporator.amount += damage;
+        public void enemyShot(Weapon weapon, Collider target, int damage, int costPayed) {
+            //damage bonus for being big
+            damage += 4*(int)Mathf.Sqrt(costPayed);
+            //return lost cost and add what was taken
+		    CellsIncorporator.amount += damage + costPayed;
 
 			Debug.Log(target.name+" got shot with "+weapon.getWeaponName() + " for "+damage+" damage");
             GameObject enemy = target.gameObject;
-           //TODO take enemy life, play sound and cast animations
+           //TODO take enemy life, play sound and cast animations depending on weapon
         }
 
         bool changingWeapon = false;

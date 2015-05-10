@@ -11,10 +11,6 @@ namespace NeonShooter.Cube
         public GameObject part;
         public int x, y, z;
 
-		public float rotationSpeed;
-
-		public GameObject aim;
-
         void Start()
         {
             Structure = new CubeStructure(gameObject, radius, part);
@@ -35,12 +31,8 @@ namespace NeonShooter.Cube
 
         void Update()
 		{
-			//this.aim.transform.Rotate (new Vector3 (0,0,rotationSpeed * Time.deltaTime));
 
             if (Input.GetKey (KeyCode.Z)) {
-				
-				if (rotationSpeed > -2000) 
-					rotationSpeed -= Time.deltaTime * 200;
 
 				if (x != radius && y != radius && z != radius) {
 					Structure.SetCell (x, y, z, false);
@@ -61,10 +53,6 @@ namespace NeonShooter.Cube
 						}
 					}
 				}
-			} else {
-				
-				if(rotationSpeed<-90) 
-					rotationSpeed+=Time.deltaTime*200;
 			}
         }
     }
