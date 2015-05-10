@@ -15,6 +15,8 @@ namespace NeonShooter.Cube
 
         public GameObject aim;
 
+		public bool targeted = false;
+
         void Start()
         {
             Structure = new CubeStructure(gameObject, radius,
@@ -68,15 +70,18 @@ namespace NeonShooter.Cube
                 //        }
                 //    }
                 //}
-                IVector3? cell = Structure.RetrieveCell();
-                if (cell == null)
-                {
-                    Destroy(gameObject);
-                }
-                else
-                {
-                    Instantiate(part, transform.localPosition + cell.Value, transform.rotation);
-                }
+				if(targeted)
+				{
+					IVector3? cell = Structure.RetrieveCell();
+                	if (cell == null)
+                	{
+                    	Destroy(gameObject);
+                	}
+                	else
+                	{
+                    	Instantiate(part, transform.localPosition + cell.Value, transform.rotation);
+                	}
+				}
             }
             else
             {
@@ -84,5 +89,12 @@ namespace NeonShooter.Cube
                     rotationSpeed += Time.deltaTime * 200;
             }
         }
+
+		public void addCube()
+		{
+			if (Structure.ShouldExpand ())
+				Structure.Expand ();
+			Structure.addRandomCube ();
+		}
     }
 }

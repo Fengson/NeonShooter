@@ -150,7 +150,12 @@ namespace NeonShooter.Cube
 
         public CellLayer GetLastLayer()
         {
-            return cellLayers.LastOrDefault();
+        	//Last or default gave us layer of Radius, not current last one
+        	//And so - expand was bugged
+			if (Radius > 1)
+				return cellLayers [Radius - 1];
+			else
+				return null;
         }
 
         public CellLayer GetLayer(int x, int y, int z)
@@ -164,7 +169,8 @@ namespace NeonShooter.Cube
         public bool LastLayerFull()
         {
             if (Radius == 0) return true;
-            return cellLayers[Radius - 1].Full;
+				return cellLayers [Radius - 1].Count == cellLayers [Radius - 1].Capacity;
+
         }
 
         /// <summary>
@@ -458,5 +464,15 @@ namespace NeonShooter.Cube
             Error,
             Exception
         }
+
+		public void addRandomCube()
+		{
+			String space = cellLayers [Radius - 1].getRandomCellSpace ();
+			string [] dims = space.Split(new Char[]{'_'});
+
+			this.SetCell (Int32.Parse(dims [0]), Int32.Parse(dims [1]), Int32.Parse(dims [2]), true);
+
+
+		}
     }
 }

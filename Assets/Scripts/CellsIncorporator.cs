@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace NeonShooter
@@ -16,6 +16,7 @@ namespace NeonShooter
                 Destroy(other.gameObject);
                 amount++;
                 GetComponent<AudioSource>().PlayOneShot(impact, 0.7F);
+				this.gameObject.GetComponent<NeonShooter.Cube.CubeOfCubes>().addCube();
             }
         }
     }
