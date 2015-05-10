@@ -18,7 +18,7 @@ public class RocketLauncher : Weapon {
 			this.FlySpeed = 10.0f;
 		}
 
-		public override void shoot(Player shooter, IPlayer target, int costPayed) {
+		public override void shoot(Player shooter, int costPayed) {
 		    shooter.StartCoroutine(rocketLauncherShoot(shooter, costPayed));
 		}
 

@@ -19,7 +19,7 @@ namespace NeonShooter.PlayerControl
 			this.ConeAngleCos = Mathf.Cos(cone_angle_radians);
 		}
 
-		abstract public void shoot(Player shooter, IPlayer target, int costPayed);
+		abstract public void shoot(Player shooter, int costPayed);
 
 		abstract public string getWeaponName();
 

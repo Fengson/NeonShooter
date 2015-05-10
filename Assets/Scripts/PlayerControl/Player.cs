@@ -23,7 +23,7 @@ namespace NeonShooter.PlayerControl
         public Player()
         {
             access = new object();
-			Application.runInBackground = true;
+			//Application.runInBackground = true;
             Position = new NotifyingProperty<Vector3>(access, true, false);
             Rotations = new NotifyingProperty<Vector2>(access, true, false);
             Direction = new NotifyingProperty<Vector3>(access, true, false);
@@ -88,12 +88,12 @@ namespace NeonShooter.PlayerControl
                 int costPayed = (int)(CellsIncorporator.selectedWeapon.AmmoCost*Mathf.Max(1,Mathf.Sqrt(CellsIncorporator.amount/100)));
                 CellsIncorporator.amount -= costPayed;
 
-                CellsIncorporator.selectedWeapon.shoot(this, this.TEMP_enemyScript, costPayed);
+                CellsIncorporator.selectedWeapon.shoot(this, costPayed);
 			    if (aimRotationSpeed > -3000)
-				    aimRotationSpeed -= Time.deltaTime*30*CellsIncorporator.selectedWeapon.Damage;
+				    aimRotationSpeed -= Time.deltaTime*100*CellsIncorporator.selectedWeapon.Damage;
                 //this will switch weapon if theres not enough ammo for current weapon
                 changeWeapon(CellsIncorporator.selectedWeapon);
-                TEMP_enemyScript.OnShootStart.Invoke(null);
+                //TEMP_enemyScript.OnShootStart.Invoke(null);
                 //TODO play sound and cast animations depending on weapon
                 yield return new WaitForSeconds(0.1f);
                 shooting=false;

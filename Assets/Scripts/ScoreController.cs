@@ -18,9 +18,9 @@ namespace NeonShooter
         {
             string weaponText = "";
             if(CellsIncorporator.selectedWeapon!=null) {
-                weaponText="\nWeapon:\n"+ CellsIncorporator.selectedWeapon.getWeaponName();
+                weaponText="Weapon:\n"+ CellsIncorporator.selectedWeapon.getWeaponName()+"\n";
             }
-            lifeText.text = "Life: " + (life + CellsIncorporator.amount)+ weaponText;
+            lifeText.text = weaponText + "Life: " + (life + CellsIncorporator.amount);
         }
     }
 }

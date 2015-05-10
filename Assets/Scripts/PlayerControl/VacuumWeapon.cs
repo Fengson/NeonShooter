@@ -9,6 +9,28 @@ public class VacuumWeapon : Weapon {
 	{
 	}
 
+   	public override void shoot(Player shooter, int costPayed)
+   	{
+   	   //TODO change this Arek when we get to know how to get IPlayer array
+    	Collider[] hitColliders = Physics.OverlapSphere(shooter.Position[null], Reach);
+		int k = 0;
+        while (k < hitColliders.Length) {
+            if(hitColliders[k].name=="Plane" || hitColliders[k].name=="FPSController") {
+            	k++;
+            	continue;
+            }
+        	Vector3 heading = (hitColliders[k].bounds.center - shooter.Position[null]).normalized;
+        	double angle_cos = Vector3.Dot(heading, shooter.Direction[null].normalized);
+        	if(angle_cos > this.ConeAngleCos)
+           		{
+				shooter.enemyShot(this, hitColliders[k], this.Damage, costPayed);
+            	}
+            k++;
+   		}
+   	}
+
+/*
+OLD METHOD
    	public override void shoot(Player shooter, IPlayer target, int costPayed)
    	{
     	RaycastHit hitInfo;
@@ -24,7 +46,7 @@ public class VacuumWeapon : Weapon {
    			}
    		}
    	}
-
+ */
    	/**
    	method redundant for this specific weapon, suction speed would be more useful, as the distance will vary
    	*/
@@ -33,7 +55,7 @@ public class VacuumWeapon : Weapon {
      }
 
    	public override int lifeRequiredToOwn() {
-     	return 0;
+     	return int.MinValue;
     }
 
    	public override Weapon nextWeapon() {

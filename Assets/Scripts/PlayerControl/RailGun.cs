@@ -8,7 +8,7 @@ public class RailGun : Weapon {
     	{
     	}
 
-    	public override void shoot(Player shooter, IPlayer target, int costPayed)
+    	public override void shoot(Player shooter, int costPayed)
     	{
     		Vector3 startingPosition = shooter.Position[null];
     	 	Vector3 endingPosition =
