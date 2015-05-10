@@ -6,6 +6,7 @@ namespace NeonShooter.PlayerControl
     class EnemyPlayer : MonoBehaviour, IPlayer
     {
         public GameObject TEMP_nose;
+		public string name;
 
         public NotifyingProperty<Vector3> Position { get; private set; }
         public NotifyingProperty<Vector2> Rotations { get; private set; }
@@ -38,11 +39,20 @@ namespace NeonShooter.PlayerControl
             Rotations.OnValueChanged += Rotations_OnValueChanged;
             OnShootStart.Action += OnShootStart_Action;
             OnShootEnd.Action += OnShootEnd_Action;
+
         }
+
+		private Vector3 previousPosition;
+		private float time = 0;
+		void Update () {
+			time += Time.deltaTime * 10;
+			transform.position = Vector3.Lerp(previousPosition, Position.Value, time);
+		}
 
         void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
         {
-            transform.localPosition = newValue;
+			previousPosition = transform.position;
+			time = 0;
         }
 
         void Rotations_OnValueChanged(Vector2 oldValue, Vector2 newValue)

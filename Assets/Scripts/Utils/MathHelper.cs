@@ -16,5 +16,16 @@ namespace NeonShooter.Utils
 
             return currentMax;
         }
+
+        public static int IntPow(int x, int exponent)
+        {
+            if (exponent < 0)
+                throw new ArgumentException("Argument exponent must not be lower than 0.");
+
+            int result = 1;
+            for (int i = 0; i < exponent; i++)
+                result *= x;
+            return result;
+        }
     }
 }

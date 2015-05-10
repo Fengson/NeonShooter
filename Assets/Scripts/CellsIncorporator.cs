@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using NeonShooter.PlayerControl;
 
@@ -19,6 +19,7 @@ namespace NeonShooter
                 amount++;
                 //TODO different sounds for different weapons
                 GetComponent<AudioSource>().PlayOneShot(impact, 0.7F);
+				this.gameObject.GetComponent<NeonShooter.Cube.CubeOfCubes>().addCube();
             }
         }
     }

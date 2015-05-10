@@ -30,7 +30,7 @@ namespace NeonShooter.Utils.Collections
         }
 
         /// <summary>
-        /// Gives number of forward items in forward the TwoWayList&lt;T&gt;.
+        /// Gives number of items in forward part of the TwoWayList&lt;T&gt;.
         /// </summary>
         public int ForwardCount
         {

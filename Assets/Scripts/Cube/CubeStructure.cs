@@ -2,6 +2,7 @@
 using NeonShooter.Utils.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace NeonShooter.Cube
@@ -12,38 +13,49 @@ namespace NeonShooter.Cube
     public class CubeStructure
     {
         GameObject cube;
-        GameObject part;
+        //GameObject part;
 
         TwoWayList<TwoWayList<TwoWayList<CubeCell>>> cells;
-        List<int> layersCellCount;
+        List<CellLayer> cellLayers;
 
         /// <summary>
         /// Current radius of this CubeStructure. It cannot be changed explicitly. Instead use Expand() and Shrink() methods.
         /// </summary>
         public int Radius { get; private set; }
 
+        public int Count { get; private set; }
+
+        public ICellRetriever CellRetriever { get; set; }
+
         public SizeChangeBehaviour UnwantedSizeChangeBehaviour { get; set; }
 
         /// <summary>
-        /// Creates new CubeStructure with given initial radius, and sets all cells are set.
+        /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
-        public CubeStructure(GameObject cube, int initialRadius, GameObject part)
+        public CubeStructure(GameObject cube, int initialRadius, ICellRetriever cellRetriever)//, GameObject part)
         {
             if (initialRadius < 0)
                 throw new ArgumentException("Argument initialRadius must not be lower than 0.");
 
             this.cube = cube;
-            this.part = part;
+            //this.part = part;
             Radius = initialRadius;
+            Count = MathHelper.IntPow(Radius + 1, 3);
+            CellRetriever = cellRetriever;
 
             cells = CreateCellXYZCube(Radius);
-            ForEveryCell((x, y, z) => cells[x][y][z] = new CubeCell(cube, x, y, z));
-            UpdateLastLayersSides();
-
-            layersCellCount = new List<int>();
+            cellLayers = new List<CellLayer>();
             for (int i = 0; i < Radius; i++)
-                layersCellCount.Add(GetLayerMaxCapacity(i));
+                cellLayers.Add(new CellLayer(i));
+
+            ForEveryCell((x, y, z) =>
+                {
+                    var cell = new CubeCell(cube, x, y, z);
+                    cells[x][y][z] = cell;
+                    cellLayers[GetLayerIndex(x, y, z)].AddCell(cell);
+                });
+            UpdateLastLayersSides();
 
             UnwantedSizeChangeBehaviour = SizeChangeBehaviour.Exception;
         }
@@ -76,24 +88,26 @@ namespace NeonShooter.Cube
         /// <param name="x">X coord of the cell.</param>
         /// <param name="y">Y coord of the cell.</param>
         /// <param name="z">Z coord of the cell.</param>
-        /// <param name="hasCellThere">If true, the cell will be created at given coords. If false, it will be erased.</param>
-        public void SetCell(int x, int y, int z, bool hasCellThere)
+        /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
+        public void SetCell(int x, int y, int z, bool cellValue)
         {
             CubeCell oldValue = cells[x][y][z];
-            if (hasCellThere == (oldValue != null)) return;
+            if (cellValue == (oldValue != null)) return;
 
-            cells[x][y][z] = hasCellThere ? new CubeCell(cube, x, y, z) : null;
-            if (!hasCellThere) oldValue.ClearSides();
+            cells[x][y][z] = cellValue ? new CubeCell(cube, x, y, z) : null;
+            if (!cellValue) oldValue.ClearSides();
+
+            int layerIndex = GetLayerIndex(x, y, z);
+            if (cellValue) cellLayers[layerIndex].AddCell(cells[x][y][z]);
+            else cellLayers[layerIndex].RemoveCell(oldValue);
 
             UpdateSides(x, y, z);
             UpdateNeighboursSides(x, y, z);
 
             //Add our lovely Life-Cube
-            UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
-
-			int layerIndex = MathHelper.Max(Math.Abs(x), Math.Abs(y), Math.Abs(z));
-            int dLayerCellCount = hasCellThere ? 1 : -1;
-            layersCellCount[layerIndex] += dLayerCellCount;
+            // ORLY? it will instantiate with every change - regardless of whether cell is added or removed.
+            // Also it breaks SRP
+            //UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
         }
 
         /// <summary>
@@ -124,17 +138,39 @@ namespace NeonShooter.Cube
             return true;
         }
 
+        public int GetLayerIndex(int x, int y, int z)
+        {
+            return MathHelper.Max(Math.Abs(x), Math.Abs(y), Math.Abs(z));
+        }
+
+        public CellLayer GetLayer(int index)
+        {
+            return cellLayers[index];
+        }
+
+        public CellLayer GetLastLayer()
+        {
+        	//Last or default gave us layer of Radius, not current last one
+        	//And so - expand was bugged
+			if (Radius > 1)
+				return cellLayers [Radius - 1];
+			else
+				return null;
+        }
+
+        public CellLayer GetLayer(int x, int y, int z)
+        {
+            return GetLayer(GetLayerIndex(x, y, z));
+        }
+
         /// <summary>
         /// Retrieves the information, whether the most outer layer of this CubeStructure is full, i.e. all of the cells are set. If CubeStructure has to grow and this method returns true, then Expand() method should be called to enable further growth.
         /// </summary>
         public bool LastLayerFull()
         {
             if (Radius == 0) return true;
+				return cellLayers [Radius - 1].Count == cellLayers [Radius - 1].Capacity;
 
-            int lastLayerIdx = Radius - 1;
-            int lastLayerCellCount = layersCellCount[lastLayerIdx];
-            bool result = lastLayerCellCount == GetLayerMaxCapacity(lastLayerIdx);
-            return result;
         }
 
         /// <summary>
@@ -151,11 +187,7 @@ namespace NeonShooter.Cube
         public bool LastLayerEmpty()
         {
             if (Radius == 0) return false;
-
-            int lastLayerIdx = Radius - 1;
-            int lastLayerCellCount = layersCellCount[lastLayerIdx];
-            bool result = lastLayerCellCount == 0;
-            return result;
+            return cellLayers[Radius - 1].Empty;
         }
 
         /// <summary>
@@ -218,7 +250,7 @@ namespace NeonShooter.Cube
                 cells[0].AddForward(new TwoWayList<CubeCell>());
                 cells[0][0].AddForward(null);
             }
-            layersCellCount.Add(0);
+            cellLayers.Add(new CellLayer(cellLayers.Count));
             return Radius;
         }
 
@@ -263,7 +295,7 @@ namespace NeonShooter.Cube
                 cells.RemoveForward();
                 cells.RemoveBackward();
 
-                layersCellCount.RemoveAt(layersCellCount.Count - 1);
+                cellLayers.RemoveAt(cellLayers.Count - 1);
                 return Radius;
             }
             else if (Radius == 1)
@@ -274,9 +306,22 @@ namespace NeonShooter.Cube
                 cells[0].RemoveForward();
                 cells.RemoveForward();
 
-                layersCellCount.RemoveAt(0);
+                cellLayers.RemoveAt(0);
             }
             return 0;
+        }
+        
+        public IVector3? RetrieveCell()
+        {
+            var cells = RetrieveCells(1);
+            if (cells.Count == 0) return null;
+            return cells[0];
+        }
+
+        public List<IVector3> RetrieveCells(int count)
+        {
+            if (CellRetriever == null) return new List<IVector3>();
+            else return CellRetriever.RetrieveCells(this, count);
         }
 
         private void UpdateSides(int x, int y, int z)
@@ -412,17 +457,6 @@ namespace NeonShooter.Cube
             }
         }
 
-        private static int GetLayerMaxCapacity(int layerIndex)
-        {
-            int diameter = layerIndex * 2 + 1;
-            int capacity = diameter * diameter * diameter;
-            if (layerIndex == 0) return capacity;
-
-            int prevDiameter = diameter - 2;
-            capacity -= prevDiameter * prevDiameter * prevDiameter;
-            return capacity;
-        }
-
         public enum SizeChangeBehaviour
         {
             Ignore,
@@ -430,5 +464,15 @@ namespace NeonShooter.Cube
             Error,
             Exception
         }
+
+		public void addRandomCube()
+		{
+			String space = cellLayers [Radius - 1].getRandomCellSpace ();
+			string [] dims = space.Split(new Char[]{'_'});
+
+			this.SetCell (Int32.Parse(dims [0]), Int32.Parse(dims [1]), Int32.Parse(dims [2]), true);
+
+
+		}
     }
 }
