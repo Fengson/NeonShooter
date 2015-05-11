@@ -17,12 +17,10 @@ public class RailGun : Weapon {
     	 	Vector3 endingPosition =
                	Vector3.MoveTowards(startingPosition, startingPosition+this.Reach*shooter.Direction[null], (int)Reach);
             RaycastHit hitInfo;
-		    if(shootLine(startingPosition, endingPosition, out hitInfo)) {
+		    if(shootLine(startingPosition, endingPosition, out hitInfo) && !(hitInfo.collider.name=="Plane" || hitInfo.collider.name=="Projectile(Clone)")) {
         	    endingPosition = hitInfo.point;
         		shooter.enemyShot(this, hitInfo.collider, Damage, costPayed);
-            	GameObject projectile = createProjectile(shooter, startingPosition, endingPosition,
-				(hitInfo.collider.name=="Plane" || hitInfo.collider.name=="Projectile(Clone)")?Color.red:
-				Color.green, false);
+            	GameObject projectile = createProjectile(shooter, startingPosition, endingPosition,	Color.green, false);
 				shooter.StartCoroutine(hitAndDestroyProjectile(shooter, projectile, startingPosition, endingPosition));
 			} else {
             	GameObject projectile = createProjectile(shooter, startingPosition, endingPosition, Color.red, false);
