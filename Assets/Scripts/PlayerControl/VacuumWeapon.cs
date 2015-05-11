@@ -11,7 +11,6 @@ public class VacuumWeapon : Weapon {
 
    	public override void shoot(Player shooter, int costPayed)
    	{
-    	shootSound(shooter);
    	   //TODO change this Arek when we get to know how to get IPlayer array
     	Collider[] hitColliders = Physics.OverlapSphere(shooter.Position[null], Reach);
 		int k = 0;
@@ -25,6 +24,7 @@ public class VacuumWeapon : Weapon {
         	if(angle_cos > this.ConeAngleCos)
            		{
 				shooter.enemyShot(this, hitColliders[k], this.Damage, costPayed);
+    			shootSound(shooter);
             	}
             k++;
    		}

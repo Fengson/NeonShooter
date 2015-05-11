@@ -26,7 +26,7 @@ public class RocketLauncher : Weapon {
 		when it hits something explode method invokes
 		*/
 		public IEnumerator rocketLauncherShoot(Player shooter, int costPayed) {
-    		Vector3 startingPosition = shooter.Position[null];
+    		Vector3 startingPosition = shooter.Position[null]+new Vector3(0,0.8f,0);
 			Vector3 finalEndingPosition =
 				Vector3.MoveTowards(startingPosition, startingPosition+Reach*shooter.Direction[null], (int)Reach);
             GameObject projectile = createProjectile(shooter, startingPosition, finalEndingPosition, Color.black, false);
@@ -78,7 +78,7 @@ public class RocketLauncher : Weapon {
         }
 
 		public override float projectileSpeed() {
-			return 10.0f;
+			return 5.0f;
 		}
 
 		public override int lifeRequiredToOwn() {
