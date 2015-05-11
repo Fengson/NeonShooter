@@ -96,26 +96,9 @@ namespace NeonShooter.PlayerControl
                 CellsIncorporator.selectedWeapon.shoot(this, costPayed);
 			    if (aimRotationSpeed > -1500)
 				    aimRotationSpeed -= Time.deltaTime*100*CellsIncorporator.selectedWeapon.Damage;
+
                 //this will switch weapon if theres not enough ammo for current weapon
                 changeWeapon(CellsIncorporator.selectedWeapon);
-                //TEMP_enemyScript.OnShootStart.Invoke(null);
-
-				if(CellsIncorporator.selectedWeapon is RailGun) {
-					sounds[0].Play();
-				}
-
-
-//				switch(CellsIncorporator.selectedWeapon) {
-//
-//				case RailGun:
-//					sounds[0].Play();
-//					break;
-//				default:
-//					break;
-//
-//				}
-
-
                 yield return new WaitForSeconds(0.1f);
                 shooting=false;
             }

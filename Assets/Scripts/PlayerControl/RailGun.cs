@@ -12,6 +12,7 @@ public class RailGun : Weapon {
 
     	public override void shoot(Player shooter, int costPayed)
     	{
+    		shootSound(shooter);
     		Vector3 startingPosition = shooter.Position[null]+new Vector3(0,0.8f,0);
     	 	Vector3 endingPosition =
                	Vector3.MoveTowards(startingPosition, startingPosition+this.Reach*shooter.Direction[null], (int)Reach);
@@ -39,6 +40,10 @@ public class RailGun : Weapon {
 
 		public override Weapon nextWeapon() {
 			return new RocketLauncher();
+		}
+
+		public override void shootSound(Player player) {
+			player.sounds[1].Play();
 		}
 
     	public override string getWeaponName() {

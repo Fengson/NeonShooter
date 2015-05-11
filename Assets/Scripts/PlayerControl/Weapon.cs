@@ -37,6 +37,8 @@ namespace NeonShooter.PlayerControl
 
 		abstract public Weapon nextWeapon();
 
+		abstract public void shootSound(Player player);
+
     	public GameObject createProjectile(Player shooter, Vector3 startingPosition, Vector3 endingPosition, Color color, bool laser) {
     		GameObject projectile;
     		if(laser) {

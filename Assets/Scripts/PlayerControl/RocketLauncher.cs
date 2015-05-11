@@ -17,6 +17,7 @@ public class RocketLauncher : Weapon {
 		}
 
 		public override void shoot(Player shooter, int costPayed) {
+    		shootSound(shooter);
 		    shooter.StartCoroutine(rocketLauncherShoot(shooter, costPayed));
 		}
 
@@ -86,6 +87,10 @@ public class RocketLauncher : Weapon {
 
 		public override Weapon nextWeapon() {
 			return new VacuumWeapon();
+		}
+
+		public override void shootSound(Player player) {
+			player.sounds[2].Play();
 		}
 
 		public override string getWeaponName() {

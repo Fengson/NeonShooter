@@ -11,6 +11,7 @@ public class VacuumWeapon : Weapon {
 
    	public override void shoot(Player shooter, int costPayed)
    	{
+    	shootSound(shooter);
    	   //TODO change this Arek when we get to know how to get IPlayer array
     	Collider[] hitColliders = Physics.OverlapSphere(shooter.Position[null], Reach);
 		int k = 0;
@@ -61,6 +62,10 @@ OLD METHOD
    	public override Weapon nextWeapon() {
      	return new RailGun();
     }
+
+	public override void shootSound(Player player) {
+		player.sounds[0].Play();
+	}
 
 	public override string getWeaponName() {
 		return "Vacuum";
