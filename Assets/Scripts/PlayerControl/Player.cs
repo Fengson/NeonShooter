@@ -15,6 +15,8 @@ namespace NeonShooter.PlayerControl
         public InvokableAction<object> OnShootStart { get; private set; }
         public InvokableAction<object> OnShootEnd { get; private set; }
 
+		public AudioSource[] sounds;
+
         //public GameObject TEMP_enemy;
         //IPlayer TEMP_enemyScript;
         float aimRotationSpeed = -90;
@@ -97,7 +99,23 @@ namespace NeonShooter.PlayerControl
                 //this will switch weapon if theres not enough ammo for current weapon
                 changeWeapon(CellsIncorporator.selectedWeapon);
                 //TEMP_enemyScript.OnShootStart.Invoke(null);
-                //TODO play sound and cast animations depending on weapon
+
+				if(CellsIncorporator.selectedWeapon is RailGun) {
+					sounds[0].Play();
+				}
+
+
+//				switch(CellsIncorporator.selectedWeapon) {
+//
+//				case RailGun:
+//					sounds[0].Play();
+//					break;
+//				default:
+//					break;
+//
+//				}
+
+
                 yield return new WaitForSeconds(0.1f);
                 shooting=false;
             }
