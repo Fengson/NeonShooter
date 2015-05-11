@@ -42,8 +42,9 @@ namespace NeonShooter.PlayerControl
         void Update()
         {
 			this.aim.transform.Rotate (new Vector3 (0,0,aimRotationSpeed * Time.deltaTime));
-            if(aimRotationSpeed<-90)
-                aimRotationSpeed+=Time.deltaTime*200;
+            if(aimRotationSpeed<-90) {
+                aimRotationSpeed=Mathf.Min(-90, aimRotationSpeed+Time.deltaTime*500);
+            }
             Position[access] = transform.position;
 
             var cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
@@ -89,7 +90,7 @@ namespace NeonShooter.PlayerControl
                 CellsIncorporator.amount -= costPayed;
 
                 CellsIncorporator.selectedWeapon.shoot(this, costPayed);
-			    if (aimRotationSpeed > -3000)
+			    if (aimRotationSpeed > -1500)
 				    aimRotationSpeed -= Time.deltaTime*100*CellsIncorporator.selectedWeapon.Damage;
                 //this will switch weapon if theres not enough ammo for current weapon
                 changeWeapon(CellsIncorporator.selectedWeapon);
