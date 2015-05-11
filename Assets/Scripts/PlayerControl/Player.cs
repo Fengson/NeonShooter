@@ -19,6 +19,8 @@ namespace NeonShooter.PlayerControl
         //IPlayer TEMP_enemyScript;
         float aimRotationSpeed = -90;
         public GameObject aim;
+        public GameObject projectilePrefab;
+        public GameObject railGunShotPrefab;
 
         public Player()
         {
@@ -99,6 +101,14 @@ namespace NeonShooter.PlayerControl
                 yield return new WaitForSeconds(0.1f);
                 shooting=false;
             }
+        }
+
+        public GameObject instantiateProjectile(GameObject projectile) {
+            return Instantiate(projectile);
+        }
+
+        public void destroyProjectile(GameObject projectile) {
+            Destroy(projectile);
         }
 
         public void enemyShot(Weapon weapon, Collider target, int damage, int costPayed) {

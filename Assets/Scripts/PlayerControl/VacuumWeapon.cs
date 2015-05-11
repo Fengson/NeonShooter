@@ -15,7 +15,7 @@ public class VacuumWeapon : Weapon {
     	Collider[] hitColliders = Physics.OverlapSphere(shooter.Position[null], Reach);
 		int k = 0;
         while (k < hitColliders.Length) {
-            if(hitColliders[k].name=="Plane" || hitColliders[k].name=="FPSController") {
+            if(hitColliders[k].name=="Plane" || hitColliders[k].name=="FPSController" || hitColliders[k].name=="Projectile(Clone)") {
             	k++;
             	continue;
             }
@@ -48,11 +48,11 @@ OLD METHOD
    	}
  */
    	/**
-   	method redundant for this specific weapon, suction speed would be more useful, as the distance will vary
+   	suction speed in this case
    	*/
-   	public override float missileFlightDuration() {
-     	return 0;
-     }
+	public override float projectileSpeed() {
+		return 1.0f;
+	}
 
    	public override int lifeRequiredToOwn() {
      	return int.MinValue;

@@ -7,7 +7,6 @@ using System.Collections;
 public class RocketLauncher : Weapon {
 
 		public float ExplosionReach { get; private set; }
-		public float FlySpeed { get; private set; }
 
 		/**
 		make sure to set Reach to whole number, so each flight part length is always 1
@@ -15,7 +14,6 @@ public class RocketLauncher : Weapon {
 		public RocketLauncher() : base((int)300, 25, 0, 50)
 		{
 			this.ExplosionReach = 5f;
-			this.FlySpeed = 10.0f;
 		}
 
 		public override void shoot(Player shooter, int costPayed) {
@@ -30,13 +28,14 @@ public class RocketLauncher : Weapon {
     		Vector3 startingPosition = shooter.Position[null];
 			Vector3 finalEndingPosition =
 				Vector3.MoveTowards(startingPosition, startingPosition+Reach*shooter.Direction[null], (int)Reach);
+            GameObject projectile = createProjectile(shooter, startingPosition, finalEndingPosition, Color.black, false);
 			Vector3 endingPosition = startingPosition;
-			//this makes length=1 for every part of rocket projectile, so rocket speed = FlySpeed
+			//this makes length=1 for every part of rocket projectile, so rocket speed = projectileSpeed()
 		    int partsNumber = (int)Reach;
 			float step = Reach/partsNumber;
 
 			int rocketId = (int)(1000*Random.value);
-			Debug.Log("Rocket "+rocketId+" launched.\nSpeed: "+step + "point/" + FlySpeed +"sec. Reach point: "+finalEndingPosition);
+			Debug.Log("Rocket "+rocketId+" launched.\nSpeed: "+step + "point/" + projectileSpeed() +"sec. Reach point: "+finalEndingPosition);
             for(int i=0; i<partsNumber; i++) {
 				startingPosition = endingPosition;
 			    endingPosition = Vector3.MoveTowards(endingPosition, finalEndingPosition, step);
@@ -46,10 +45,11 @@ public class RocketLauncher : Weapon {
                 RaycastHit hitInfo;
 			    if(shootLine(startingPosition, endingPosition, out hitInfo)) {
 			        //explosion effect
+			        shooter.StartCoroutine(destroyProjectile(shooter, projectile));
 			        explodeMissile(shooter, hitInfo.point, hitInfo.collider, costPayed);
 			        break;
 			    }
-                yield return new WaitForSeconds(1.0f/FlySpeed);
+                yield return new WaitForSeconds(1.0f/projectileSpeed());
             }
         }
 
@@ -58,7 +58,7 @@ public class RocketLauncher : Weapon {
             int k = 0;
             while (k < hitColliders.Length) {
             	//TODO compare to other player collider list
-            	if(hitColliders[k].name=="Plane" || hitColliders[k].name=="FPSController") {
+            	if(hitColliders[k].name=="Plane" || hitColliders[k].name=="FPSController" || hitColliders[k].name=="Projectile(Clone)") {
             		k++;
             		continue;
             	}
@@ -76,8 +76,8 @@ public class RocketLauncher : Weapon {
             }
         }
 
-		public override float missileFlightDuration() {
-			return Reach/FlySpeed;
+		public override float projectileSpeed() {
+			return 10.0f;
 		}
 
 		public override int lifeRequiredToOwn() {
