@@ -33,29 +33,34 @@ namespace NeonShooter.PlayerControl
 
 		abstract public float projectileSpeed();
 
+		abstract public float projectileForceModifier();
+
 		abstract public int lifeRequiredToOwn();
 
 		abstract public Weapon nextWeapon();
 
 		abstract public void shootSound(Player player);
 
-    	public GameObject createProjectile(Player shooter, Vector3 startingPosition, Vector3 endingPosition, Color color, bool laser) {
+    	public GameObject createProjectile(Player shooter, Vector3 startingPosition, Color color) {
     		GameObject projectile;
-    		if(laser) {
-				//LASER
-				projectile = shooter.instantiateProjectile(shooter.railGunShotPrefab);
-				LineRenderer lineRenderer = projectile.GetComponent<LineRenderer>();
-				lineRenderer.SetPosition(0, startingPosition);
-				lineRenderer.SetPosition(1, endingPosition);
-				lineRenderer.SetColors(Color.red, Color.yellow);
-				lineRenderer.SetWidth(0.2F, 0.2F);
-			} else {
-				projectile = shooter.instantiateProjectile(shooter.projectilePrefab);
-                projectile.transform.position=startingPosition+2*shooter.Direction[null];
-                projectile.GetComponent<ConstantForce>().force=shooter.Direction[null].normalized*projectileSpeed()*10;
-                projectile.GetComponent<ConstantForce>().torque=shooter.Direction[null]*10;
-                projectile.GetComponent<Renderer>().material.color = color;
-			}
+			projectile = shooter.instantiateProjectile(shooter.projectilePrefab);
+            projectile.transform.position=startingPosition+2*shooter.Direction[null];
+            projectile.GetComponent<ConstantForce>().force=shooter.Direction[null].normalized*(projectileSpeed()*projectileForceModifier());
+            projectile.GetComponent<ConstantForce>().torque=shooter.Direction[null]*10;
+            projectile.GetComponent<Renderer>().material.color = color;
+
+        	return projectile;
+    	}
+
+    	public GameObject createLaserProjectile(Player shooter, Vector3 startingPosition, Vector3 endingPosition) {
+    		GameObject projectile;
+
+			projectile = shooter.instantiateProjectile(shooter.railGunShotPrefab);
+			LineRenderer lineRenderer = projectile.GetComponent<LineRenderer>();
+			lineRenderer.SetPosition(0, startingPosition);
+			lineRenderer.SetPosition(1, endingPosition);
+			lineRenderer.SetColors(Color.red, Color.yellow);
+			lineRenderer.SetWidth(0.2F, 0.2F);
 
         	return projectile;
     	}

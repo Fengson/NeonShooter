@@ -20,15 +20,19 @@ public class RailGun : Weapon {
 		    if(shootLine(startingPosition, endingPosition, out hitInfo) && !(hitInfo.collider.name=="Plane" || hitInfo.collider.name=="Projectile(Clone)")) {
         	    endingPosition = hitInfo.point;
         		shooter.enemyShot(this, hitInfo.collider, Damage, costPayed);
-            	GameObject projectile = createProjectile(shooter, startingPosition, endingPosition,	Color.green, false);
+            	GameObject projectile = createProjectile(shooter, startingPosition, Color.green);
 				shooter.StartCoroutine(hitAndDestroyProjectile(shooter, projectile, startingPosition, endingPosition));
 			} else {
-            	GameObject projectile = createProjectile(shooter, startingPosition, endingPosition, Color.red, false);
+            	GameObject projectile = createProjectile(shooter, startingPosition, Color.red);
 				shooter.StartCoroutine(destroyProjectile(shooter, projectile));
 			}
     	}
 
 		public override float projectileSpeed() {
+			return 100.0f;
+		}
+
+		public override float projectileForceModifier() {
 			return 100.0f;
 		}
 

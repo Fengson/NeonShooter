@@ -29,15 +29,16 @@ public class RocketLauncher : Weapon {
     		Vector3 startingPosition = shooter.Position[null]+new Vector3(0,0.8f,0);
 			Vector3 finalEndingPosition =
 				Vector3.MoveTowards(startingPosition, startingPosition+Reach*shooter.Direction[null], (int)Reach);
-            GameObject projectile = createProjectile(shooter, startingPosition, finalEndingPosition, Color.black, false);
+            GameObject projectile = createProjectile(shooter, startingPosition, Color.black);
 			Vector3 endingPosition = startingPosition;
 			//this makes length=1 for every part of rocket projectile, so rocket speed = projectileSpeed()
-		    int partsNumber = (int)Reach;
+		    int partsNumber = (int)(Reach/2);
 			float step = Reach/partsNumber;
 
 			int rocketId = (int)(1000*Random.value);
 			Debug.Log("Rocket "+rocketId+" launched.\nSpeed: "+step + "point/" + projectileSpeed() +"sec. Reach point: "+finalEndingPosition);
             for(int i=0; i<partsNumber; i++) {
+            	float beforeCalc = Time.time;
 				startingPosition = endingPosition;
 			    endingPosition = Vector3.MoveTowards(endingPosition, finalEndingPosition, step);
 
@@ -50,7 +51,8 @@ public class RocketLauncher : Weapon {
 			        explodeMissile(shooter, hitInfo.point, hitInfo.collider, costPayed);
 			        break;
 			    }
-                yield return new WaitForSeconds(1.0f/projectileSpeed());
+            	float minusSeconds = Time.time-beforeCalc;
+                yield return new WaitForSeconds(Mathf.Max(0.1f,step/projectileSpeed()-minusSeconds));
             }
         }
 
@@ -78,7 +80,11 @@ public class RocketLauncher : Weapon {
         }
 
 		public override float projectileSpeed() {
-			return 5.0f;
+			return 40.0f;
+		}
+
+		public override float projectileForceModifier() {
+			return 2.5f;
 		}
 
 		public override int lifeRequiredToOwn() {

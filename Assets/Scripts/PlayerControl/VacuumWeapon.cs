@@ -55,6 +55,10 @@ OLD METHOD
 		return 1.0f;
 	}
 
+	public override float projectileForceModifier() {
+		return 100.0f;
+	}
+
    	public override int lifeRequiredToOwn() {
      	return int.MinValue;
     }
