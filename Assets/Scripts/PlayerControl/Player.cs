@@ -15,10 +15,14 @@ namespace NeonShooter.PlayerControl
         public InvokableAction<object> OnShootStart { get; private set; }
         public InvokableAction<object> OnShootEnd { get; private set; }
 
+		public AudioSource[] sounds;
+
         //public GameObject TEMP_enemy;
         //IPlayer TEMP_enemyScript;
         float aimRotationSpeed = -90;
         public GameObject aim;
+        public GameObject projectilePrefab;
+        public GameObject railGunShotPrefab;
 
         public Player()
         {
@@ -42,8 +46,9 @@ namespace NeonShooter.PlayerControl
         void Update()
         {
 			this.aim.transform.Rotate (new Vector3 (0,0,aimRotationSpeed * Time.deltaTime));
-            if(aimRotationSpeed<-90)
-                aimRotationSpeed+=Time.deltaTime*200;
+            if(aimRotationSpeed<-90) {
+                aimRotationSpeed=Mathf.Min(-90, aimRotationSpeed+Time.deltaTime*500);
+            }
             Position[access] = transform.position;
 
             var cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
@@ -89,15 +94,22 @@ namespace NeonShooter.PlayerControl
                 CellsIncorporator.amount -= costPayed;
 
                 CellsIncorporator.selectedWeapon.shoot(this, costPayed);
-			    if (aimRotationSpeed > -3000)
+			    if (aimRotationSpeed > -1500)
 				    aimRotationSpeed -= Time.deltaTime*100*CellsIncorporator.selectedWeapon.Damage;
+
                 //this will switch weapon if theres not enough ammo for current weapon
                 changeWeapon(CellsIncorporator.selectedWeapon);
-                //TEMP_enemyScript.OnShootStart.Invoke(null);
-                //TODO play sound and cast animations depending on weapon
                 yield return new WaitForSeconds(0.1f);
                 shooting=false;
             }
+        }
+
+        public GameObject instantiateProjectile(GameObject projectile) {
+            return Instantiate(projectile);
+        }
+
+        public void destroyProjectile(GameObject projectile) {
+            Destroy(projectile);
         }
 
         public void enemyShot(Weapon weapon, Collider target, int damage, int costPayed) {
