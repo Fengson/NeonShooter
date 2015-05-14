@@ -17,7 +17,7 @@ public class VacuumWeapon : Weapon
 				RaycastHit hit;
 				if (Physics.Raycast (shooter.Position [null], heading, out hit, this.Reach))
 				{
-					shooter.enemyShot (this, target.GetComponent<Collider> (), this.Damage, costPayed);
+					shooter.enemyShot (this, target, this.Damage, costPayed);
 				}
 			}
 		}
