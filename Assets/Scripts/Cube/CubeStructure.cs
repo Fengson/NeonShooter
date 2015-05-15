@@ -33,13 +33,12 @@ namespace NeonShooter.Cube
         /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
-        public CubeStructure(GameObject cube, int initialRadius, ICellRetriever cellRetriever)//, GameObject part)
+        public CubeStructure(GameObject cube, int initialRadius, ICellRetriever cellRetriever)
         {
             if (initialRadius < 0)
                 throw new ArgumentException("Argument initialRadius must not be lower than 0.");
 
             this.cube = cube;
-            //this.part = part;
             Radius = initialRadius;
             Count = MathHelper.IntPow(Radius + 1, 3);
             CellRetriever = cellRetriever;
@@ -103,11 +102,6 @@ namespace NeonShooter.Cube
 
             UpdateSides(x, y, z);
             UpdateNeighboursSides(x, y, z);
-
-            //Add our lovely Life-Cube
-            // ORLY? it will instantiate with every change - regardless of whether cell is added or removed.
-            // Also it breaks SRP
-            //UnityEngine.Object.Instantiate(part, cube.transform.localPosition + new Vector3(x, y, z), cube.transform.rotation);
         }
 
         /// <summary>
