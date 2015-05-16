@@ -12,7 +12,7 @@ namespace NeonShooter.Cube
     /// </summary>
     public class CubeStructure
     {
-        GameObject cube;
+        GameObject owner;
 
         TwoWayList<TwoWayList<TwoWayList<CubeCell>>> cells;
         List<CellLayer> cellLayers;
@@ -33,12 +33,12 @@ namespace NeonShooter.Cube
         /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
-        public CubeStructure(GameObject cube, int initialRadius)
+        public CubeStructure(GameObject owner, int initialRadius)
         {
             if (initialRadius < 0)
                 throw new ArgumentException("Argument initialRadius must not be lower than 0.");
 
-            this.cube = cube;
+            this.owner = owner;
             Radius = initialRadius;
             Count = MathHelper.IntPow(Radius + 1, 3);
 
@@ -49,7 +49,7 @@ namespace NeonShooter.Cube
 
             ForEachCell((v) =>
                 {
-                    var cell = new CubeCell(cube, v);
+                    var cell = new CubeCell(owner, v);
                     cells[v.X][v.Y][v.Z] = cell;
                     cellLayers[GetLayerIndex(v)].AddCellSpace(v);
                 });
@@ -119,7 +119,7 @@ namespace NeonShooter.Cube
             CubeCell oldValue = cells[position.X][position.Y][position.Z];
             if (cellValue == (oldValue != null)) return;
 
-            cells[position.X][position.Y][position.Z] = cellValue ? new CubeCell(cube, position) : null;
+            cells[position.X][position.Y][position.Z] = cellValue ? new CubeCell(owner, position) : null;
             if (!cellValue) oldValue.ClearSides();
 
             int layerIndex = GetLayerIndex(position);

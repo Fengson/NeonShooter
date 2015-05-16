@@ -1,7 +1,7 @@
 ﻿using NeonShooter.Utils;
 using UnityEngine;
 
-namespace NeonShooter.PlayerControl
+namespace NeonShooter.Players.Weapons
 {
     public class Projectile : MonoBehaviour
     {

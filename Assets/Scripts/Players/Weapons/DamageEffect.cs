@@ -1,4 +1,4 @@
-﻿namespace NeonShooter.PlayerControl
+﻿namespace NeonShooter.Players.Weapons
 {
     public enum DamageEffect
     {

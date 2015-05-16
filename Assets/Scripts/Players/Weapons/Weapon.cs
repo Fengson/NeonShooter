@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace NeonShooter.PlayerControl
+namespace NeonShooter.Players.Weapons
 {
     public abstract class Weapon
     {

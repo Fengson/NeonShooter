@@ -2,12 +2,16 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using NeonShooter.Cube;
+using NeonShooter.Players.Weapons;
 
-namespace NeonShooter.PlayerControl
+namespace NeonShooter.Players
 {
     public class Player : MonoBehaviour, IPlayer
     {
         readonly System.Object access;
+
+        CubeStructure cubeStructure;
 
         Weapon defaultWeapon;
         List<Weapon> weapons;
@@ -19,13 +23,15 @@ namespace NeonShooter.PlayerControl
 
         public GameObject projectilePrefab;
         public GameObject railGunShotPrefab;
-
         public GameObject vacuumConePrefab;
+        public GameObject cubelingPrefab;
 
         /// <summary>
         /// Debug value - set to true to use any weapon regardless of the cost.
         /// </summary>
         public bool DEBUGCanUseAnyWeapon;
+
+        public int Life { get { return cubeStructure.Count; } }
 
         public NotifyingProperty<Vector3> Position { get; private set; }
         public NotifyingProperty<Vector2> Rotations { get; private set; }
@@ -38,6 +44,8 @@ namespace NeonShooter.PlayerControl
 
         public Player()
         {
+            //cubeStructure = new CubeStructure(gameObject, 3);
+
             defaultWeapon = new VacuumWeapon();
             weapons = new List<Weapon> { defaultWeapon, new RailGun(), new RocketLauncher() };
 
@@ -55,11 +63,24 @@ namespace NeonShooter.PlayerControl
             LaunchedProjectiles = new NotifyingList<Projectile>();
         }
 
+        //public void GainLife(int amount)
+        //{
+        //    //cubeStructure.AppendCells(amount);
+        //}
+
+        //public void DealDamage(int amount, DamageEffect damageEffect)
+        //{
+        //    //List<IVector3> cubelingPositions = cubeStructure.RetrieveCells(amount);
+        //    //foreach (var v in cubelingPositions)
+        //    //{
+        //    //    Instantiate(cubelingPrefab, transform.localPosition + v, transform.rotation);
+        //    //}
+        //}
+
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-
         }
 
         void Update()
@@ -114,7 +135,7 @@ namespace NeonShooter.PlayerControl
             if (aimRotationSpeed > -1500)
                 aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
 
-            //this will switch weapon if theres not enough ammo for current weapon
+            //this will switch weapon if there's not enough ammo for current weapon
             if (!CanUseWeapon(SelectedWeapon.Value))
                 ChangeWeaponToNext();
         }

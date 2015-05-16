@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using NeonShooter.Players;
+using UnityEngine;
 using UnityEngine.UI;
-using NeonShooter.PlayerControl;
 
 namespace NeonShooter
 {

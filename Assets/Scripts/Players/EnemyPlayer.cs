@@ -1,7 +1,8 @@
-﻿using NeonShooter.Utils;
+﻿using NeonShooter.Players.Weapons;
+using NeonShooter.Utils;
 using UnityEngine;
 
-namespace NeonShooter.PlayerControl
+namespace NeonShooter.Players
 {
     class EnemyPlayer : MonoBehaviour, IPlayer
     {

@@ -7,7 +7,7 @@ namespace NeonShooter.Cube
 {
     public class CubeCell
     {
-        GameObject cube;
+        GameObject owner;
         GameObject sidesParent;
         Dictionary<CubeCellPlaneSide, GameObject> sides;
 
@@ -17,9 +17,9 @@ namespace NeonShooter.Cube
 
         public IVector3 Position { get; private set; }
 
-        public CubeCell(GameObject cube, IVector3 position)
+        public CubeCell(GameObject owner, IVector3 position)
         {
-            this.cube = cube;
+            this.owner = owner;
             sidesParent = null;
             sides = new Dictionary<CubeCellPlaneSide, GameObject>();
 
@@ -40,7 +40,7 @@ namespace NeonShooter.Cube
                 sidesParent = GameObjectMaker.CreateGameObject(
                     String.Format("CubeCell [ {0}, {1}, {2} ]", X, Y, Z),
                     new Vector3(X, Y, Z), Vector3.zero, Vector3.one);
-                GameObjectHelper.SetParentDontMessUpCoords(sidesParent, cube);
+                GameObjectHelper.SetParentDontMessUpCoords(sidesParent, owner);
             }
             GameObject sideObject = CubeGameObjectMaker.CreateCubeCellPlane(side);
             GameObjectHelper.SetParentDontMessUpCoords(sideObject, sidesParent);

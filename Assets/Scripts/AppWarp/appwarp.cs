@@ -3,16 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 using com.shephertz.app42.gaming.multiplayer.client;
-using com.shephertz.app42.gaming.multiplayer.client.events;
-using com.shephertz.app42.gaming.multiplayer.client.listener;
-using com.shephertz.app42.gaming.multiplayer.client.command;
-using com.shephertz.app42.gaming.multiplayer.client.message;
-using com.shephertz.app42.gaming.multiplayer.client.transformer;
-
-//using UnityEditor;
+//using com.shephertz.app42.gaming.multiplayer.client.events;
+//using com.shephertz.app42.gaming.multiplayer.client.listener;
+//using com.shephertz.app42.gaming.multiplayer.client.command;
+//using com.shephertz.app42.gaming.multiplayer.client.message;
+//using com.shephertz.app42.gaming.multiplayer.client.transformer;
 
 using AssemblyCSharp;
-using NeonShooter.PlayerControl;
+using NeonShooter.Players;
 
 public class appwarp : MonoBehaviour {
 	public float interval = 0.1f;

@@ -1,8 +1,8 @@
-﻿using NeonShooter.Utils;
-using System;
+﻿using NeonShooter.Players.Weapons;
+using NeonShooter.Utils;
 using UnityEngine;
 
-namespace NeonShooter.PlayerControl
+namespace NeonShooter.Players
 {
     public interface IPlayer
     {
