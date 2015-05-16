@@ -17,8 +17,6 @@ namespace NeonShooter.PlayerControl
 
 		public AudioSource[] sounds;
 
-        //public GameObject TEMP_enemy;
-        //IPlayer TEMP_enemyScript;
         float aimRotationSpeed = -90;
         public GameObject aim;
         public GameObject projectilePrefab;
@@ -34,13 +32,6 @@ namespace NeonShooter.PlayerControl
 
             OnShootStart = new InvokableAction<object>(access);
             OnShootEnd = new InvokableAction<object>(access);
-        }
-
-        void Start()
-        {
-            //TEMP_enemyScript = TEMP_enemy.GetComponent<EnemyPlayer>();
-            //OnShootStart.Action += TEMP_OnShootStart_Action;
-            //OnShootEnd.Action += TEMP_OnShootEnd_Action;
         }
 
         void Update()
@@ -70,21 +61,7 @@ namespace NeonShooter.PlayerControl
             if (Input.GetKey(KeyCode.X)) {
                 StartCoroutine(changeToNextWeapon());
             }
-
-            //TEMP_enemyScript.Position.Value = Position.Value + new Vector3(5, 0, 0);
-            //TEMP_enemyScript.Rotations.Value = new Vector2(Rotations.Value.x, -Rotations.Value.y);
-        }
-
-        void TEMP_OnShootStart_Action(object obj)
-        {         
-            //StartCoroutine(onShoot());
-            //TEMP_enemyScript.OnShootStart.Invoke(null);
-        }
-
-        void TEMP_OnShootEnd_Action(object obj)
-        {
-            //TEMP_enemyScript.OnShootEnd.Invoke(null);
-        }     
+        } 
 
         bool shooting = false;
         IEnumerator onShoot() {
