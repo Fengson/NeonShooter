@@ -44,8 +44,6 @@ namespace NeonShooter.Players
 
         public Player()
         {
-            //cubeStructure = new CubeStructure(gameObject, 3);
-
             defaultWeapon = new VacuumWeapon();
             weapons = new List<Weapon> { defaultWeapon, new RailGun(), new RocketLauncher() };
 
@@ -63,24 +61,12 @@ namespace NeonShooter.Players
             LaunchedProjectiles = new NotifyingList<Projectile>();
         }
 
-        //public void GainLife(int amount)
-        //{
-        //    //cubeStructure.AppendCells(amount);
-        //}
-
-        //public void DealDamage(int amount, DamageEffect damageEffect)
-        //{
-        //    //List<IVector3> cubelingPositions = cubeStructure.RetrieveCells(amount);
-        //    //foreach (var v in cubelingPositions)
-        //    //{
-        //    //    Instantiate(cubelingPrefab, transform.localPosition + v, transform.rotation);
-        //    //}
-        //}
-
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+
+            cubeStructure = new CubeStructure(gameObject, 3);
         }
 
         void Update()
@@ -158,6 +144,8 @@ namespace NeonShooter.Players
             damage += (int)(8 * Mathf.Sqrt(paidCost));
             //return lost cost and add what was taken
             //CellsIncorporator.amount += damage + costPayed;
+            enemy.GetComponent<IPlayer>().DealDamage(damage, weapon.DamageEffect);
+            GainLife(damage); // <--- TEMP
 
             Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.getWeaponName() + " for " + damage + " damage");
             //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
@@ -183,6 +171,20 @@ namespace NeonShooter.Players
         {
             return DEBUGCanUseAnyWeapon || weapon == defaultWeapon ||
                 CellsIncorporator.amount >= weapon.lifeRequiredToOwn();
+        }
+
+        public void GainLife(int amount)
+        {
+            cubeStructure.AppendCells(amount);
+        }
+
+        public void DealDamage(int amount, DamageEffect damageEffect)
+        {
+            List<IVector3> cubelingPositions = cubeStructure.RetrieveCells(amount);
+            //foreach (var v in cubelingPositions)
+            //{
+            //    Instantiate(cubelingPrefab, transform.localPosition + v, transform.rotation);
+            //}
         }
     }
 }

@@ -6,8 +6,7 @@ namespace NeonShooter.Players
 {
     class EnemyPlayer : MonoBehaviour, IPlayer
     {
-        public GameObject TEMP_nose;
-        public string name;
+        public string NetworkName { get; set; }
 
         public NotifyingProperty<Vector3> Position { get; private set; }
         public NotifyingProperty<Vector2> Rotations { get; private set; }
@@ -62,8 +61,16 @@ namespace NeonShooter.Players
             Vector3 rot = transform.localEulerAngles;
             transform.localEulerAngles = new Vector3(rot.x, newValue.y, rot.z);
 
-            rot = TEMP_nose.transform.localEulerAngles;
-            TEMP_nose.transform.localEulerAngles = new Vector3(newValue.x, rot.y, rot.z);
+            //rot = TEMP_nose.transform.localEulerAngles;
+            //TEMP_nose.transform.localEulerAngles = new Vector3(newValue.x, rot.y, rot.z);
+        }
+
+        public void GainLife(int amount)
+        {
+        }
+
+        public void DealDamage(int amount, DamageEffect damageEffect)
+        {
         }
     }
 }

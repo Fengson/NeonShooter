@@ -13,5 +13,8 @@ namespace NeonShooter.Players
         NotifyingProperty<Weapon> SelectedWeapon { get; }
 
         NotifyingList<Projectile> LaunchedProjectiles { get; }
+
+        void GainLife(int amount);
+        void DealDamage(int amount, DamageEffect damageEffect);
     }
 }
