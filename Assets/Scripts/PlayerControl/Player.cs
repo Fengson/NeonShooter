@@ -93,10 +93,10 @@ namespace NeonShooter.PlayerControl
             //damage bonus for being big
             damage += (int)(8*Mathf.Sqrt(costPayed));
             //return lost cost and add what was taken
-		    CellsIncorporator.amount += damage + costPayed;
+		    //CellsIncorporator.amount += damage + costPayed;
 
 			Debug.Log(enemy.GetComponent<Collider> ().name+" got shot with "+weapon.getWeaponName() + " for "+damage+" damage");
-           //TODO take enemy life, play sound and cast animations depending on weapon
+           //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
         }
 
         bool changingWeapon = false;

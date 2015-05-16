@@ -18,7 +18,7 @@ public class RailGun : Weapon {
                	Vector3.MoveTowards(startingPosition, startingPosition+this.Reach*shooter.Direction[null], (int)Reach);
             RaycastHit hitInfo;
             bool enemyShot = false;
-		    if(shootLine(startingPosition, endingPosition, out hitInfo) && !(hitInfo.collider.name=="Plane" || hitInfo.collider.name=="Projectile(Clone)")) {
+		    if(shootLine(startingPosition, endingPosition, out hitInfo)) {
 				foreach (GameObject target in appwarp.enemies)
 				{
 					if(target.GetComponent<Collider> ()==hitInfo.collider) {
@@ -50,7 +50,7 @@ public class RailGun : Weapon {
 		}
 
 		public override Weapon nextWeapon() {
-			return new RocketLauncher();
+			return new VacuumWeapon();
 		}
 
 		public override void shootSound(Player player) {

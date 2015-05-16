@@ -60,10 +60,6 @@ public class RocketLauncher : Weapon {
         	Collider[] hitColliders = Physics.OverlapSphere(hitPoint, ExplosionReach);
             int k = 0;
             while (k < hitColliders.Length) {
-            	if(hitColliders[k].name=="Plane" || hitColliders[k].name=="FPSController" || hitColliders[k].name=="Projectile(Clone)") {
-            		k++;
-            		continue;
-            	}
             	foreach (GameObject target in appwarp.enemies)
                 {
 					if(target.GetComponent<Collider>()==hitColliders[k].GetComponent<Collider>()) {
