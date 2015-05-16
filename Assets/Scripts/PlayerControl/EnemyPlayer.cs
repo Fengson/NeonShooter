@@ -6,23 +6,17 @@ namespace NeonShooter.PlayerControl
     class EnemyPlayer : MonoBehaviour, IPlayer
     {
         public GameObject TEMP_nose;
-		public string name;
+        public string name;
 
         public NotifyingProperty<Vector3> Position { get; private set; }
         public NotifyingProperty<Vector2> Rotations { get; private set; }
         public NotifyingProperty<Vector3> Direction { get; private set; }
 
-        public InvokableAction<object> OnShootStart { get; private set; }
-        public InvokableAction<object> OnShootEnd { get; private set; }
-
         public EnemyPlayer()
         {
-            Position = new NotifyingProperty<Vector3>();
-            Rotations = new NotifyingProperty<Vector2>();
-            Direction = new NotifyingProperty<Vector3>();
-
-            OnShootStart = new InvokableAction<object>();
-            OnShootEnd = new InvokableAction<object>();
+            Position = NotifyingProperty<Vector3>.PublicBoth();
+            Rotations = NotifyingProperty<Vector2>.PublicBoth();
+            Direction = NotifyingProperty<Vector3>.PublicBoth();
         }
 
         void Start()
@@ -37,22 +31,21 @@ namespace NeonShooter.PlayerControl
 
             Position.OnValueChanged += Position_OnValueChanged;
             Rotations.OnValueChanged += Rotations_OnValueChanged;
-            OnShootStart.Action += OnShootStart_Action;
-            OnShootEnd.Action += OnShootEnd_Action;
 
         }
 
-		private Vector3 previousPosition;
-		private float time = 0;
-		void Update () {
-			time += Time.deltaTime * 10;
-			transform.position = Vector3.Lerp(previousPosition, Position.Value, time);
-		}
+        private Vector3 previousPosition;
+        private float time = 0;
+        void Update()
+        {
+            time += Time.deltaTime * 10;
+            transform.position = Vector3.Lerp(previousPosition, Position.Value, time);
+        }
 
         void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
         {
-			previousPosition = transform.position;
-			time = 0;
+            previousPosition = transform.position;
+            time = 0;
         }
 
         void Rotations_OnValueChanged(Vector2 oldValue, Vector2 newValue)
@@ -62,16 +55,6 @@ namespace NeonShooter.PlayerControl
 
             rot = TEMP_nose.transform.localEulerAngles;
             TEMP_nose.transform.localEulerAngles = new Vector3(newValue.x, rot.y, rot.z);
-        }
-
-        void OnShootStart_Action(object arg)
-        {
-            TEMP_nose.GetComponent<Renderer>().material.color = Color.red;
-        }
-
-        void OnShootEnd_Action(object arg)
-        {
-            TEMP_nose.GetComponent<Renderer>().material.color = Color.white;
         }
     }
 }

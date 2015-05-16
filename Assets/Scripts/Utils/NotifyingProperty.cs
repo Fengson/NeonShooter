@@ -4,6 +4,16 @@ namespace NeonShooter.Utils
 {
     public class NotifyingProperty<T>
     {
+        public static NotifyingProperty<T> PublicBoth(T value = default(T))
+        {
+            return new NotifyingProperty<T>(value);
+        }
+
+        public static NotifyingProperty<T> PublicGetPrivateSet(object access, T value = default(T))
+        {
+            return new NotifyingProperty<T>(access, true, false, value);
+        }
+
         private object access;
 
         public event NotifyingPropertyEventHandler<T> OnValueChanged;
@@ -39,17 +49,12 @@ namespace NeonShooter.Utils
             set { this[new object()] = value; }
         }
 
-        public NotifyingProperty()
-            : this(null, true, true, default(T))
-        {
-        }
-
-        public NotifyingProperty(T value)
+        NotifyingProperty(T value = default(T))
             : this(null, true, true, value)
         {
         }
 
-        public NotifyingProperty(object access, bool publicGet, bool publicSet, T value = default(T))
+        NotifyingProperty(object access, bool publicGet, bool publicSet, T value = default(T))
         {
             this.access = access;
             PublicGet = publicGet;

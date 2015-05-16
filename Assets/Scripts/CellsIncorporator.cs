@@ -6,7 +6,6 @@ namespace NeonShooter
 {
     public class CellsIncorporator : MonoBehaviour
     {
-        public static Weapon selectedWeapon = new VacuumWeapon();
         public static int amount = 1000;
         public AudioClip impact;
 

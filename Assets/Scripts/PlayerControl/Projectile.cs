@@ -16,8 +16,8 @@ namespace NeonShooter.PlayerControl
         public Projectile()
         {
             access = new System.Object();
-            Position = new NotifyingProperty<Vector3>(access, true, false);
-            Rotation = new NotifyingProperty<Quaternion>(access, true, false);
+            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
+            Rotation = NotifyingProperty<Quaternion>.PublicGetPrivateSet(access);
         }
 
         void Update()

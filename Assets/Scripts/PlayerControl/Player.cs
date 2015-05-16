@@ -1,35 +1,47 @@
 ﻿using NeonShooter.Utils;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace NeonShooter.PlayerControl
 {
-    public class Player : MonoBehaviour
+    public class Player : MonoBehaviour, IPlayer
     {
-        private readonly System.Object access;
+        readonly System.Object access;
 
-        public NotifyingProperty<Vector3> Position { get; private set; }
-        public NotifyingProperty<Vector2> Rotations { get; private set; }
-        public NotifyingProperty<Vector3> Direction { get; private set; }
-
-        public NotifyingList<Projectile> LaunchedProjectiles { get; private set; }
+        Weapon defaultWeapon;
+        List<Weapon> weapons;
 
         public AudioSource[] sounds;
 
         float aimRotationSpeed = -90;
         public GameObject aim;
+
         public GameObject projectilePrefab;
         public GameObject railGunShotPrefab;
 
+        public NotifyingProperty<Vector3> Position { get; private set; }
+        public NotifyingProperty<Vector2> Rotations { get; private set; }
+        public NotifyingProperty<Vector3> Direction { get; private set; }
+
+        public NotifyingProperty<Weapon> SelectedWeapon { get; private set; }
+
+        public NotifyingList<Projectile> LaunchedProjectiles { get; private set; }
+
         public Player()
         {
+            defaultWeapon = new VacuumWeapon();
+            weapons = new List<Weapon> { defaultWeapon, new RailGun(), new RocketLauncher() };
+
             // TODO: For multiple client network testing, move somewhere else
             //Application.runInBackground = true;
 
             access = new object();
-            Position = new NotifyingProperty<Vector3>(access, true, false);
-            Rotations = new NotifyingProperty<Vector2>(access, true, false);
-            Direction = new NotifyingProperty<Vector3>(access, true, false);
+            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
+            Rotations = NotifyingProperty<Vector2>.PublicGetPrivateSet(access);
+            Direction = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
+
+            SelectedWeapon = NotifyingProperty<Weapon>.PublicGetPrivateSet(access, defaultWeapon);
 
             LaunchedProjectiles = new NotifyingList<Projectile>();
         }
@@ -59,8 +71,8 @@ namespace NeonShooter.PlayerControl
             if (Input.GetMouseButtonDown(0))
                 StartCoroutine(onShoot());
 
-            if (Input.GetKey(KeyCode.X))
-                StartCoroutine(changeToNextWeapon());
+            if (Input.GetKeyDown(KeyCode.X))
+                ChangeWeaponToNext();
         }
 
         bool shooting = false;
@@ -69,15 +81,17 @@ namespace NeonShooter.PlayerControl
             if (!shooting)
             {
                 shooting = true;
-                int costPayed = (int)(CellsIncorporator.selectedWeapon.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
+                int costPayed = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
                 CellsIncorporator.amount -= costPayed;
 
-                CellsIncorporator.selectedWeapon.shoot(this, costPayed);
+                SelectedWeapon.Value.shoot(this, costPayed);
                 if (aimRotationSpeed > -1500)
-                    aimRotationSpeed -= Time.deltaTime * 100 * CellsIncorporator.selectedWeapon.Damage;
+                    aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
 
                 //this will switch weapon if theres not enough ammo for current weapon
-                changeWeapon(CellsIncorporator.selectedWeapon);
+                if (!CanUseWeapon(SelectedWeapon.Value))
+                    ChangeWeaponToNext();
+
                 yield return new WaitForSeconds(0.1f);
                 shooting = false;
             }
@@ -94,31 +108,25 @@ namespace NeonShooter.PlayerControl
             //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
         }
 
-        bool changingWeapon = false;
-        IEnumerator changeToNextWeapon()
+        void ChangeWeaponToNext()
         {
-            if (!changingWeapon)
+            var index = weapons.IndexOf(SelectedWeapon.Value);
+            for (int i = 0; i < weapons.Count; i++)
             {
-                changingWeapon = true;
-                changeWeapon(CellsIncorporator.selectedWeapon.nextWeapon());
-                yield return new WaitForSeconds(0.1f);
-                changingWeapon = false;
+                index = (index + 1) % weapons.Count;
+                var candidate = weapons[index];
+                if (CanUseWeapon(candidate))
+                {
+                    SelectedWeapon[access] = candidate;
+                    break;
+                }
             }
         }
 
-        /**
-        changes weapon to set, or next if not available
-        */
-        void changeWeapon(Weapon weapon)
+        bool CanUseWeapon(Weapon weapon)
         {
-            if (CellsIncorporator.amount > weapon.lifeRequiredToOwn())
-            {
-                CellsIncorporator.selectedWeapon = weapon;
-            }
-            else
-            {
-                changeWeapon(weapon.nextWeapon());
-            }
+            return weapon == defaultWeapon ||
+                CellsIncorporator.amount >= weapon.lifeRequiredToOwn();
         }
     }
 }
