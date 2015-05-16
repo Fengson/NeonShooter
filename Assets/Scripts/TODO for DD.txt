@@ -2,7 +2,7 @@
 
 Weapons:
  + effect of damage (destruction / suction)
- + type of fire (single / rapid)
+ + type of fire (single / continous)
  - inflict damage on enemy when hit (take cells from CubeStructure)
  - decompose projectile into collectible cubelings on hit
  - keep NotifyingProperties/List for:
