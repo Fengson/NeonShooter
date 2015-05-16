@@ -1,26 +1,31 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using NeonShooter.Players;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace NeonShooter
 {
     public class ScoreController : MonoBehaviour
     {
-        public Text lifeText;
-        int life = 125;
+        Player player;
+        Text lifeText;
+
+        public GameObject playerObject;
 
         void Start()
         {
             lifeText = GetComponent<Text>();
+            player = playerObject.GetComponent<Player>();
         }
 
         void Update()
         {
             string weaponText = "";
-            if(CellsIncorporator.selectedWeapon!=null) {
-                weaponText="Weapon:\n"+ CellsIncorporator.selectedWeapon.getWeaponName()+"\n";
+            var selectedWeapon = player.SelectedWeapon.Value;
+            if (selectedWeapon != null)
+            {
+                weaponText = "Weapon:\n" + selectedWeapon.getWeaponName() + "\n";
             }
-            lifeText.text = weaponText + "Life: " + (life + CellsIncorporator.amount);
+            lifeText.text = weaponText + "Life: " + CellsIncorporator.amount;
         }
     }
 }

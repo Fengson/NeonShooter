@@ -6,20 +6,19 @@ namespace NeonShooter.Cube
 {
     public class CubeOfCubes : MonoBehaviour
     {
-        public CubeStructure Structure { get; private set; }
         public int radius;
         public GameObject part;
-        public int x, y, z;
 
-		public bool targeted = false;
+        public bool targeted;
+
+        public CubeStructure Structure { get; private set; }
 
         void Start()
         {
-            Structure = new CubeStructure(gameObject, radius,
-                new RandomOuterLayerCellRetriever());//, part);
-            x = radius - 1;
-            y = radius - 1;
-            z = radius - 1;
+            Structure = new CubeStructure(gameObject, radius);
+            Structure.CellRetriever = new RandomOuterLayerCellRetriever();
+            Structure.CellAppender = new RandomOuterLayerCellAppender();
+
             //Structure.SetCell(2, -2, 2, false);
             //Structure.SetCell(-2, -2, 2, false);
             //Structure.SetCell(-1, 2, -2, false);
@@ -32,54 +31,28 @@ namespace NeonShooter.Cube
         }
 
         void Update()
-		{
-            if (Input.GetKey (KeyCode.Z)) {
-
-                //if (x != radius && y != radius && z != radius)
-                //{
-                //    Structure.SetCell(x, y, z, false);
-                //    if (z != (radius - 1) * (-1))
-                //        z = z - 1;
-                //    else
-                //    {
-                //        z = radius - 1;
-                //        if (x != (radius - 1) * (-1))
-                //            x = x - 1;
-                //        else
-                //        {
-                //            x = radius - 1;
-                //            if (y != (radius - 1) * (-1))
-                //            {
-                //                y = y - 1;
-                //            }
-                //            else
-                //            {
-
-                //                Destroy(gameObject);
-                //            }
-                //        }
-                //    }
-                //}
-				if(targeted)
-				{
-					IVector3? cell = Structure.RetrieveCell();
-                	if (cell == null)
-                	{
-                    	Destroy(gameObject);
-                	}
-                	else
-                	{
-                    	Instantiate(part, transform.localPosition + cell.Value, transform.rotation);
-                	}
-				}
-			}
+        {
+            if (Input.GetKey(KeyCode.Z))
+            {
+                if (targeted)
+                {
+                    IVector3? cell = RemoveCubeling();
+                    if (cell == null) Destroy(gameObject);
+                    else Instantiate(part, transform.localPosition + cell.Value, transform.rotation);
+                }
+            }
         }
 
-		public void addCube()
-		{
-			if (Structure.ShouldExpand ())
-				Structure.Expand ();
-			Structure.addRandomCube ();
-		}
+        public IVector3? AddCubeling()
+        {
+            if (Structure == null) return null;
+            return Structure.AppendCell();
+        }
+
+        public IVector3? RemoveCubeling()
+        {
+            if (Structure == null) return null;
+            return Structure.RetrieveCell();
+        }
     }
 }

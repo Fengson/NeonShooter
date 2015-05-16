@@ -7,23 +7,23 @@ namespace NeonShooter.Cube
 {
     public class CubeCell
     {
-        GameObject cube;
+        GameObject owner;
         GameObject sidesParent;
         Dictionary<CubeCellPlaneSide, GameObject> sides;
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        public int Z { get; private set; }
+        public int X { get { return Position.X; } }
+        public int Y { get { return Position.Y; } }
+        public int Z { get { return Position.Z; } }
 
-        public CubeCell(GameObject cube, int x, int y, int z)
+        public IVector3 Position { get; private set; }
+
+        public CubeCell(GameObject owner, IVector3 position)
         {
-            this.cube = cube;
+            this.owner = owner;
             sidesParent = null;
             sides = new Dictionary<CubeCellPlaneSide, GameObject>();
 
-            X = x;
-            Y = y;
-            Z = z;
+            Position = position;
         }
 
         public bool ContainsSide(CubeCellPlaneSide side)
@@ -40,7 +40,7 @@ namespace NeonShooter.Cube
                 sidesParent = GameObjectMaker.CreateGameObject(
                     String.Format("CubeCell [ {0}, {1}, {2} ]", X, Y, Z),
                     new Vector3(X, Y, Z), Vector3.zero, Vector3.one);
-                GameObjectHelper.SetParentDontMessUpCoords(sidesParent, cube);
+                GameObjectHelper.SetParentDontMessUpCoords(sidesParent, owner);
             }
             GameObject sideObject = CubeGameObjectMaker.CreateCubeCellPlane(side);
             GameObjectHelper.SetParentDontMessUpCoords(sideObject, sidesParent);

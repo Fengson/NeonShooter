@@ -1,111 +1,109 @@
-﻿using System;
+﻿using NeonShooter.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace NeonShooter.Cube
 {
-	public class CellLayer
+    public class CellLayer
     {
-        HashSet<CubeCell> cells;
+        List<IVector3> cellSpaces;
+        List<IVector3> freeSpaces;
 
         public int Index { get; private set; }
         public int Capacity { get; private set; }
 
-        public int Count { 
-			get { return cells.Count(); }
-		}
+        public int CellSpacesCount { get { return cellSpaces.Count; } }
+        public int FreeSpacesCount { get { return freeSpaces.Count; } }
 
-        public bool Empty { get { return Count == 0; } }
-        public bool Full { get { return Count == Capacity; } }
-
-		public List<String> freeIndexes;
+        public bool Empty { get { return CellSpacesCount == 0; } }
+        public bool Full { get { return FreeSpacesCount == 0; } }
 
         public CellLayer(int index)
         {
+            cellSpaces = new List<IVector3>();
+            freeSpaces = new List<IVector3>();
+
             Index = index;
             Capacity = CalculateCapacity(index);
-            cells = new HashSet<CubeCell>();
-			freeIndexes = new List<string> ();
-			GenerateFreeIndexes (index);
 
+            InitializeLists();
         }
 
-        public bool AddCell(CubeCell cell)
+        public bool AddCellSpace(IVector3 space)
         {
-            if (Count == Capacity) return false;
+            if (CellSpacesCount == Capacity) return false;
+            if (!freeSpaces.Contains(space)) return false;
 
-            cells.Add(cell);
-			this.freeIndexes.Remove (cell.X + "_" + cell.Y + "_" + cell.Z);
+            freeSpaces.Remove(space);
+            cellSpaces.Add(space);
+
             return true;
         }
 
-        public CubeCell GetRandomCell()
+        public bool RemoveCellSpace(IVector3 space)
         {
-            if (Count == 0) return null;
-            return cells.ElementAt(new Random().Next(Count));
+            if (FreeSpacesCount == Capacity) return false;
+            if (!cellSpaces.Contains(space)) return false;
+
+            cellSpaces.Remove(space);
+            freeSpaces.Add(space);
+
+            return true;
         }
 
-        public void RemoveCell(CubeCell cell)
+        public IVector3? GetRandomCellSpace()
         {
-            cells.Remove(cell);
-			this.freeIndexes.Add (cell.X + "_" + cell.Y + "_" + cell.Z);
+            if (CellSpacesCount == 0) return null;
+            return cellSpaces[new Random().Next(CellSpacesCount)];
+        }
+
+        public IVector3? GetRandomFreeSpace()
+        {
+            if (FreeSpacesCount == 0) return null;
+            return freeSpaces[new Random().Next(FreeSpacesCount)];
         }
 
         private static int CalculateCapacity(int index)
         {
             int diameter = index * 2 + 1;
-            int capacity = diameter * diameter * diameter;
+            int capacity = MathHelper.IntPow(diameter, 3);
 
             if (index == 0) return capacity;
 
             int prevDiameter = diameter - 2;
-            capacity -= prevDiameter * prevDiameter * prevDiameter;
+            capacity -= MathHelper.IntPow(prevDiameter, 3);
             return capacity;
         }
 
-		private void GenerateFreeIndexes(int index)
-		{
-			for (int i = -index; i<=index; i++) {
-				for(int j = -index; j<=index; j++)
-					if(!this.freeIndexes.Contains(index+"_"+i+"_"+j))
-						this.freeIndexes.Add(index+"_"+i+"_"+j);
-			}
+        private void InitializeLists()
+        {
+            if (Index == 0)
+            {
+                freeSpaces.Add(IVector3.Zero);
+                return;
+            }
 
-			for (int i = -index; i<=index; i++) {
-				for(int j = -index; j<=index; j++)
-					if(!this.freeIndexes.Contains(-index+"_"+i+"_"+j))
-						this.freeIndexes.Add(-index+"_"+i+"_"+j);
-			}
+            for (int x = -Index; x <= Index; x++)
+                for (int y = -Index; y <= Index; y++)
+                {
+                    freeSpaces.Add(new IVector3(x, y, Index));
+                    freeSpaces.Add(new IVector3(x, y, -Index));
+                }
 
-			for (int i = -index; i<=index; i++) {
-				for(int j = -index; j<=index; j++)
-					if(!this.freeIndexes.Contains(i+"_"+index+"_"+j))
-						this.freeIndexes.Add(i+"_"+index+"_"+j);
-			}
+            for (int y = -Index; y <= Index; y++)
+                for (int z = -Index + 1; z < Index; z++)
+                {
+                    freeSpaces.Add(new IVector3(Index, y, z));
+                    freeSpaces.Add(new IVector3(-Index, y, z));
+                }
 
-			for (int i = -index; i<=index; i++) {
-				for(int j = -index; j<=index; j++)
-					if(!this.freeIndexes.Contains(i+"_"+-index+"_"+j))
-						this.freeIndexes.Add(i+"_"+-index+"_"+j);
-			}
-
-			for (int i = -index; i<=index; i++) {
-				for(int j = -index; j<=index; j++)
-					if(!this.freeIndexes.Contains(i+"_"+j+"_"+index))
-						this.freeIndexes.Add(i+"_"+j+"_"+index);
-			}
-
-			for (int i = -index; i<=index; i++) {
-				for(int j = -index; j<=index; j++)
-					if(!this.freeIndexes.Contains(i+"_"+j+"_"+-index))
-						this.freeIndexes.Add(i+"_"+j+"_"+-index);
-			}
-
-		}
-
-		public String getRandomCellSpace()
-		{
-			return this.freeIndexes[new Random ().Next (freeIndexes.Count)];
-		}
+            for (int z = -Index + 1; z < Index; z++)
+                for (int x = -Index + 1; x < Index; x++)
+                {
+                    freeSpaces.Add(new IVector3(x, Index, z));
+                    freeSpaces.Add(new IVector3(x, -Index, z));
+                }
+        }
     }
 }

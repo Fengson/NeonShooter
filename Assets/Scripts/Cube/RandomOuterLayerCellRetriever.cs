@@ -1,11 +1,12 @@
 ﻿using NeonShooter.Utils;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace NeonShooter.Cube
 {
-    public class RandomOuterLayerCellRetriever : ICellRetriever
+    public class RandomOuterLayerCellRetriever : ICubeStructureCellsModifier
     {
-        public List<IVector3> RetrieveCells(CubeStructure structure, int count)
+        public List<IVector3> ModifyCells(CubeStructure structure, int count)
         {
             var removedCells = new List<IVector3>();
 
@@ -14,9 +15,11 @@ namespace NeonShooter.Cube
                 var layer = structure.GetLastLayer();
                 if (layer == null) break;
 
-                CubeCell cell = layer.GetRandomCell();
-                structure.SetCell(cell.X, cell.Y, cell.Z, false);
-                removedCells.Add(new IVector3(cell.X, cell.Y, cell.Z));
+                IVector3? position = layer.GetRandomCellSpace();
+                if (!position.HasValue) break;
+
+                structure.SetCell(position.Value, false);
+                removedCells.Add(position.Value);
 
                 if (structure.CanShrink()) structure.Shrink();
             }
