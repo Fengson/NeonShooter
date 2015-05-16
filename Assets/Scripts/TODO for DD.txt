@@ -16,7 +16,7 @@ Weapons:
    - projectile hits something (which projectile)
    - enemy is dealt damage (what effect of damage)
 CubeStructure:
- - better method for gaining and losing cells
+ + better method for gaining and losing cells
  - keep NotifyingProperty for:
    - CubeStructure
  - grow colliders when radius++, shrink when radius--
