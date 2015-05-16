@@ -42,7 +42,6 @@ public class appwarp : MonoBehaviour {
 		// join with a unique name (current time stamp)
 		username = System.DateTime.UtcNow.Ticks.ToString();
 		WarpClient.GetInstance().Connect(username);
-		//EditorApplication.playmodeStateChanged += OnEditorStateChanged;
 		//For weapon tests
 		addPlayer("TestPlayer");
 	}
@@ -89,7 +88,6 @@ public class appwarp : MonoBehaviour {
 			Application.Quit();
 		}
 		WarpClient.GetInstance().Update();
-		//obj.transform.position = Vector3.Lerp(obj.transform.position, newPos, Time.deltaTime);
 	}
 	
 	void OnGUI()
@@ -97,14 +95,6 @@ public class appwarp : MonoBehaviour {
 		GUI.contentColor = Color.black;
 		GUI.Label(new Rect(10,10,500,200), listen.getDebug());
 	}
-	
-	/*void OnEditorStateChanged()
-	{
-    	if(EditorApplication.isPlaying == false) 
-		{
-			WarpClient.GetInstance().Disconnect();
-    	}
-	}*/
 	
 	void OnApplicationQuit()
 	{

@@ -34,6 +34,12 @@ namespace NeonShooter.PlayerControl
             OnShootEnd = new InvokableAction<object>(access);
         }
 
+        void Start()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
         void Update()
         {
 			this.aim.transform.Rotate (new Vector3 (0,0,aimRotationSpeed * Time.deltaTime));
