@@ -78,6 +78,12 @@ namespace NeonShooter.Cube
 
         private void InitializeLists()
         {
+            if (Index == 0)
+            {
+                freeSpaces.Add(IVector3.Zero);
+                return;
+            }
+
             for (int x = -Index; x <= Index; x++)
                 for (int y = -Index; y <= Index; y++)
                 {

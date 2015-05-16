@@ -1,11 +1,12 @@
 ﻿using NeonShooter.Utils;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace NeonShooter.Cube
 {
-    public class RandomOuterLayerCellRetriever : ICellRetriever
+    public class RandomOuterLayerCellRetriever : ICubeStructureCellsModifier
     {
-        public List<IVector3> RetrieveCells(CubeStructure structure, int count)
+        public List<IVector3> ModifyCells(CubeStructure structure, int count)
         {
             var removedCells = new List<IVector3>();
 

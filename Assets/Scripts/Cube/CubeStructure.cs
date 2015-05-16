@@ -24,7 +24,8 @@ namespace NeonShooter.Cube
 
         public int Count { get; private set; }
 
-        public ICellRetriever CellRetriever { get; set; }
+        public ICubeStructureCellsModifier CellRetriever { get; set; }
+        public ICubeStructureCellsModifier CellAppender { get; set; }
 
         public SizeChangeBehaviour UnwantedSizeChangeBehaviour { get; set; }
 
@@ -32,7 +33,7 @@ namespace NeonShooter.Cube
         /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
         /// <param name="initialRadius">Initial radius of the CubeStructure.</param>
-        public CubeStructure(GameObject cube, int initialRadius, ICellRetriever cellRetriever)
+        public CubeStructure(GameObject cube, int initialRadius)
         {
             if (initialRadius < 0)
                 throw new ArgumentException("Argument initialRadius must not be lower than 0.");
@@ -40,14 +41,13 @@ namespace NeonShooter.Cube
             this.cube = cube;
             Radius = initialRadius;
             Count = MathHelper.IntPow(Radius + 1, 3);
-            CellRetriever = cellRetriever;
 
             cells = CreateCellXYZCube(Radius);
             cellLayers = new List<CellLayer>();
             for (int i = 0; i < Radius; i++)
                 cellLayers.Add(new CellLayer(i));
 
-            ForEveryCell((v) =>
+            ForEachCell((v) =>
                 {
                     var cell = new CubeCell(cube, v);
                     cells[v.X][v.Y][v.Z] = cell;
@@ -189,12 +189,7 @@ namespace NeonShooter.Cube
 
         public CellLayer GetLastLayer()
         {
-            //Last or default gave us layer of Radius, not current last one
-            //And so - expand was bugged
-            if (Radius > 1)
-                return cellLayers[Radius - 1];
-            else
-                return null;
+            return cellLayers.LastOrDefault();
         }
 
         public CellLayer GetLayer(int x, int y, int z)
@@ -208,7 +203,7 @@ namespace NeonShooter.Cube
         public bool LastLayerFull()
         {
             if (Radius == 0) return true;
-            return cellLayers[Radius - 1].Full;
+            return GetLastLayer().Full;
 
         }
 
@@ -226,7 +221,8 @@ namespace NeonShooter.Cube
         public bool LastLayerEmpty()
         {
             if (Radius == 0) return false;
-            return cellLayers[Radius - 1].Empty;
+            //Debug.Log(String.Format("Cells: {0}, Free: {1}", GetLastLayer().CellSpacesCount, GetLastLayer().FreeSpacesCount));
+            return GetLastLayer().Empty;
         }
 
         /// <summary>
@@ -360,14 +356,20 @@ namespace NeonShooter.Cube
         public List<IVector3> RetrieveCells(int count)
         {
             if (CellRetriever == null) return new List<IVector3>();
-            else return CellRetriever.RetrieveCells(this, count);
+            else return CellRetriever.ModifyCells(this, count);
         }
 
-        public void AddRandomCube()
+        public IVector3? AppendCell()
         {
-            IVector3? space = cellLayers[Radius - 1].GetRandomFreeSpace();
-            if (space == null) return;
-            SetCell(space.Value, true);
+            var cells = AppendCells(1);
+            if (cells.Count == 0) return null;
+            return cells[0];
+        }
+
+        public List<IVector3> AppendCells(int count)
+        {
+            if (CellAppender == null) return new List<IVector3>();
+            else return CellAppender.ModifyCells(this, count);
         }
 
         private void UpdateSides(int x, int y, int z)
@@ -451,7 +453,7 @@ namespace NeonShooter.Cube
                 }
         }
 
-        private void ForEveryCell(Action<IVector3> action)
+        private void ForEachCell(Action<IVector3> action)
         {
             for (int x = -Radius + 1; x < Radius; x++)
             {

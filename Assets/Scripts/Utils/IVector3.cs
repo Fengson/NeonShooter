@@ -7,6 +7,8 @@ namespace NeonShooter.Utils
         private const int Prime1 = 179424691;
         private const int Prime2 = 512927377;
 
+        public static readonly IVector3 Zero = new IVector3(0, 0, 0);
+
         public int X { get; private set; }
         public int Y { get; private set; }
         public int Z { get; private set; }

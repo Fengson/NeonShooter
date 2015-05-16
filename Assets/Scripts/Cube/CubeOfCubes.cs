@@ -15,8 +15,9 @@ namespace NeonShooter.Cube
 
         void Start()
         {
-            Structure = new CubeStructure(gameObject, radius,
-                new RandomOuterLayerCellRetriever());
+            Structure = new CubeStructure(gameObject, radius);
+            Structure.CellRetriever = new RandomOuterLayerCellRetriever();
+            Structure.CellAppender = new RandomOuterLayerCellAppender();
 
             //Structure.SetCell(2, -2, 2, false);
             //Structure.SetCell(-2, -2, 2, false);
@@ -35,21 +36,23 @@ namespace NeonShooter.Cube
             {
                 if (targeted)
                 {
-                    IVector3? cell = Structure.RetrieveCell();
-                    if (cell == null)
-                        Destroy(gameObject);
+                    IVector3? cell = RemoveCubeling();
+                    if (cell == null) Destroy(gameObject);
                     else Instantiate(part, transform.localPosition + cell.Value, transform.rotation);
                 }
             }
         }
 
-        public void addCube()
+        public IVector3? AddCubeling()
         {
-            if (Structure == null) return;
+            if (Structure == null) return null;
+            return Structure.AppendCell();
+        }
 
-            if (Structure.ShouldExpand())
-                Structure.Expand();
-            Structure.AddRandomCube();
+        public IVector3? RemoveCubeling()
+        {
+            if (Structure == null) return null;
+            return Structure.RetrieveCell();
         }
     }
 }

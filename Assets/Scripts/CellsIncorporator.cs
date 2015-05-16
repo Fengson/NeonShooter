@@ -18,7 +18,7 @@ namespace NeonShooter
                 amount++;
                 //TODO different sounds for different weapons
                 GetComponent<AudioSource>().PlayOneShot(impact, 0.7F);
-				gameObject.GetComponent<CubeOfCubes>().addCube();
+				gameObject.GetComponent<CubeOfCubes>().AddCubeling();
             }
         }
     }
