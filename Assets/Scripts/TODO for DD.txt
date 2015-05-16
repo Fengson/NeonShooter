@@ -1,0 +1,40 @@
+﻿Probably not everything on this list will be done
+
+Weapons:
+ - effect of damage (destruction / suction)
+ - type of fire (single / rapid)
+ - inflict damage on enemy when hit (take cells from CubeStructure)
+ - decompose projectile into collectible cubelings on hit
+ - keep NotifyingProperties for:
+   - launched projectiles
+   - weapon fire state (Vacuum - firing / not firing)
+   - cubelings created from destroyed projectiles
+   - cubelings sucked and flying towards us (if we dealt suction damage)
+   - cubelings ripped off us (if we were dealt destruction damage)
+ - use InvokableActions when:
+   - launching a projectile (what kind of projectile)
+   - projectile hits something (which projectile)
+   - enemy is dealt damage (what effect of damage)
+CubeStructure:
+ - better method for gaining and losing cells
+ - keep NotifyingProperty for:
+   - CubeStructure
+ - grow colliders when radius++, shrink when radius--
+Network:
+ - Read proper NotifyingProperties and InvokableActions from Player and EnemyPlayer and send them
+ - Set proper incoming NotifyingProperties and invoke InvokableActions on EnemyPlayer and player
+EnemyPlayer & Player:
+ - Implement events for proper NotifyingProperties and InvokableActions
+Player:
+ - Dying effect?
+ - Invokable Action "I'm dead :("
+Spawn points:
+ - for selecting starting position, at least as much as the number of players to avoid telefrag
+JumpPads:
+ - No functionality yet... however it's independent, no need to merge with any other module
+
+Recording:
+ - Create cameras throughout the scene and let them record gameplay
+   - static cameras in strategic places always focusing player
+   - static cameras overviewing big area
+   - dynamic camera flying through the scene and recording the action
