@@ -45,7 +45,7 @@ namespace NeonShooter.PlayerControl
     		GameObject projectile;
 			projectile = shooter.instantiateProjectile(shooter.projectilePrefab);
             projectile.transform.position=startingPosition+2*shooter.Direction[null];
-            projectile.GetComponent<ConstantForce>().force=shooter.Direction[null].normalized*(projectileSpeed()*projectileForceModifier());
+            projectile.GetComponent<ConstantForce>().force=shooter.Direction.Value.normalized*(projectileSpeed()*projectileForceModifier());
             projectile.GetComponent<ConstantForce>().torque=shooter.Direction[null]*10;
             projectile.GetComponent<Renderer>().material.color = color;
 

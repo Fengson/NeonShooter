@@ -89,15 +89,14 @@ namespace NeonShooter.PlayerControl
             Destroy(projectile);
         }
 
-        public void enemyShot(Weapon weapon, Collider target, int damage, int costPayed) {
+        public void enemyShot(Weapon weapon, GameObject enemy, int damage, int costPayed) {
             //damage bonus for being big
             damage += (int)(8*Mathf.Sqrt(costPayed));
             //return lost cost and add what was taken
-		    CellsIncorporator.amount += damage + costPayed;
+		    //CellsIncorporator.amount += damage + costPayed;
 
-			Debug.Log(target.name+" got shot with "+weapon.getWeaponName() + " for "+damage+" damage");
-            GameObject enemy = target.gameObject;
-           //TODO take enemy life, play sound and cast animations depending on weapon
+			Debug.Log(enemy.GetComponent<Collider> ().name+" got shot with "+weapon.getWeaponName() + " for "+damage+" damage");
+           //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
         }
 
         bool changingWeapon = false;

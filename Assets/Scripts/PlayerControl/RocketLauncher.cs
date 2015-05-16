@@ -60,22 +60,23 @@ public class RocketLauncher : Weapon {
         	Collider[] hitColliders = Physics.OverlapSphere(hitPoint, ExplosionReach);
             int k = 0;
             while (k < hitColliders.Length) {
-            	//TODO compare to other player collider list
-            	if(hitColliders[k].name=="Plane" || hitColliders[k].name=="FPSController" || hitColliders[k].name=="Projectile(Clone)") {
-            		k++;
-            		continue;
-            	}
-            	if(hitColliders[k]==directHitCollider) {
-            		shooter.enemyShot(this, hitColliders[k], this.Damage, costPayed);
-            	} else {
-            		float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
-                	Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
-            		if(distanceFromExplosion<ExplosionReach) {
-            			//only on clear shot we return shot cost
-            			shooter.enemyShot(this, hitColliders[k], (int)(Damage*(1.0f-(distanceFromExplosion/ExplosionReach))), 0);
-            		}
-            	}
-                k++;
+            	foreach (GameObject target in appwarp.enemies)
+                {
+					if(target.GetComponent<Collider>()==hitColliders[k].GetComponent<Collider>()) {
+						if(hitColliders[k]==directHitCollider) {
+							shooter.enemyShot(this, target, this.Damage, costPayed);
+						} else {
+							float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
+							Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
+							if(distanceFromExplosion<ExplosionReach) {
+								//only on clear shot we return shot cost
+								shooter.enemyShot(this, target, (int)(Damage*(1.0f-(distanceFromExplosion/ExplosionReach))), 0);
+							}
+						}
+						break;
+					}
+               	}
+				k++;
             }
         }
 

@@ -43,6 +43,8 @@ public class appwarp : MonoBehaviour {
 		username = System.DateTime.UtcNow.Ticks.ToString();
 		WarpClient.GetInstance().Connect(username);
 		//EditorApplication.playmodeStateChanged += OnEditorStateChanged;
+		//For weapon tests
+		addPlayer("TestPlayer");
 	}
 
 
