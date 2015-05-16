@@ -1,18 +1,18 @@
 ﻿Probably not everything on this list will be done
 
 Weapons:
- - effect of damage (destruction / suction)
- - type of fire (single / rapid)
+ + effect of damage (destruction / suction)
+ + type of fire (single / rapid)
  - inflict damage on enemy when hit (take cells from CubeStructure)
  - decompose projectile into collectible cubelings on hit
- - keep NotifyingProperties for:
-   - launched projectiles
-   - weapon fire state (Vacuum - firing / not firing)
+ - keep NotifyingProperties/List for:
+   + launched projectiles
+   + selected weapon
+   + weapon fire state (Vacuum - firing / not firing)
    - cubelings created from destroyed projectiles
    - cubelings sucked and flying towards us (if we dealt suction damage)
-   - cubelings ripped off us (if we were dealt destruction damage)
+   - cubelings ripped off of us (if we were dealt destruction damage)
  - use InvokableActions when:
-   - launching a projectile (what kind of projectile)
    - projectile hits something (which projectile)
    - enemy is dealt damage (what effect of damage)
 CubeStructure:

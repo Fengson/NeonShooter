@@ -4,25 +4,63 @@ using UnityEngine;
 
 public class VacuumWeapon : Weapon
 {
+    private float damageLeftover;
+    private GameObject vacuumCone;
+    private Player shooter;
+
+    public GameObject VacuumConePrefab { get; set; }
+
     public override DamageEffect DamageEffect { get { return DamageEffect.Suction; } }
+    public override FireType FireType { get { return FireType.Continous; } }
+    public override float CoolDownTime { get { return 0; } }
 
-    public VacuumWeapon() : base(50, 10, (float)(4.0 / 18.0 * Mathf.PI), 0) { }
+    public VacuumWeapon() : base(50, 10, 10 * Mathf.Deg2Rad, 0) { }
 
-    public override void shoot(Player shooter, int costPayed)
+    public override void Update()
     {
+        base.Update();
+
+        if (shooter != null && vacuumCone != null)
+            vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
+    }
+
+    public override void ShootStart(Player shooter)
+    {
+        this.shooter = shooter;
+
+        damageLeftover = 0;
+        vacuumCone = Object.Instantiate(shooter.vacuumConePrefab);
+        GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.gameObject);
+        var xyScale = Reach * Mathf.Tan(ConeAngleRadians);
+        vacuumCone.transform.localScale = new Vector3(xyScale, xyScale, Reach);
+        vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
+    }
+
+    public override void shoot(Player shooter, int paidCost)
+    {
+        float fractionalDamage = Damage * Time.deltaTime + damageLeftover;
+        int integerDamage = (int)fractionalDamage;
+        damageLeftover = fractionalDamage - integerDamage;
+        if (integerDamage == 0) return;
+
         foreach (GameObject target in appwarp.enemies)
         {
-            Vector3 heading = (target.transform.position - shooter.Position[null]).normalized;
-            double angle_cos = Vector3.Dot(heading, shooter.Direction[null].normalized);
+            Vector3 heading = (target.transform.position - shooter.Position.Value).normalized;
+            double angle_cos = Vector3.Dot(heading, shooter.Direction.Value.normalized);
             if (angle_cos > this.ConeAngleCos)
             {
                 RaycastHit hit;
-                if (Physics.Raycast(shooter.Position[null], heading, out hit, this.Reach))
+                if (Physics.Raycast(shooter.Position.Value, heading, out hit, this.Reach))
                 {
-                    shooter.enemyShot(this, target, this.Damage, costPayed);
+                    shooter.enemyShot(this, target, integerDamage, paidCost);
                 }
             }
         }
+    }
+
+    public override void ShootEnd()
+    {
+        Object.Destroy(vacuumCone);
     }
 
     /**
@@ -41,11 +79,6 @@ public class VacuumWeapon : Weapon
     public override int lifeRequiredToOwn()
     {
         return int.MinValue;
-    }
-
-    public override Weapon nextWeapon()
-    {
-        return new RailGun();
     }
 
     public override void shootSound(Player player)

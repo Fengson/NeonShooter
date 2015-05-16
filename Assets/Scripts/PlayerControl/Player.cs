@@ -20,11 +20,19 @@ namespace NeonShooter.PlayerControl
         public GameObject projectilePrefab;
         public GameObject railGunShotPrefab;
 
+        public GameObject vacuumConePrefab;
+
+        /// <summary>
+        /// Debug value - set to true to use any weapon regardless of the cost.
+        /// </summary>
+        public bool DEBUGCanUseAnyWeapon;
+
         public NotifyingProperty<Vector3> Position { get; private set; }
         public NotifyingProperty<Vector2> Rotations { get; private set; }
         public NotifyingProperty<Vector3> Direction { get; private set; }
 
         public NotifyingProperty<Weapon> SelectedWeapon { get; private set; }
+        public NotifyingProperty<bool> ContinuousFire { get; private set; }
 
         public NotifyingList<Projectile> LaunchedProjectiles { get; private set; }
 
@@ -42,6 +50,7 @@ namespace NeonShooter.PlayerControl
             Direction = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
 
             SelectedWeapon = NotifyingProperty<Weapon>.PublicGetPrivateSet(access, defaultWeapon);
+            ContinuousFire = NotifyingProperty<bool>.PublicGetPrivateSet(access);
 
             LaunchedProjectiles = new NotifyingList<Projectile>();
         }
@@ -50,6 +59,7 @@ namespace NeonShooter.PlayerControl
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+
         }
 
         void Update()
@@ -67,40 +77,64 @@ namespace NeonShooter.PlayerControl
                 cameraObject.transform.eulerAngles.y);
             Direction[access] = Quaternion.Euler(Rotations.Value.x, Rotations.Value.y, 0) * Vector3.forward;
 
+            SelectedWeapon.Value.Update();
+
             //TODO talk about this with Sushi & Arek - Grzesiek
-            if (Input.GetMouseButtonDown(0))
-                StartCoroutine(onShoot());
+            switch (SelectedWeapon.Value.FireType)
+            {
+                case FireType.Single:
+                    if (Input.GetMouseButtonDown(0))
+                        onShoot();
+                    break;
+                case FireType.Continous:
+                    if (Input.GetMouseButtonDown(0))
+                        onShootStart();
+                    if (Input.GetMouseButton(0))
+                        onShoot();
+                    if (Input.GetMouseButtonUp(0))
+                        onShootEnd();
+                    break;
+            }
 
             if (Input.GetKeyDown(KeyCode.X))
                 ChangeWeaponToNext();
         }
 
-        bool shooting = false;
-        IEnumerator onShoot()
+        void onShoot()
         {
-            if (!shooting)
-            {
-                shooting = true;
-                int costPayed = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
-                CellsIncorporator.amount -= costPayed;
+            if (SelectedWeapon.Value.IsCoolingDown()) return;
 
-                SelectedWeapon.Value.shoot(this, costPayed);
-                if (aimRotationSpeed > -1500)
-                    aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
+            SelectedWeapon.Value.RaiseCooldown();
 
-                //this will switch weapon if theres not enough ammo for current weapon
-                if (!CanUseWeapon(SelectedWeapon.Value))
-                    ChangeWeaponToNext();
+            int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
+            CellsIncorporator.amount -= paidCost;
+            if (CellsIncorporator.amount < 0) CellsIncorporator.amount = 0;
 
-                yield return new WaitForSeconds(0.1f);
-                shooting = false;
-            }
+            SelectedWeapon.Value.shoot(this, paidCost);
+            if (aimRotationSpeed > -1500)
+                aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
+
+            //this will switch weapon if theres not enough ammo for current weapon
+            if (!CanUseWeapon(SelectedWeapon.Value))
+                ChangeWeaponToNext();
         }
 
-        public void enemyShot(Weapon weapon, GameObject enemy, int damage, int costPayed)
+        void onShootStart()
+        {
+            ContinuousFire[access] = true;
+            SelectedWeapon.Value.ShootStart(this);
+        }
+
+        void onShootEnd()
+        {
+            ContinuousFire[access] = false;
+            SelectedWeapon.Value.ShootEnd();
+        }
+
+        public void enemyShot(Weapon weapon, GameObject enemy, int damage, int paidCost)
         {
             //damage bonus for being big
-            damage += (int)(8 * Mathf.Sqrt(costPayed));
+            damage += (int)(8 * Mathf.Sqrt(paidCost));
             //return lost cost and add what was taken
             //CellsIncorporator.amount += damage + costPayed;
 
@@ -117,6 +151,7 @@ namespace NeonShooter.PlayerControl
                 var candidate = weapons[index];
                 if (CanUseWeapon(candidate))
                 {
+                    ContinuousFire[access] = false;
                     SelectedWeapon[access] = candidate;
                     break;
                 }
@@ -125,7 +160,7 @@ namespace NeonShooter.PlayerControl
 
         bool CanUseWeapon(Weapon weapon)
         {
-            return weapon == defaultWeapon ||
+            return DEBUGCanUseAnyWeapon || weapon == defaultWeapon ||
                 CellsIncorporator.amount >= weapon.lifeRequiredToOwn();
         }
     }

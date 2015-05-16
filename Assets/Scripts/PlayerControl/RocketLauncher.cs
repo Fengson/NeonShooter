@@ -7,6 +7,8 @@ using System.Collections;
 public class RocketLauncher : Weapon
 {
     public override DamageEffect DamageEffect { get { return DamageEffect.Destruction; } }
+    public override FireType FireType { get { return FireType.Single; } }
+    public override float CoolDownTime { get { return 0.3f; } }
 
     public float ExplosionReach { get; private set; }
 
@@ -107,11 +109,6 @@ public class RocketLauncher : Weapon
     public override int lifeRequiredToOwn()
     {
         return 300;
-    }
-
-    public override Weapon nextWeapon()
-    {
-        return new VacuumWeapon();
     }
 
     public override void shootSound(Player player)

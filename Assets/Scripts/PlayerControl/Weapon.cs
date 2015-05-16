@@ -5,22 +5,52 @@ namespace NeonShooter.PlayerControl
 {
     public abstract class Weapon
     {
+        float currentCoolDownTime;
+
         public int Damage { get; private set; }
         public float Reach { get; private set; }
         public int AmmoCost { get; private set; }
+        protected float ConeAngleRadians { get; private set; }
         public double ConeAngleCos { get; private set; }
 
         public abstract DamageEffect DamageEffect { get; }
+        public abstract FireType FireType { get; }
+        public abstract float CoolDownTime { get; }
 
         public Weapon(int dmg, float reach, float cone_angle_radians, int ammo_cost)
         {
             this.Damage = dmg;
             this.Reach = reach;
             this.AmmoCost = ammo_cost;
+            ConeAngleRadians = cone_angle_radians;
             this.ConeAngleCos = Mathf.Cos(cone_angle_radians);
         }
 
+        public virtual void Update()
+        {
+            currentCoolDownTime -= Time.deltaTime;
+            if (currentCoolDownTime < 0) currentCoolDownTime = 0;
+        }
+
+        public void RaiseCooldown()
+        {
+            currentCoolDownTime = CoolDownTime;
+        }
+
+        public bool IsCoolingDown()
+        {
+            return currentCoolDownTime > 0;
+        }
+
+        public virtual void ShootStart(Player shooter)
+        {
+        }
+
         public abstract void shoot(Player shooter, int costPayed);
+
+        public virtual void ShootEnd()
+        {
+        }
 
         public abstract string getWeaponName();
 
@@ -34,8 +64,6 @@ namespace NeonShooter.PlayerControl
         public abstract float projectileForceModifier();
 
         public abstract int lifeRequiredToOwn();
-
-        public abstract Weapon nextWeapon();
 
         public abstract void shootSound(Player player);
 

@@ -7,6 +7,8 @@ using System.Collections;
 public class RailGun : Weapon
 {
     public override DamageEffect DamageEffect { get { return DamageEffect.Destruction; } }
+    public override FireType FireType { get { return FireType.Single; } }
+    public override float CoolDownTime { get { return 1; } }
 
     public RailGun()
         : base(150, 900, 0, 35)
@@ -56,11 +58,6 @@ public class RailGun : Weapon
     public override int lifeRequiredToOwn()
     {
         return -100;
-    }
-
-    public override Weapon nextWeapon()
-    {
-        return new VacuumWeapon();
     }
 
     public override void shootSound(Player player)

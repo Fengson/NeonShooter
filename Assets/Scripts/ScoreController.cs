@@ -7,8 +7,6 @@ namespace NeonShooter
 {
     public class ScoreController : MonoBehaviour
     {
-        int life = 125;
-
         Player player;
         Text lifeText;
 
@@ -28,7 +26,7 @@ namespace NeonShooter
             {
                 weaponText = "Weapon:\n" + selectedWeapon.getWeaponName() + "\n";
             }
-            lifeText.text = weaponText + "Life: " + (life + CellsIncorporator.amount);
+            lifeText.text = weaponText + "Life: " + CellsIncorporator.amount;
         }
     }
 }

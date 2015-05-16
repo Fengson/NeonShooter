@@ -12,11 +12,19 @@ namespace NeonShooter.PlayerControl
         public NotifyingProperty<Vector2> Rotations { get; private set; }
         public NotifyingProperty<Vector3> Direction { get; private set; }
 
+        public NotifyingProperty<Weapon> SelectedWeapon { get; private set; }
+
+        public NotifyingList<Projectile> LaunchedProjectiles { get; private set; }
+
         public EnemyPlayer()
         {
             Position = NotifyingProperty<Vector3>.PublicBoth();
             Rotations = NotifyingProperty<Vector2>.PublicBoth();
             Direction = NotifyingProperty<Vector3>.PublicBoth();
+
+            SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth();
+
+            LaunchedProjectiles = new NotifyingList<Projectile>();
         }
 
         void Start()
