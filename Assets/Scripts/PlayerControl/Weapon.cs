@@ -41,12 +41,13 @@ namespace NeonShooter.PlayerControl
 
         public GameObject createProjectile(Player shooter, Vector3 startingPosition, Color color, int costPaid)
         {
-            var projectile = shooter.instantiateProjectile(shooter.projectilePrefab);
-            projectile.transform.position = startingPosition + 2 * shooter.Direction[null];
+            var projectile = Object.Instantiate(shooter.projectilePrefab);
+            projectile.transform.position = startingPosition + 2 * shooter.Direction.Value;
             projectile.GetComponent<Renderer>().material.color = color;
             var script = projectile.AddComponent<Projectile>();
             script.ParentWeapon = this;
             script.CubeValue = costPaid;
+            shooter.LaunchedProjectiles.Add(script);
             return projectile;
         }
 
@@ -54,7 +55,7 @@ namespace NeonShooter.PlayerControl
         {
             var projectile = createProjectile(shooter, startingPosition, color, costPaid);
             projectile.GetComponent<ConstantForce>().force = shooter.Direction.Value.normalized * (projectileSpeed() * projectileForceModifier());
-            projectile.GetComponent<ConstantForce>().torque = shooter.Direction[null] * 10;
+            projectile.GetComponent<ConstantForce>().torque = shooter.Direction.Value * 10;
             return projectile;
         }
 
@@ -62,7 +63,7 @@ namespace NeonShooter.PlayerControl
         {
             GameObject projectile;
 
-            projectile = shooter.instantiateProjectile(shooter.railGunShotPrefab);
+            projectile = Object.Instantiate(shooter.railGunShotPrefab);
             LineRenderer lineRenderer = projectile.GetComponent<LineRenderer>();
             lineRenderer.SetPosition(0, startingPosition);
             lineRenderer.SetPosition(1, endingPosition);
@@ -75,21 +76,26 @@ namespace NeonShooter.PlayerControl
         public IEnumerator destroyLaserProjectile(Player shooter, GameObject projectile)
         {
             yield return new WaitForSeconds(0.1f);
-
-            shooter.destroyProjectile(projectile);
+            Object.Destroy(projectile);
         }
 
         public IEnumerator destroyProjectile(Player shooter, GameObject projectile)
         {
             yield return new WaitForSeconds(Reach / projectileSpeed());
-
-            shooter.destroyProjectile(projectile);
+            DestroyProjectileNow(shooter, projectile);
         }
 
         public IEnumerator hitAndDestroyProjectile(Player shooter, GameObject projectile, Vector3 startingPosition, Vector3 endingPosition)
         {
             yield return new WaitForSeconds((endingPosition - startingPosition).magnitude / projectileSpeed());
-            shooter.destroyProjectile(projectile);
+            DestroyProjectileNow(shooter, projectile);
+        }
+
+        void DestroyProjectileNow(Player shooter, GameObject projectile)
+        {
+            var script = projectile.GetComponent<Projectile>();
+            shooter.LaunchedProjectiles.Remove(script);
+            Object.Destroy(projectile);
         }
     }
 }
