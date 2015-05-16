@@ -51,7 +51,7 @@ namespace NeonShooter.Players.Weapons
                 if (angle_cos > this.ConeAngleCos)
                 {
                     RaycastHit hit;
-                    if (Physics.Raycast(shooter.Position.Value, heading, out hit, this.Reach) && hit.collider.name == target.GetComponent<Collider>().name)
+                    if (Physics.Raycast(shooter.Position.Value, heading, out hit, this.Reach) && hit.collider.gameObject == target)
                     {
 						Debug.Log(hit.collider.name);
 						shooter.enemyShot(this, target, integerDamage, paidCost);
