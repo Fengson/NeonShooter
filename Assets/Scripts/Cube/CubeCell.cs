@@ -11,19 +11,19 @@ namespace NeonShooter.Cube
         GameObject sidesParent;
         Dictionary<CubeCellPlaneSide, GameObject> sides;
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        public int Z { get; private set; }
+        public int X { get { return Position.X; } }
+        public int Y { get { return Position.Y; } }
+        public int Z { get { return Position.Z; } }
 
-        public CubeCell(GameObject cube, int x, int y, int z)
+        public IVector3 Position { get; private set; }
+
+        public CubeCell(GameObject cube, IVector3 position)
         {
             this.cube = cube;
             sidesParent = null;
             sides = new Dictionary<CubeCellPlaneSide, GameObject>();
 
-            X = x;
-            Y = y;
-            Z = z;
+            Position = position;
         }
 
         public bool ContainsSide(CubeCellPlaneSide side)

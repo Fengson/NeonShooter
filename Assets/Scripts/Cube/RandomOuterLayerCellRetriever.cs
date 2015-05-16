@@ -14,9 +14,11 @@ namespace NeonShooter.Cube
                 var layer = structure.GetLastLayer();
                 if (layer == null) break;
 
-                CubeCell cell = layer.GetRandomCell();
-                structure.SetCell(cell.X, cell.Y, cell.Z, false);
-                removedCells.Add(new IVector3(cell.X, cell.Y, cell.Z));
+                IVector3? position = layer.GetRandomCellSpace();
+                if (!position.HasValue) break;
+
+                structure.SetCell(position.Value, false);
+                removedCells.Add(position.Value);
 
                 if (structure.CanShrink()) structure.Shrink();
             }

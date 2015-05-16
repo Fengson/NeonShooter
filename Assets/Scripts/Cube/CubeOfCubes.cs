@@ -45,9 +45,11 @@ namespace NeonShooter.Cube
 
         public void addCube()
         {
+            if (Structure == null) return;
+
             if (Structure.ShouldExpand())
                 Structure.Expand();
-            Structure.addRandomCube();
+            Structure.AddRandomCube();
         }
     }
 }

@@ -13,7 +13,6 @@ namespace NeonShooter.Cube
     public class CubeStructure
     {
         GameObject cube;
-        //GameObject part;
 
         TwoWayList<TwoWayList<TwoWayList<CubeCell>>> cells;
         List<CellLayer> cellLayers;
@@ -48,11 +47,11 @@ namespace NeonShooter.Cube
             for (int i = 0; i < Radius; i++)
                 cellLayers.Add(new CellLayer(i));
 
-            ForEveryCell((x, y, z) =>
+            ForEveryCell((v) =>
                 {
-                    var cell = new CubeCell(cube, x, y, z);
-                    cells[x][y][z] = cell;
-                    cellLayers[GetLayerIndex(x, y, z)].AddCell(cell);
+                    var cell = new CubeCell(cube, v);
+                    cells[v.X][v.Y][v.Z] = cell;
+                    cellLayers[GetLayerIndex(v)].AddCellSpace(v);
                 });
             UpdateLastLayersSides();
 
@@ -73,6 +72,15 @@ namespace NeonShooter.Cube
         /// <summary>
         /// Allows to get the CubeCell of this CubeStructure at given coordinates. Throws IndexOutOfBoundsException, if any coord is not lower than Radius.
         /// </summary>
+        /// <param name="position">X, Y and Z coords of the cell.</param>
+        public CubeCell this[IVector3 position]
+        {
+            get { return this[position.X, position.Y, position.Z]; }
+        }
+
+        /// <summary>
+        /// Allows to get the CubeCell of this CubeStructure at given coordinates. Throws IndexOutOfBoundsException, if any coord is not lower than Radius.
+        /// </summary>
         /// <param name="x">X coord of the cell.</param>
         /// <param name="y">Y coord of the cell.</param>
         /// <param name="z">Z coord of the cell.</param>
@@ -82,6 +90,15 @@ namespace NeonShooter.Cube
         }
 
         /// <summary>
+        /// Allows to get the CubeCell of this CubeStructure at given coordinates. Throws IndexOutOfBoundsException, if any coord is not lower than Radius.
+        /// </summary>
+        /// <param name="position">X, Y and Z coords of the cell.</param>
+        public CubeCell GetCell(IVector3 position)
+        {
+            return GetCell(position.X, position.Y, position.Z);
+        }
+        
+        /// <summary>
         /// Allows to set the CubeCell of this CubeStructure at given coordinates. Throws IndexOutOfBoundsException, if any coord is not lower than Radius.
         /// </summary>
         /// <param name="x">X coord of the cell.</param>
@@ -90,18 +107,27 @@ namespace NeonShooter.Cube
         /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
         public void SetCell(int x, int y, int z, bool cellValue)
         {
-            CubeCell oldValue = cells[x][y][z];
+        }
+
+        /// <summary>
+        /// Allows to set the CubeCell of this CubeStructure at given coordinates. Throws IndexOutOfBoundsException, if any coord is not lower than Radius.
+        /// </summary>
+        /// <param name="position">X, Y and Z coords of the cell.</param>
+        /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
+        public void SetCell(IVector3 position, bool cellValue)
+        {
+            CubeCell oldValue = cells[position.X][position.Y][position.Z];
             if (cellValue == (oldValue != null)) return;
 
-            cells[x][y][z] = cellValue ? new CubeCell(cube, x, y, z) : null;
+            cells[position.X][position.Y][position.Z] = cellValue ? new CubeCell(cube, position) : null;
             if (!cellValue) oldValue.ClearSides();
 
-            int layerIndex = GetLayerIndex(x, y, z);
-            if (cellValue) cellLayers[layerIndex].AddCell(cells[x][y][z]);
-            else cellLayers[layerIndex].RemoveCell(oldValue);
+            int layerIndex = GetLayerIndex(position);
+            if (cellValue) cellLayers[layerIndex].AddCellSpace(position);
+            else cellLayers[layerIndex].RemoveCellSpace(position);
 
-            UpdateSides(x, y, z);
-            UpdateNeighboursSides(x, y, z);
+            UpdateSides(position);
+            UpdateNeighboursSides(position);
         }
 
         /// <summary>
@@ -112,9 +138,18 @@ namespace NeonShooter.Cube
         /// <param name="z">Z coord of the cell.</param>
         public CubeCell TryGetCell(int x, int y, int z)
         {
-            if (IsOutOfRadius(x, y, z)) return null;
+            return TryGetCell(new IVector3(x, y, z));
+        }
 
-            return GetCell(x, y, z);
+        /// <summary>
+        /// Gets the CubeCell of this CubeStructure at given coordinates. Returns null, if any coord is not lower than Radius.
+        /// </summary>
+        /// <param name="position">X, Y and Z coords of the cell.</param>
+        public CubeCell TryGetCell(IVector3 position)
+        {
+            if (IsOutOfRadius(position)) return null;
+
+            return GetCell(position);
         }
 
         /// <summary>
@@ -123,18 +158,28 @@ namespace NeonShooter.Cube
         /// <param name="x">X coord of the cell.</param>
         /// <param name="y">Y coord of the cell.</param>
         /// <param name="z">Z coord of the cell.</param>
-        /// <param name="hasCellThere">If true, the cell will be created at given coords. If false, it will be erased.</param>
-        public bool TrySetCell(int x, int y, int z, bool hasCellThere)
+        /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
+        public bool TrySetCell(int x, int y, int z, bool cellValue)
         {
-            if (IsOutOfRadius(x, y, z)) return false;
+            return TrySetCell(new IVector3(x, y, z), cellValue);
+        }
 
-            SetCell(x, y, z, hasCellThere);
+        /// <summary>
+        /// Sets the CubeCell of this CubeStructure at given coordinates. Returns false, if any coord is not lower than Radius, otherwise true.
+        /// </summary>
+        /// <param name="position">X, Y and Z coords of the cell.</param>
+        /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
+        public bool TrySetCell(IVector3 position, bool cellValue)
+        {
+            if (IsOutOfRadius(position)) return false;
+
+            SetCell(position, cellValue);
             return true;
         }
 
-        public int GetLayerIndex(int x, int y, int z)
+        public int GetLayerIndex(IVector3 position)
         {
-            return MathHelper.Max(Math.Abs(x), Math.Abs(y), Math.Abs(z));
+            return MathHelper.Max(Math.Abs(position.X), Math.Abs(position.Y), Math.Abs(position.Z));
         }
 
         public CellLayer GetLayer(int index)
@@ -144,17 +189,17 @@ namespace NeonShooter.Cube
 
         public CellLayer GetLastLayer()
         {
-        	//Last or default gave us layer of Radius, not current last one
-        	//And so - expand was bugged
-			if (Radius > 1)
-				return cellLayers [Radius - 1];
-			else
-				return null;
+            //Last or default gave us layer of Radius, not current last one
+            //And so - expand was bugged
+            if (Radius > 1)
+                return cellLayers[Radius - 1];
+            else
+                return null;
         }
 
         public CellLayer GetLayer(int x, int y, int z)
         {
-            return GetLayer(GetLayerIndex(x, y, z));
+            return GetLayer(GetLayerIndex(new IVector3(x, y, z)));
         }
 
         /// <summary>
@@ -163,7 +208,7 @@ namespace NeonShooter.Cube
         public bool LastLayerFull()
         {
             if (Radius == 0) return true;
-				return cellLayers [Radius - 1].Count == cellLayers [Radius - 1].Capacity;
+            return cellLayers[Radius - 1].Full;
 
         }
 
@@ -304,7 +349,7 @@ namespace NeonShooter.Cube
             }
             return 0;
         }
-        
+
         public IVector3? RetrieveCell()
         {
             var cells = RetrieveCells(1);
@@ -318,12 +363,28 @@ namespace NeonShooter.Cube
             else return CellRetriever.RetrieveCells(this, count);
         }
 
+        public void AddRandomCube()
+        {
+            IVector3? space = cellLayers[Radius - 1].GetRandomFreeSpace();
+            if (space == null) return;
+            SetCell(space.Value, true);
+        }
+
         private void UpdateSides(int x, int y, int z)
         {
-            if (IsOutOfRadius(x, y, z)) return;
+            UpdateSides(new IVector3(x, y, z));
+        }
 
-            CubeCell cell = this[x, y, z];
+        private void UpdateSides(IVector3 position)
+        {
+            if (IsOutOfRadius(position)) return;
+
+            CubeCell cell = this[position];
             if (cell == null) return;
+
+            int x = position.X;
+            int y = position.Y;
+            int z = position.Z;
 
             bool rightSide = TryGetCell(x + 1, y, z) == null;
             bool leftSide = TryGetCell(x - 1, y, z) == null;
@@ -340,12 +401,16 @@ namespace NeonShooter.Cube
             cell.TurnSideOnOff(CubeCellPlaneSide.Back, backSide);
         }
 
-        private void UpdateNeighboursSides(int x, int y, int z)
+        private void UpdateNeighboursSides(IVector3 position)
         {
-            if (IsOutOfRadius(x, y, z)) return;
+            if (IsOutOfRadius(position)) return;
 
-            CubeCell cell = this[x, y, z];
+            CubeCell cell = this[position];
             bool hasSide = cell == null;
+
+            int x = position.X;
+            int y = position.Y;
+            int z = position.Z;
 
             var rightCell = TryGetCell(x + 1, y, z);
             var leftCell = TryGetCell(x - 1, y, z);
@@ -365,32 +430,28 @@ namespace NeonShooter.Cube
         private void UpdateLastLayersSides()
         {
             for (int x = -Radius + 1; x < Radius; x++)
-            {
                 for (int y = -Radius + 1; y < Radius; y++)
                 {
                     UpdateSides(x, y, -Radius + 1);
                     UpdateSides(x, y, Radius - 1);
                 }
-            }
+
             for (int y = -Radius + 1; y < Radius; y++)
-            {
                 for (int z = -Radius + 2; z < Radius - 1; z++)
                 {
                     UpdateSides(-Radius + 1, y, z);
                     UpdateSides(Radius - 1, y, z);
                 }
-            }
+
             for (int z = -Radius + 2; z < Radius - 1; z++)
-            {
                 for (int x = -Radius + 2; x < Radius - 1; x++)
                 {
                     UpdateSides(x, -Radius + 1, z);
                     UpdateSides(x, Radius - 1, z);
                 }
-            }
         }
 
-        private void ForEveryCell(Action<int, int, int> action)
+        private void ForEveryCell(Action<IVector3> action)
         {
             for (int x = -Radius + 1; x < Radius; x++)
             {
@@ -398,18 +459,18 @@ namespace NeonShooter.Cube
                 {
                     for (int z = -Radius + 1; z < Radius; z++)
                     {
-                        action(x, y, z);
+                        action(new IVector3(x, y, z));
                     }
                 }
             }
         }
 
-        private bool IsOutOfRadius(int x, int y, int z)
+        private bool IsOutOfRadius(IVector3 position)
         {
             return
-                Math.Abs(x) >= Radius ||
-                Math.Abs(y) >= Radius ||
-                Math.Abs(z) >= Radius;
+                Math.Abs(position.X) >= Radius ||
+                Math.Abs(position.Y) >= Radius ||
+                Math.Abs(position.Z) >= Radius;
         }
 
         private static CubeCell CreateCellNull(int radius) { return null; }
@@ -458,15 +519,5 @@ namespace NeonShooter.Cube
             Error,
             Exception
         }
-
-		public void addRandomCube()
-		{
-			String space = cellLayers [Radius - 1].getRandomCellSpace ();
-			string [] dims = space.Split(new Char[]{'_'});
-
-			this.SetCell (Int32.Parse(dims [0]), Int32.Parse(dims [1]), Int32.Parse(dims [2]), true);
-
-
-		}
     }
 }
