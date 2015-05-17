@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NeonShooter.Players
 {
-    class EnemyPlayer : MonoBehaviour, IPlayer
+    public class EnemyPlayer : MonoBehaviour, IPlayer
     {
         public string NetworkName { get; set; }
 

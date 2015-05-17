@@ -9,9 +9,9 @@ using com.shephertz.app42.gaming.multiplayer.client.transformer;
 
 using System;
 using System.Collections.Generic;
-using NeonShooter.PlayerControl;
+using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 
-namespace AssemblyCSharp
+namespace NeonShooter.AppWarp
 {
 	public class Listener : ConnectionRequestListener, LobbyRequestListener, ZoneRequestListener, RoomRequestListener, ChatRequestListener, UpdateRequestListener, NotifyListener, TurnBasedRoomListener
 	{
@@ -296,7 +296,7 @@ namespace AssemblyCSharp
 		
 		public void onChatReceived (ChatEvent eventObj)
 		{
-			com.shephertz.app42.gaming.multiplayer.client.SimpleJSON.JSONNode msg =  com.shephertz.app42.gaming.multiplayer.client.SimpleJSON.JSON.Parse(eventObj.getMessage());
+			//JSONNode msg = JSON.Parse(eventObj.getMessage());
 			//msg[0] 
 			if(eventObj.getSender() != appwarp.username)
 			{
@@ -305,8 +305,9 @@ namespace AssemblyCSharp
 				   appwarp.addPlayer(eventObj.getSender().ToString());
 				}
 
-				appwarp.movePlayer(msg["x"].AsFloat,msg["y"].AsFloat,msg["z"].AsFloat, eventObj.getSender().ToString());
+				//appwarp.movePlayer(msg["x"].AsFloat,msg["y"].AsFloat,msg["z"].AsFloat, eventObj.getSender().ToString());
 				//Log("otryzmana pozycja: " + msg["x"].ToString()+" "+msg["y"].ToString()+" "+msg["z"].ToString());
+                appwarp.InterpretMessage(eventObj.getMessage(), eventObj.getSender().ToString());
 			}
 		}
 		

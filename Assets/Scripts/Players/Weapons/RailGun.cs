@@ -2,6 +2,7 @@
 using NeonShooter.Utils;
 using UnityEngine;
 using System.Collections;
+using NeonShooter.AppWarp;
 
 namespace NeonShooter.Players.Weapons
 {
@@ -26,7 +27,7 @@ namespace NeonShooter.Players.Weapons
             bool enemyShot = false;
             if (shootLine(startingPosition, endingPosition, out hitInfo))
             {
-                foreach (GameObject target in appwarp.enemies)
+                foreach (GameObject target in appwarp.enemies.Values)
                 {
                     if (target.GetComponent<Collider>() == hitInfo.collider)
                     {

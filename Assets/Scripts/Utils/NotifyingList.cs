@@ -1,14 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace NeonShooter.Utils
 {
-    public class NotifyingList<T>
+    public class NotifyingList<T> : IEnumerable<T>, IEnumerable
     {
-        public event NotifyingListItemSetEventHandler<T> OnItemSet;
-        public event NotifyingListItemEventHandler<T> OnItemAdded;
-        public event NotifyingListItemEventHandler<T> OnItemRemoved;
-        public event NotifyingListEventHandler<T> OnCleared;
+        public event NotifyingListEventHandler OnListChanged;
 
         List<T> list;
         public T this[int index]
@@ -20,8 +18,8 @@ namespace NeonShooter.Utils
 
                 var oldValue = list[index];
                 list[index] = value;
-                if (OnItemSet != null)
-                    OnItemSet(index, oldValue, value);
+                if (OnListChanged != null)
+                    OnListChanged(new NotifyingListEventArgs(ListChange.ItemSet, value, oldValue, index));
             }
         }
 
@@ -33,26 +31,58 @@ namespace NeonShooter.Utils
         public void Add(T item)
         {
             list.Add(item);
-            if (OnItemAdded != null)
-                OnItemAdded(item);
+            if (OnListChanged != null)
+                OnListChanged(new NotifyingListEventArgs(ListChange.ItemAdd, item));
         }
 
         public void Remove(T item)
         {
             list.Remove(item);
-            if (OnItemAdded != null)
-                OnItemAdded(item);
+            if (OnListChanged != null)
+                OnListChanged(new NotifyingListEventArgs(ListChange.ItemRemove, item));
         }
 
         public void Clear()
         {
             list.Clear();
-            if (OnCleared != null)
-                OnCleared();
+            if (OnListChanged != null)
+                OnListChanged(new NotifyingListEventArgs(ListChange.Clear));
+        }
+
+        public delegate void NotifyingListEventHandler(NotifyingListEventArgs e);
+
+        public class NotifyingListEventArgs
+        {
+            public ListChange Change { get; private set; }
+            public T NewItem { get; private set; }
+            public T OldItem { get; private set; }
+            public int Index { get; private set; }
+
+            public NotifyingListEventArgs(ListChange change, T newItem = default(T), T oldItem = default(T), int index = -1)
+            {
+                Change = change;
+                NewItem = newItem;
+                OldItem = oldItem;
+                Index = index;
+            }
+        }
+
+        public enum ListChange
+        {
+            ItemAdd,
+            ItemRemove,
+            ItemSet,
+            Clear
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return list.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
-
-    public delegate void NotifyingListItemSetEventHandler<T>(int index, T oldItem, T newItem);
-    public delegate void NotifyingListItemEventHandler<T>(T item);
-    public delegate void NotifyingListEventHandler<T>();
 }
