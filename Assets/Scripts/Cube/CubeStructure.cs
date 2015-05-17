@@ -17,10 +17,26 @@ namespace NeonShooter.Cube
         TwoWayList<TwoWayList<TwoWayList<CubeCell>>> cells;
         List<CellLayer> cellLayers;
 
+        public event CellChangedEventHandler CellChanged;
+        public event RadiusChangedEventHandler RadiusChanged;
+
         /// <summary>
         /// Current radius of this CubeStructure. It cannot be changed explicitly. Instead use Expand() and Shrink() methods.
         /// </summary>
-        public int Radius { get; private set; }
+        private int radius;
+        public int Radius
+        {
+            get { return radius; }
+            private set
+            {
+                if (value == radius) return;
+
+                var oldValue = radius;
+                radius = value;
+                if (RadiusChanged != null)
+                    RadiusChanged(oldValue, value);
+            }
+        }
 
         public int Count { get; private set; }
 
@@ -107,6 +123,7 @@ namespace NeonShooter.Cube
         /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
         public void SetCell(int x, int y, int z, bool cellValue)
         {
+            SetCell(new IVector3(x, y, z), cellValue);
         }
 
         /// <summary>
@@ -128,6 +145,9 @@ namespace NeonShooter.Cube
 
             UpdateSides(position);
             UpdateNeighboursSides(position);
+
+            if (CellChanged != null)
+                CellChanged(position, cellValue);
         }
 
         /// <summary>
@@ -521,5 +541,8 @@ namespace NeonShooter.Cube
             Error,
             Exception
         }
+
+        public delegate void CellChangedEventHandler(IVector3 position, bool cellValue);
+        public delegate void RadiusChangedEventHandler(int oldValue, int newValue);
     }
 }

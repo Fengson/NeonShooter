@@ -31,11 +31,11 @@ namespace NeonShooter.AppWarp.States
 
         public PlayerState(Player player)
         {
-            player.Position.OnValueChanged += Position_OnValueChanged;
-            player.Rotations.OnValueChanged += Rotations_OnValueChanged;
+            player.Position.ValueChanged += Position_ValueChanged;
+            player.Rotations.ValueChanged += Rotations_ValueChanged;
 
-            player.SelectedWeapon.OnValueChanged += SelectedWeapon_OnValueChanged;
-            player.ContinuousFire.OnValueChanged += ContinuousFire_OnValueChanged;
+            player.SelectedWeapon.ValueChanged += SelectedWeapon_ValueChanged;
+            player.ContinuousFire.ValueChanged += ContinuousFire_ValueChanged;
 
             LaunchedProjectiles = new ListState<Projectile, ProjectileState>(player.LaunchedProjectiles, p => new ProjectileState(p));
         }
@@ -59,22 +59,22 @@ namespace NeonShooter.AppWarp.States
             return json;
         }
 
-        void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
+        void Position_ValueChanged(Vector3 oldValue, Vector3 newValue)
         {
             Position = newValue;
         }
 
-        void Rotations_OnValueChanged(Vector2 oldValue, Vector2 newValue)
+        void Rotations_ValueChanged(Vector2 oldValue, Vector2 newValue)
         {
             Rotations = newValue;
         }
 
-        void SelectedWeapon_OnValueChanged(Weapon oldValue, Weapon newValue)
+        void SelectedWeapon_ValueChanged(Weapon oldValue, Weapon newValue)
         {
             SelectedWeapon = newValue;
         }
 
-        void ContinuousFire_OnValueChanged(bool oldValue, bool newValue)
+        void ContinuousFire_ValueChanged(bool oldValue, bool newValue)
         {
             ContinousFire = newValue;
         }

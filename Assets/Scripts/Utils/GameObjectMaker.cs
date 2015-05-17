@@ -4,13 +4,16 @@ namespace NeonShooter.Utils
 {
     public static class GameObjectMaker
     {
+        
+
         public static GameObject CreateGameObject(string name, Mesh mesh)
         {
             var gameObject = new GameObject(name);
             var meshFilter = (MeshFilter)gameObject.AddComponent(typeof(MeshFilter));
             meshFilter.mesh = mesh;
             var renderer = (MeshRenderer)gameObject.AddComponent(typeof(MeshRenderer));
-            renderer.material.shader = Shader.Find("Standard");
+            var shader = Globals.Instance == null ? null : Globals.Instance.invisibleShadowCasterShader;
+            if (shader == null) shader = Shader.Find("Standard");
             return gameObject;
         }
 

@@ -19,10 +19,14 @@ CubeStructure:
  + better method for gaining and losing cells
  - keep NotifyingProperty for:
    - CubeStructure
- - grow colliders when radius++, shrink when radius--
+ + grow colliders when radius++, shrink when radius--
 Network:
- - Read proper NotifyingProperties and InvokableActions from Player and EnemyPlayer and send them
- - Set proper incoming NotifyingProperties and invoke InvokableActions on EnemyPlayer and player
+ - Read proper NotifyingProperties and InvokableActions from Player and send them
+   + NP Player.Position
+   + NP Player.Rotations
+ - Set proper incoming NotifyingProperties and invoke InvokableActions on EnemyPlayer
+   + NP EnemyPlayer.Position
+   + NP EnemyPlayer.Rotations
 EnemyPlayer & Player:
  - Implement events for proper NotifyingProperties and InvokableActions
 Player:

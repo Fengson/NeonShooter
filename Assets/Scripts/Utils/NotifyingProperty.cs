@@ -16,7 +16,7 @@ namespace NeonShooter.Utils
 
         private object access;
 
-        public event NotifyingPropertyEventHandler<T> OnValueChanged;
+        public event NotifyingPropertyEventHandler<T> ValueChanged;
 
         public bool PublicGet { get; private set; }
         public bool PublicSet { get; private set; }
@@ -39,8 +39,8 @@ namespace NeonShooter.Utils
 
                 var oldValue = this.value;
                 this.value = value;
-                if (OnValueChanged != null)
-                    OnValueChanged(oldValue, value);
+                if (ValueChanged != null)
+                    ValueChanged(oldValue, value);
             }
         }
         public T Value
