@@ -45,6 +45,19 @@ namespace NeonShooter.Cube
 
         public SizeChangeBehaviour UnwantedSizeChangeBehaviour { get; set; }
 
+        private bool visible;
+        public bool Visible
+        {
+            get { return visible; }
+            set
+            {
+                if (value == visible) return;
+
+                visible = value;
+                ForEachCell(cell => cell.UpdateVisible());
+            }
+        }
+
         /// <summary>
         /// Creates new CubeStructure with given initial radius, and sets all cells active.
         /// </summary>
@@ -65,13 +78,15 @@ namespace NeonShooter.Cube
 
             ForEachCell((v) =>
                 {
-                    var cell = new CubeCell(owner, v);
+                    var cell = new CubeCell(this, owner, v);
                     cells[v.X][v.Y][v.Z] = cell;
                     cellLayers[GetLayerIndex(v)].AddCellSpace(v);
                 });
             UpdateLastLayersSides();
 
             UnwantedSizeChangeBehaviour = SizeChangeBehaviour.Exception;
+
+            Visible = true;
         }
 
         /// <summary>
@@ -136,7 +151,7 @@ namespace NeonShooter.Cube
             CubeCell oldValue = cells[position.X][position.Y][position.Z];
             if (cellValue == (oldValue != null)) return;
 
-            cells[position.X][position.Y][position.Z] = cellValue ? new CubeCell(owner, position) : null;
+            cells[position.X][position.Y][position.Z] = cellValue ? new CubeCell(this, owner, position) : null;
             if (!cellValue) oldValue.ClearSides();
 
             int layerIndex = GetLayerIndex(position);
@@ -485,6 +500,11 @@ namespace NeonShooter.Cube
                     }
                 }
             }
+        }
+
+        private void ForEachCell(Action<CubeCell> action)
+        {
+            ForEachCell(v => action(this[v]));
         }
 
         private bool IsOutOfRadius(IVector3 position)

@@ -20,6 +20,7 @@ namespace NeonShooter.Players
         public AudioSource[] sounds;
 
         public int initialRadius;
+        public bool cubeStructureVisible = false;
 
         float aimRotationSpeed = -90;
         public GameObject aim;
@@ -71,6 +72,7 @@ namespace NeonShooter.Players
 
             int radius = Math.Max(1, initialRadius);
             cubeStructure = new CubeStructure(gameObject, radius);
+            cubeStructure.Visible = cubeStructureVisible;
             ChangeSize(1, radius);
             cubeStructure.RadiusChanged += ChangeSize;
         }
@@ -111,6 +113,8 @@ namespace NeonShooter.Players
 
             if (Input.GetKeyDown(KeyCode.X))
                 ChangeWeaponToNext();
+
+            cubeStructure.Visible = cubeStructureVisible;
         }
 
         void onShoot()
