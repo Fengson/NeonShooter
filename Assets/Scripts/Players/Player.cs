@@ -46,10 +46,7 @@ namespace NeonShooter.Players
         {
             defaultWeapon = new VacuumWeapon();
             weapons = new List<Weapon> { defaultWeapon, new RailGun(), new RocketLauncher() };
-
-            // TODO: For multiple client network testing, move somewhere else
-            //Application.runInBackground = true;
-
+            
             access = new object();
             Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
             Rotations = NotifyingProperty<Vector2>.PublicGetPrivateSet(access);
@@ -65,6 +62,9 @@ namespace NeonShooter.Players
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+
+            // TODO: For multiple client network testing, move somewhere else
+            Application.runInBackground = true;
 
             cubeStructure = new CubeStructure(gameObject, 3);
         }

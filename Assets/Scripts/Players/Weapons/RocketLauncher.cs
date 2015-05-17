@@ -2,6 +2,7 @@
 using NeonShooter.Utils;
 using UnityEngine;
 using System.Collections;
+using NeonShooter.AppWarp;
 
 namespace NeonShooter.Players.Weapons
 {
@@ -72,7 +73,7 @@ namespace NeonShooter.Players.Weapons
             int k = 0;
             while (k < hitColliders.Length)
             {
-                foreach (GameObject target in appwarp.enemies)
+                foreach (GameObject target in appwarp.enemies.Values)
                 {
                     if (target.GetComponent<Collider>() == hitColliders[k].GetComponent<Collider>())
                     {

@@ -1,4 +1,5 @@
-﻿using NeonShooter.Utils;
+﻿using NeonShooter.AppWarp;
+using NeonShooter.Utils;
 using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
@@ -44,7 +45,7 @@ namespace NeonShooter.Players.Weapons
             damageLeftover = fractionalDamage - integerDamage;
             if (integerDamage == 0) return;
 
-            foreach (GameObject target in appwarp.enemies)
+            foreach (GameObject target in appwarp.enemies.Values)
             {
                 Vector3 heading = (target.transform.position - shooter.Position.Value).normalized;
                 double angle_cos = Vector3.Dot(heading, shooter.Direction.Value.normalized);
