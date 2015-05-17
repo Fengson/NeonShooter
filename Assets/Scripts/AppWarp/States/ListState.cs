@@ -35,7 +35,7 @@ namespace NeonShooter.AppWarp.States
             ObservedItems = new Dictionary<TList, TState>();
             DestroyedItems = new Dictionary<TList, TState>();
 
-            list.OnListChanged += list_OnListChanged;
+            list.ListChanged += list_ListChanged;
         }
 
         public void Clear()
@@ -63,7 +63,7 @@ namespace NeonShooter.AppWarp.States
             return json;
         }
 
-        void list_OnListChanged(NotifyingList<TList>.NotifyingListEventArgs e)
+        void list_ListChanged(NotifyingList<TList>.NotifyingListEventArgs e)
         {
             TState state;
             switch (e.Change)

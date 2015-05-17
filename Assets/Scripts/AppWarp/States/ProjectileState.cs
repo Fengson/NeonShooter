@@ -21,8 +21,8 @@ namespace NeonShooter.AppWarp.States
 
         public ProjectileState(Projectile projectile)
         {
-            projectile.Position.OnValueChanged += Position_OnValueChanged;
-            projectile.Rotation.OnValueChanged += Rotation_OnValueChanged;
+            projectile.Position.ValueChanged += Position_ValueChanged;
+            projectile.Rotation.ValueChanged += Rotation_ValueChanged;
         }
 
         public void Clear()
@@ -39,12 +39,12 @@ namespace NeonShooter.AppWarp.States
             return json;
         }
 
-        void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
+        void Position_ValueChanged(Vector3 oldValue, Vector3 newValue)
         {
             Position = newValue;
         }
 
-        void Rotation_OnValueChanged(Quaternion oldValue, Quaternion newValue)
+        void Rotation_ValueChanged(Quaternion oldValue, Quaternion newValue)
         {
             Rotation = newValue;
         }

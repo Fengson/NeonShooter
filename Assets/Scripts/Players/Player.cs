@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using NeonShooter.Cube;
 using NeonShooter.Players.Weapons;
+using System;
 
 namespace NeonShooter.Players
 {
@@ -17,6 +18,9 @@ namespace NeonShooter.Players
         List<Weapon> weapons;
 
         public AudioSource[] sounds;
+
+        public int initialRadius;
+        public bool cubeStructureVisible = false;
 
         float aimRotationSpeed = -90;
         public GameObject aim;
@@ -64,9 +68,13 @@ namespace NeonShooter.Players
             Cursor.visible = false;
 
             // TODO: For multiple client network testing, move somewhere else
-            Application.runInBackground = true;
+            //Application.runInBackground = true;
 
-            cubeStructure = new CubeStructure(gameObject, 3);
+            int radius = Math.Max(1, initialRadius);
+            cubeStructure = new CubeStructure(gameObject, radius);
+            cubeStructure.Visible = cubeStructureVisible;
+            ChangeSize(1, radius);
+            cubeStructure.RadiusChanged += ChangeSize;
         }
 
         void Update()
@@ -105,6 +113,8 @@ namespace NeonShooter.Players
 
             if (Input.GetKeyDown(KeyCode.X))
                 ChangeWeaponToNext();
+
+            cubeStructure.Visible = cubeStructureVisible;
         }
 
         void onShoot()
@@ -185,6 +195,27 @@ namespace NeonShooter.Players
             //{
             //    Instantiate(cubelingPrefab, transform.localPosition + v, transform.rotation);
             //}
+        }
+
+        void ChangeSize(int currentRadius, int newRadius)
+        {
+            var pos = transform.position;
+            var currentR = CalculateColliderRadius(currentRadius);
+            var newR = CalculateColliderRadius(newRadius);
+            var dr = newR - currentR;
+
+            var collider = GetComponent<CharacterController>();
+            collider.radius = newR;
+            collider.height = 2 * newR;
+            transform.position += Vector3.up * dr;
+
+            var character = GameObject.FindGameObjectWithTag("CameraScale");
+            character.transform.localScale = Vector3.one * newR * 2;
+        }
+
+        float CalculateColliderRadius(int structureRadius)
+        {
+            return Mathf.Max(0, structureRadius - 0.5f);
         }
     }
 }
