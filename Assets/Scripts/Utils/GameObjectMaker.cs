@@ -14,6 +14,7 @@ namespace NeonShooter.Utils
             var renderer = (MeshRenderer)gameObject.AddComponent(typeof(MeshRenderer));
             var shader = Globals.Instance == null ? null : Globals.Instance.invisibleShadowCasterShader;
             if (shader == null) shader = Shader.Find("Standard");
+            renderer.material.shader = shader;
             return gameObject;
         }
 
