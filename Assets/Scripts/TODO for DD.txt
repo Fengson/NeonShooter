@@ -24,6 +24,7 @@ Network:
  - Read proper NotifyingProperties and InvokableActions from Player and send them
    + NP Player.Position
    + NP Player.Rotations
+   + NP Player.ContinousWeapon
  - Set proper incoming NotifyingProperties and invoke InvokableActions on EnemyPlayer
    + NP EnemyPlayer.Position
    + NP EnemyPlayer.Rotations
