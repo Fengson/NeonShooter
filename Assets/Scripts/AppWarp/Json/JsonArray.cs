@@ -16,27 +16,27 @@ namespace NeonShooter.AppWarp.Json
             set { objects[index] = value; }
         }
 
-        public JsonArray(params IJsonObject[] pairs)
+        public JsonArray(params IJsonObject[] objects)
         {
-            this.objects = new List<IJsonObject>(pairs);
+            this.objects = new List<IJsonObject>(objects);
         }
 
-        public JsonArray(IEnumerable<IJsonObject> pairs)
+        public JsonArray(IEnumerable<IJsonObject> objects)
         {
-            this.objects = new List<IJsonObject>(pairs);
+            this.objects = new List<IJsonObject>(objects);
         }
 
-        public void Add(IJsonObject pair)
+        public void Add(IJsonObject o)
         {
-            objects.Add(pair);
+            objects.Add(o);
         }
 
-        public void Remove(IJsonObject pair)
+        public void Remove(IJsonObject o)
         {
-            objects.Remove(pair);
+            objects.Remove(o);
         }
 
-        public void Clear(IJsonObject pair)
+        public void Clear()
         {
             objects.Clear();
         }
@@ -44,9 +44,13 @@ namespace NeonShooter.AppWarp.Json
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder("[ ");
+            int i = 0;
             foreach (var o in objects)
             {
-                sb.AppendFormat("{0}, ", o);
+                sb.AppendFormat("{0}", o);
+                if (i < objects.Count - 1) sb.Append(',');
+                sb.Append(' ');
+                i++;
             }
             sb.Append("]");
             return sb.ToString();

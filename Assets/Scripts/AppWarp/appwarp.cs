@@ -76,7 +76,6 @@ namespace NeonShooter.AppWarp
             {
                 var json = playerState.ToJson();
                 json.Append(new JsonPair("Type", "PlayerState"));
-                Debug.Log(json);
                 playerState.Clear();
                 listener.sendMsg(json.ToString());
 
@@ -97,7 +96,7 @@ namespace NeonShooter.AppWarp
             var json = JSON.Parse(message);
             var type = json["Type"];
 
-            if (type == "PlayerState")
+            if (type.Value == "PlayerState")
             {
                 var jsonPosition = json["Position"];
                 if (jsonPosition != null)

@@ -6,7 +6,21 @@ namespace NeonShooter.Players
 {
     public class EnemyPlayer : MonoBehaviour, IPlayer
     {
+        public const float DefaultLerpFactor = 10;
+
         public string NetworkName { get; set; }
+
+        public float LerpFactor
+        {
+            get
+            {
+                var globalsObject = GameObject.FindGameObjectWithTag("Globals");
+                if (globalsObject == null) return DefaultLerpFactor;
+                var globals = globalsObject.GetComponent<Globals>();
+                if (globals == null) return DefaultLerpFactor;
+                return globals.enemyLerpFactor;
+            }
+        }
 
         public NotifyingProperty<Vector3> Position { get; private set; }
         public NotifyingProperty<Vector2> Rotations { get; private set; }
@@ -15,6 +29,9 @@ namespace NeonShooter.Players
         public NotifyingProperty<Weapon> SelectedWeapon { get; private set; }
 
         public NotifyingList<Projectile> LaunchedProjectiles { get; private set; }
+
+        PropertyInterpolator<Vector3> positionLerp;
+        PropertyInterpolator<Vector2> rotationsLerp;
 
         public EnemyPlayer()
         {
@@ -25,6 +42,24 @@ namespace NeonShooter.Players
             SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth();
 
             LaunchedProjectiles = new NotifyingList<Projectile>();
+        }
+
+        void Awake()
+        {
+            positionLerp = new PropertyInterpolator<Vector3>(
+                () => transform.position,
+                v => transform.position = v,
+                (v1, v2, p) => Vector3.Lerp(v1, v2, p));
+            rotationsLerp = new PropertyInterpolator<Vector2>(
+                () => transform.localEulerAngles,
+                v =>
+                {
+                    var rot = transform.localEulerAngles;
+                    transform.localEulerAngles = new Vector3(rot.x, v.y, rot.z);
+                },
+                (v1, v2, p) => new Vector2(
+                    Mathf.LerpAngle(v1.x, v2.x, p),
+                    Mathf.LerpAngle(v1.y, v2.y, p)));
         }
 
         void Start()
@@ -39,30 +74,29 @@ namespace NeonShooter.Players
 
             Position.OnValueChanged += Position_OnValueChanged;
             Rotations.OnValueChanged += Rotations_OnValueChanged;
-
         }
 
-        private Vector3 previousPosition;
-        private float time = 0;
         void Update()
         {
-            time += Time.deltaTime * 10;
-            transform.position = Vector3.Lerp(previousPosition, Position.Value, time);
+            float dProgress = Time.deltaTime * LerpFactor;
+            Debug.Log(string.Format("{0}, {1}", LerpFactor, dProgress));
+            positionLerp.UpdateForward(dProgress);
+            rotationsLerp.UpdateForward(dProgress);
         }
 
         void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
         {
-            previousPosition = transform.position;
-            time = 0;
+            positionLerp.TargetValue = newValue;
         }
 
         void Rotations_OnValueChanged(Vector2 oldValue, Vector2 newValue)
         {
-            Vector3 rot = transform.localEulerAngles;
-            transform.localEulerAngles = new Vector3(rot.x, newValue.y, rot.z);
+            //Vector3 rot = transform.localEulerAngles;
+            //transform.localEulerAngles = new Vector3(rot.x, newValue.y, rot.z);
 
             //rot = TEMP_nose.transform.localEulerAngles;
             //TEMP_nose.transform.localEulerAngles = new Vector3(newValue.x, rot.y, rot.z);
+            rotationsLerp.TargetValue = newValue;
         }
 
         public void GainLife(int amount)
