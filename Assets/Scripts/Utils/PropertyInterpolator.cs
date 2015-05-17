@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace NeonShooter.Utils
 {
@@ -19,11 +20,28 @@ namespace NeonShooter.Utils
             {
                 sourceValue = getProperty();
                 targetValue = value;
-                Progress = 0;
+                progress = 0;
             }
         }
 
-        public float Progress { get; private set; }
+        float progress;
+        public float Progress
+        {
+            get { return progress; }
+            set
+            {
+                if (value == progress) return;
+
+                if (value < 0) value = 0;
+                if (value > 1) value = 1;
+
+                progress = value;
+
+                if (progress == 0) setProperty(sourceValue);
+                else if (progress == 1) setProperty(targetValue);
+                else setProperty(interpolate(sourceValue, targetValue, progress));
+            }
+        }
 
         public PropertyInterpolator(Func<T> propertyGetter, Action<T> propertySetter,
             InterpolationFunction interpolationFunction)
@@ -34,16 +52,10 @@ namespace NeonShooter.Utils
             TargetValue = getProperty();
         }
 
-        public void UpdateForward(float dProgress)
+        public void Update(float dProgress)
         {
-            Progress += dProgress;
-            if (Progress > 1) Progress = 1;
-            Update(Progress);
-        }
-
-        public void Update(float Progress)
-        {
-            setProperty(interpolate(sourceValue, targetValue, Progress));
+            if (Progress == 1) return;
+            Progress = Mathf.Max(1, Progress + dProgress);
         }
 
         public delegate T InterpolationFunction(T from, T to, float progress);

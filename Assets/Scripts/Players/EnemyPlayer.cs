@@ -80,8 +80,8 @@ namespace NeonShooter.Players
         {
             float dProgress = Time.deltaTime * LerpFactor;
             Debug.Log(string.Format("{0}, {1}", LerpFactor, dProgress));
-            positionLerp.UpdateForward(dProgress);
-            rotationsLerp.UpdateForward(dProgress);
+            positionLerp.Update(dProgress);
+            rotationsLerp.Update(dProgress);
         }
 
         void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
