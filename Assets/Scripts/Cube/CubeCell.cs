@@ -7,6 +7,8 @@ namespace NeonShooter.Cube
 {
     public class CubeCell
     {
+        CubeStructure parentStructure;
+
         GameObject owner;
         GameObject sidesParent;
         Dictionary<CubeCellPlaneSide, GameObject> sides;
@@ -17,8 +19,9 @@ namespace NeonShooter.Cube
 
         public IVector3 Position { get; private set; }
 
-        public CubeCell(GameObject owner, IVector3 position)
+        public CubeCell(CubeStructure parentStructure, GameObject owner, IVector3 position)
         {
+            this.parentStructure = parentStructure;
             this.owner = owner;
             sidesParent = null;
             sides = new Dictionary<CubeCellPlaneSide, GameObject>();
@@ -42,7 +45,7 @@ namespace NeonShooter.Cube
                     new Vector3(X, Y, Z), Vector3.zero, Vector3.one);
                 GameObjectHelper.SetParentDontMessUpCoords(sidesParent, owner);
             }
-            GameObject sideObject = CubeGameObjectMaker.CreateCubeCellPlane(side);
+            GameObject sideObject = CubeGameObjectMaker.CreateCubeCellPlane(side, parentStructure.Visible);
             GameObjectHelper.SetParentDontMessUpCoords(sideObject, sidesParent);
 
             sides.Add(side, sideObject);
@@ -84,6 +87,18 @@ namespace NeonShooter.Cube
         {
             if (isOn) AddSide(side);
             else RemoveSide(side);
+        }
+
+        public void UpdateVisible()
+        {
+            Material material = (parentStructure.Visible || Globals.Instance == null) ?
+                null : Globals.Instance.invisibleShadowCasterMaterial;
+            if (material == null) material = Globals.DefaultMaterial;
+            foreach (var side in sides.Values)
+            {
+                var renderer = side.GetComponent<MeshRenderer>();
+                renderer.material = material;
+            }
         }
     }
 }

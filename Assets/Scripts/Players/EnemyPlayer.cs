@@ -14,11 +14,8 @@ namespace NeonShooter.Players
         {
             get
             {
-                var globalsObject = GameObject.FindGameObjectWithTag("Globals");
-                if (globalsObject == null) return DefaultLerpFactor;
-                var globals = globalsObject.GetComponent<Globals>();
-                if (globals == null) return DefaultLerpFactor;
-                return globals.enemyLerpFactor;
+                if (Globals.Instance == null) return DefaultLerpFactor;
+                return Globals.Instance.enemyLerpFactor;
             }
         }
 
@@ -72,31 +69,15 @@ namespace NeonShooter.Players
                 cameraObject.transform.eulerAngles.x);
             Direction.Value = Quaternion.Euler(Rotations.Value.x, Rotations.Value.y, 0) * Vector3.forward;
 
-            Position.OnValueChanged += Position_OnValueChanged;
-            Rotations.OnValueChanged += Rotations_OnValueChanged;
+            Position.ValueChanged += (oldVal, newVal) => positionLerp.TargetValue = newVal;
+            Rotations.ValueChanged += (oldVal, newVal) => rotationsLerp.TargetValue = newVal;
         }
 
         void Update()
         {
             float dProgress = Time.deltaTime * LerpFactor;
-            Debug.Log(string.Format("{0}, {1}", LerpFactor, dProgress));
             positionLerp.Update(dProgress);
             rotationsLerp.Update(dProgress);
-        }
-
-        void Position_OnValueChanged(Vector3 oldValue, Vector3 newValue)
-        {
-            positionLerp.TargetValue = newValue;
-        }
-
-        void Rotations_OnValueChanged(Vector2 oldValue, Vector2 newValue)
-        {
-            //Vector3 rot = transform.localEulerAngles;
-            //transform.localEulerAngles = new Vector3(rot.x, newValue.y, rot.z);
-
-            //rot = TEMP_nose.transform.localEulerAngles;
-            //TEMP_nose.transform.localEulerAngles = new Vector3(newValue.x, rot.y, rot.z);
-            rotationsLerp.TargetValue = newValue;
         }
 
         public void GainLife(int amount)

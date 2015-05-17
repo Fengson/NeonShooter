@@ -6,7 +6,7 @@ namespace NeonShooter.Utils
 {
     public class NotifyingList<T> : IEnumerable<T>, IEnumerable
     {
-        public event NotifyingListEventHandler OnListChanged;
+        public event NotifyingListEventHandler ListChanged;
 
         List<T> list;
         public T this[int index]
@@ -18,8 +18,8 @@ namespace NeonShooter.Utils
 
                 var oldValue = list[index];
                 list[index] = value;
-                if (OnListChanged != null)
-                    OnListChanged(new NotifyingListEventArgs(ListChange.ItemSet, value, oldValue, index));
+                if (ListChanged != null)
+                    ListChanged(new NotifyingListEventArgs(ListChange.ItemSet, value, oldValue, index));
             }
         }
 
@@ -31,22 +31,22 @@ namespace NeonShooter.Utils
         public void Add(T item)
         {
             list.Add(item);
-            if (OnListChanged != null)
-                OnListChanged(new NotifyingListEventArgs(ListChange.ItemAdd, item));
+            if (ListChanged != null)
+                ListChanged(new NotifyingListEventArgs(ListChange.ItemAdd, item));
         }
 
         public void Remove(T item)
         {
             list.Remove(item);
-            if (OnListChanged != null)
-                OnListChanged(new NotifyingListEventArgs(ListChange.ItemRemove, item));
+            if (ListChanged != null)
+                ListChanged(new NotifyingListEventArgs(ListChange.ItemRemove, item));
         }
 
         public void Clear()
         {
             list.Clear();
-            if (OnListChanged != null)
-                OnListChanged(new NotifyingListEventArgs(ListChange.Clear));
+            if (ListChanged != null)
+                ListChanged(new NotifyingListEventArgs(ListChange.Clear));
         }
 
         public delegate void NotifyingListEventHandler(NotifyingListEventArgs e);
