@@ -65,9 +65,9 @@ namespace NeonShooter.AppWarp
             enemy.NetworkName = playerName;
             enemies[enemy.NetworkName] = enemyObject;
             
-            //var json = playerState.AbsoluteJson as JsonObject;
-            //json.Append(new JsonPair("Type", "PlayerState"));
-            //listener.sendPrivateMsg(playerName, json.ToString());
+            var json = playerState.AbsoluteJson as JsonObject;
+            json.Append(new JsonPair("Type", "PlayerState"));
+            listener.sendMsg(json.ToString(), playerName);
         }
 
         public void removePlayer(string playerName)
@@ -78,17 +78,16 @@ namespace NeonShooter.AppWarp
         void Update()
         {
             timer -= Time.deltaTime;
-            if (timer < 0)
+            if (listener.CanSendMessages && timer < 0)
             {
                 var json = playerState.RelativeJson as JsonObject;
                 json.Append(new JsonPair("Type", "PlayerState"));
                 playerState.ClearChanges();
                 listener.sendMsg(json.ToString());
 
-                Debug.Log(json.ToString());
-
                 timer = interval;
             }
+            
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -100,8 +99,6 @@ namespace NeonShooter.AppWarp
         public void InterpretMessage(string message, string sender)
         {
             var enemy = enemies[sender].GetComponent<EnemyPlayer>();
-
-            //Debug.Log(message);
 
             var json = JSON.Parse(message);
             var type = json["Type"];

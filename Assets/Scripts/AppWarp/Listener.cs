@@ -9,15 +9,29 @@ using com.shephertz.app42.gaming.multiplayer.client.transformer;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
+
+using NeonShooter.Utils;
 
 namespace NeonShooter.AppWarp
 {
 	public class Listener : ConnectionRequestListener, LobbyRequestListener, ZoneRequestListener, RoomRequestListener, ChatRequestListener, UpdateRequestListener, NotifyListener, TurnBasedRoomListener
-	{
+    {
+        const int maxMessageLength = 1000;
+        const string partWrapper1 = "{ Type : Parts, Id : ";
+        const string partWrapper2 = ", Count : ";
+        const string partWrapper3 = ", Index : ";
+        const string partWrapper4 = ", Contents : \"";
+        const string partWrapper5 = "\" }";
+        const int maxCountLength = 10;
+        const int maxIndexLength = 10;
+
 		int state = 0;
 		string debug = "";
 		public appwarp appwarp;
+
+        public bool CanSendMessages { get { return state == 1; } }
 
 		public void Log(string msg)
 		{
@@ -33,12 +47,44 @@ namespace NeonShooter.AppWarp
 			Log (message);
 		}
 
-		public void sendMsg(string msg)
+		public bool sendMsg(string msg, string username = null)
 		{
-			if(state == 1)
-			{
-				WarpClient.GetInstance().SendChat(msg);
-			}
+            //Debug.Log(msg);
+
+            if (!CanSendMessages) return false;
+
+            Stack<string> parts = new Stack<string>();
+            parts.Push(msg);
+            if (msg.Length > maxMessageLength)
+            {
+                string partWrapper12 = partWrapper1 + DateTime.UtcNow.Ticks + partWrapper2;
+                int wrapperLength = partWrapper12.Length + maxCountLength + partWrapper3.Length + maxIndexLength + partWrapper4.Length + partWrapper5.Length;
+                int maxContentsLength = maxMessageLength - wrapperLength;
+
+                int count = msg.Length / maxContentsLength + 1;
+                string partWrapper123 = partWrapper12 + count + partWrapper3;
+                
+                for (int i = 0; i < count; i++)
+                {
+                    string partWrapper1234 = partWrapper123 + i + partWrapper4;
+
+                    string whole = parts.Pop();
+                    string part = whole.Substring(0, Math.Min(whole.Length, maxContentsLength));
+                    string partWrapper12345 = partWrapper1234 + part + partWrapper5;
+                    string rest = whole.Substring(part.Length);
+
+                    parts.Push(partWrapper12345);
+                    if (rest.Length > 0)
+                        parts.Push(rest);
+                }
+            }
+
+            foreach (var part in parts.Reverse())
+            {
+                if (username == null) WarpClient.GetInstance().SendChat(part);
+                else WarpClient.GetInstance().sendPrivateChat(username, part);
+            }
+            return true;
 		}
 
 		//ConnectionRequestListener
@@ -286,7 +332,10 @@ namespace NeonShooter.AppWarp
 			
 		public void onPrivateChatReceived(string sender, string message)
 		{
-			Log ("onPrivateChatReceived : " + sender);
+            Log("onPrivateChatReceived : " + sender);
+
+            Debug.Log(message ?? "NULL");
+            receiveMessage(sender, message);
 		}
 		
 		public void onMoveCompleted(MoveEvent move)
@@ -296,20 +345,129 @@ namespace NeonShooter.AppWarp
 		
 		public void onChatReceived (ChatEvent eventObj)
 		{
-			//JSONNode msg = JSON.Parse(eventObj.getMessage());
-			//msg[0] 
-			if(eventObj.getSender() != appwarp.username)
-			{
-				//Log(eventObj.getSender() + " sended " + eventObj.getMessage());
-				if(!appwarp.playerNames.Contains(eventObj.getSender().ToString())){
-				   appwarp.addPlayer(eventObj.getSender().ToString());
-				}
-
-				//appwarp.movePlayer(msg["x"].AsFloat,msg["y"].AsFloat,msg["z"].AsFloat, eventObj.getSender().ToString());
-				//Log("otryzmana pozycja: " + msg["x"].ToString()+" "+msg["y"].ToString()+" "+msg["z"].ToString());
-                appwarp.InterpretMessage(eventObj.getMessage(), eventObj.getSender().ToString());
-			}
+            receiveMessage(eventObj.getSender(), eventObj.getMessage());
 		}
+
+        private abstract class GeneralMessage
+        {
+            public string Sender { get; set; }
+
+            public abstract SingleMessage CompleteMessage { get; }
+        }
+
+        private class SingleMessage : GeneralMessage
+        {
+            public string Contents { get; set; }
+            public override SingleMessage CompleteMessage { get { return this; } }
+        }
+
+        private class MessageSequence : GeneralMessage
+        {
+            public string Id { get; set; }
+            public int Count { get; set; }
+            public int Received { get; set; }
+            public string[] Messages { get; set; }
+
+            public override SingleMessage CompleteMessage
+            {
+                get 
+                {
+                    if (Received < Count) return null;
+                    return new SingleMessage
+                    {
+                        Sender = Sender,
+                        Contents = String.Concat(Messages)
+                    };
+                }
+            }
+        }
+
+        Queue<GeneralMessage> messageQueue = new Queue<GeneralMessage>();
+        Dictionary<string, Dictionary<string, MessageSequence>> messageSequences = new Dictionary<string, Dictionary<string, MessageSequence>>();
+
+        private void receiveMessage(string sender, string message)
+        {
+            if (sender == appwarp.username) return;
+
+            EnqueueMessage(sender, message);
+
+            while (true)
+            {
+                var singleMessage = TryDequeueMessage();
+                if (singleMessage == null) break;
+
+                ProcessMessage(singleMessage.Sender, singleMessage.Contents);
+            }
+        }
+
+        private void EnqueueMessage(string sender, string message)
+        {
+            var json = JSON.Parse(message);
+            var type = json["Type"];
+            if (type.Value == "Parts")
+            {
+                string id = json["Id"].Value;
+                int count = json["Count"].AsInt;
+                int index = json["Index"].AsInt;
+                string contents = json["Contents"];
+
+                bool isNew = false;
+
+                var innerDict = messageSequences.TryGet(sender);
+                if (innerDict == null)
+                {
+                    innerDict = new Dictionary<string, MessageSequence>();
+                    messageSequences[sender] = innerDict;
+                    isNew = true;
+                }
+                
+                MessageSequence seq = null;
+                if (!isNew) seq = innerDict.TryGet(id);
+                if (seq == null)
+                {
+                    seq = new MessageSequence
+                    {
+                        Sender = sender,
+                        Id = id,
+                        Count = count,
+                        Received = 0,
+                        Messages = new string[count]
+                    };
+                    innerDict[id] = seq;
+                    messageQueue.Enqueue(seq);
+                }
+
+                seq.Messages[index] = contents;
+                seq.Received++;
+            }
+            else
+            {
+                messageQueue.Enqueue(new SingleMessage
+                {
+                    Sender = sender,
+                    Contents = message
+                });
+            }
+        }
+
+        private SingleMessage TryDequeueMessage()
+        {
+            if (messageQueue.Count == 0) return null;
+            SingleMessage message = messageQueue.Peek().CompleteMessage;
+            if (message == null) return null;
+            messageQueue.Dequeue();
+            return message;
+        }
+
+        private void ProcessMessage(string sender, string message)
+        {
+            if (!appwarp.playerNames.Contains(sender))
+            {
+                appwarp.addPlayer(sender);
+            }
+
+            appwarp.InterpretMessage(message, sender);
+        }
 		
 		public void onUpdatePeersReceived (UpdateEvent eventObj)
 		{
