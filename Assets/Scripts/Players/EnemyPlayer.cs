@@ -8,6 +8,8 @@ namespace NeonShooter.Players
 {
     public class EnemyPlayer : BasePlayer
     {
+        private bool left;
+
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Vector2> rotationsLerp;
 
@@ -30,7 +32,7 @@ namespace NeonShooter.Players
             Rotations.ValueChanged += (oldVal, newVal) => RecalculateDirection();
 
             ContinousFire = NotifyingProperty<bool>.PublicBoth();
-            SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth();
+            SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth(DefaultWeapon);
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
 
@@ -75,6 +77,11 @@ namespace NeonShooter.Players
         protected override void OnUpdate()
         {
             base.OnUpdate();
+
+            if (left)
+            {
+                Object.Destroy(gameObject);
+            }
 
             float dProgress = Time.deltaTime * Globals.LerpFactor;
             positionLerp.Update(dProgress);
@@ -137,6 +144,11 @@ namespace NeonShooter.Players
         {
             if (newValue) SelectedWeapon.Value.OnShootStart(this);
             else SelectedWeapon.Value.OnShootEnd();
+        }
+
+        public void SetLeft()
+        {
+            left = true;
         }
     }
 }

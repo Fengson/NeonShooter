@@ -78,7 +78,8 @@ namespace NeonShooter.AppWarp
 
         public void removePlayer(string playerName)
         {
-            // TODO: ...
+            enemies[playerName].GetComponent<EnemyPlayer>().SetLeft();
+            enemies.Remove(playerName);
         }
 
         void Update()
@@ -106,7 +107,7 @@ namespace NeonShooter.AppWarp
 
         public void InterpretMessage(string message, string sender)
         {
-            //Debug.Log(message);
+            Debug.Log(message);
 
             var enemy = enemies[sender].GetComponent<EnemyPlayer>();
 
