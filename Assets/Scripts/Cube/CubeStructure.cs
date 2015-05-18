@@ -1,6 +1,6 @@
 ﻿using NeonShooter.Utils;
-using NeonShooter.Utils.Collections;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,7 +10,7 @@ namespace NeonShooter.Cube
     /// <summary>
     /// Class representing structure of the cube with given radius. Radius is its most important property. Instance of this class can be adressed with index operator [x, y, z] to get CubeCell at given coordinates of the structure. Note that coords must always be lower than the Radius. When the Radius is 0, there are no cells. When the Radius is 1, it's a cube 1x1x1 and max (and only) absolute value of coord is 0. When the Radius is 2, it's a cube 3x3x3 and max absolute value of coord is 1. And so on.
     /// </summary>
-    public class CubeStructure
+    public class CubeStructure : IEnumerable<CubeCell>, IEnumerable
     {
         GameObject owner;
 
@@ -54,7 +54,8 @@ namespace NeonShooter.Cube
                 if (value == visible) return;
 
                 visible = value;
-                ForEachCell(cell => cell.UpdateVisible());
+                foreach (var cell in this)
+                    cell.UpdateVisible();
             }
         }
 
@@ -69,14 +70,14 @@ namespace NeonShooter.Cube
 
             this.owner = owner;
             Radius = initialRadius;
-            Count = MathHelper.IntPow(Radius + 1, 3);
+            Count = MathHelper.IntPow(2 * Radius - 1, 3);
 
             cells = CreateCellXYZCube(Radius);
             cellLayers = new List<CellLayer>();
             for (int i = 0; i < Radius; i++)
                 cellLayers.Add(new CellLayer(i));
 
-            ForEachCell((v) =>
+            ForEachPosition((v) =>
                 {
                     var cell = new CubeCell(this, owner, v);
                     cells[v.X][v.Y][v.Z] = cell;
@@ -324,6 +325,14 @@ namespace NeonShooter.Cube
             return Radius;
         }
 
+        public bool TryExpand()
+        {
+            if (!ShouldExpand()) return false;
+
+            Expand();
+            return true;
+        }
+
         /// <summary>
         /// Shrinks the cube by 1 in every direction. Radius is decremented and any CubeCells on the borders are lost. Cell values can be now set only up to coords 1 closer to center than before.
         /// </summary>
@@ -381,6 +390,19 @@ namespace NeonShooter.Cube
             return 0;
         }
 
+        public bool TryShrink()
+        {
+            if (!CanShrink()) return false;
+
+            Shrink();
+            return true;
+        }
+
+        public void ShrinkTillCant()
+        {
+            while (TryShrink()) { }
+        }
+
         public IVector3? RetrieveCell()
         {
             var cells = RetrieveCells(1);
@@ -405,6 +427,38 @@ namespace NeonShooter.Cube
         {
             if (CellAppender == null) return new List<IVector3>();
             else return CellAppender.ModifyCells(this, count);
+        }
+
+        public void AddCellAt(IVector3 position)
+        {
+            while (IsOutOfRadius(position))
+                Expand();
+            SetCell(position, true);
+        }
+
+        public void AddCellsAt(IEnumerable<IVector3> positions)
+        {
+            foreach (var p in positions)
+                AddCellAt(p);
+        }
+
+        public void RemoveCellAt(IVector3 position)
+        {
+            RemoveCellAtCore(position);
+            ShrinkTillCant();
+        }
+
+        public void RemoveCellsAt(IEnumerable<IVector3> positions)
+        {
+            foreach (var p in positions)
+                RemoveCellAtCore(p);
+            ShrinkTillCant();
+        }
+
+        private void RemoveCellAtCore(IVector3 position)
+        {
+            if (!IsOutOfRadius(position))
+                SetCell(position, false);
         }
 
         private void UpdateSides(int x, int y, int z)
@@ -488,23 +542,12 @@ namespace NeonShooter.Cube
                 }
         }
 
-        private void ForEachCell(Action<IVector3> action)
+        private void ForEachPosition(Action<IVector3> action)
         {
             for (int x = -Radius + 1; x < Radius; x++)
-            {
                 for (int y = -Radius + 1; y < Radius; y++)
-                {
                     for (int z = -Radius + 1; z < Radius; z++)
-                    {
                         action(new IVector3(x, y, z));
-                    }
-                }
-            }
-        }
-
-        private void ForEachCell(Action<CubeCell> action)
-        {
-            ForEachCell(v => action(this[v]));
         }
 
         private bool IsOutOfRadius(IVector3 position)
@@ -564,5 +607,17 @@ namespace NeonShooter.Cube
 
         public delegate void CellChangedEventHandler(IVector3 position, bool cellValue);
         public delegate void RadiusChangedEventHandler(int oldValue, int newValue);
+
+        public IEnumerator<CubeCell> GetEnumerator()
+        {
+            foreach (var layer in cellLayers)
+                foreach (var position in layer.CellSpacesEnumerable)
+                    yield return this[position];
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

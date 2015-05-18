@@ -12,7 +12,7 @@ namespace NeonShooter.Cube
 
             for (int i = 0; i < count; i++)
             {
-                if (structure.ShouldExpand()) structure.Expand();
+                structure.TryExpand();
 
                 var layer = structure.GetLastLayer();
                 if (layer == null) 

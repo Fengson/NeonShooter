@@ -8,20 +8,8 @@ using System;
 
 namespace NeonShooter.Players
 {
-    public class Player : MonoBehaviour, IPlayer
+    public class Player : BasePlayer
     {
-        readonly System.Object access;
-
-        CubeStructure cubeStructure;
-
-        Weapon defaultWeapon;
-        List<Weapon> weapons;
-
-        public AudioSource[] sounds;
-
-        public int initialRadius;
-        public bool cubeStructureVisible = false;
-
         float aimRotationSpeed = -90;
         public GameObject aim;
 
@@ -35,62 +23,51 @@ namespace NeonShooter.Players
         /// </summary>
         public bool DEBUGCanUseAnyWeapon;
 
-        public int Life { get { return cubeStructure.Count; } }
-
-        public NotifyingProperty<Vector3> Position { get; private set; }
-        public NotifyingProperty<Vector2> Rotations { get; private set; }
-        public NotifyingProperty<Vector3> Direction { get; private set; }
-
-        public NotifyingProperty<Weapon> SelectedWeapon { get; private set; }
-        public NotifyingProperty<bool> ContinuousFire { get; private set; }
-
-        public NotifyingList<Projectile> LaunchedProjectiles { get; private set; }
-
         public Player()
         {
-            defaultWeapon = new VacuumWeapon();
-            weapons = new List<Weapon> { defaultWeapon, new RailGun(), new RocketLauncher() };
-            
-            access = new object();
-            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
-            Rotations = NotifyingProperty<Vector2>.PublicGetPrivateSet(access);
-            Direction = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
+            CellsInStructure = new NotifyingList<IVector3>();
 
-            SelectedWeapon = NotifyingProperty<Weapon>.PublicGetPrivateSet(access, defaultWeapon);
-            ContinuousFire = NotifyingProperty<bool>.PublicGetPrivateSet(access);
+            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
+            Rotations = NotifyingProperty<Vector2>.PublicGetPrivateSet(Access);
+            Rotations.ValueChanged += (oldVal, newVal) => RecalculateDirection();
 
-            LaunchedProjectiles = new NotifyingList<Projectile>();
+            SelectedWeapon = NotifyingProperty<Weapon>.PublicGetPrivateSet(Access, DefaultWeapon);
+            SelectedWeapon.ValueChanged += (oldVal, newVal) => ContinousFire[Access] = false;
+            ContinousFire = NotifyingProperty<bool>.PublicGetPrivateSet(Access);
+
+            LaunchedProjectiles = new NotifyingList<BaseProjectile>();
+
+            DamageDealt = InvokableAction<Damage>.Public();
         }
 
-        void Start()
+        protected override void OnAwake()
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
+            base.OnAwake();
+
             // TODO: For multiple client network testing, move somewhere else
             //Application.runInBackground = true;
 
-            int radius = Math.Max(1, initialRadius);
-            cubeStructure = new CubeStructure(gameObject, radius);
-            cubeStructure.Visible = cubeStructureVisible;
-            ChangeSize(1, radius);
-            cubeStructure.RadiusChanged += ChangeSize;
+            CubeStructure.CellChanged += CubeStructure_CellChanged;
+            DamageDealt.Action += DamageDealt_Action;
         }
 
-        void Update()
+        protected override void OnUpdate()
         {
+            base.OnUpdate();
+
             this.aim.transform.Rotate(new Vector3(0, 0, aimRotationSpeed * Time.deltaTime));
             if (aimRotationSpeed < -90)
-            {
                 aimRotationSpeed = Mathf.Min(-90, aimRotationSpeed + Time.deltaTime * 500);
-            }
-            Position[access] = transform.position;
+
+            Position[Access] = transform.position;
 
             var cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
-            Rotations[access] = new Vector2(
+            Rotations[Access] = new Vector2(
                 cameraObject.transform.eulerAngles.x,
                 cameraObject.transform.eulerAngles.y);
-            Direction[access] = Quaternion.Euler(Rotations.Value.x, Rotations.Value.y, 0) * Vector3.forward;
 
             SelectedWeapon.Value.Update();
 
@@ -113,8 +90,19 @@ namespace NeonShooter.Players
 
             if (Input.GetKeyDown(KeyCode.X))
                 ChangeWeaponToNext();
+        }
 
-            cubeStructure.Visible = cubeStructureVisible;
+        protected override void TriggerEnter(Collider other)
+        {
+            base.TriggerEnter(other);
+
+            if (other.gameObject.CompareTag("Cubeling") && other.gameObject.GetComponent<IsCubelingPickabe>().pickable)
+            {
+                Destroy(other.gameObject);
+                GainLife(1);
+                if (sounds[0] != null)
+                    GetComponent<AudioSource>().PlayOneShot(sounds[0].clip);
+            }
         }
 
         void onShoot()
@@ -138,13 +126,13 @@ namespace NeonShooter.Players
 
         void onShootStart()
         {
-            ContinuousFire[access] = true;
+            ContinousFire[Access] = true;
             SelectedWeapon.Value.ShootStart(this);
         }
 
         void onShootEnd()
         {
-            ContinuousFire[access] = false;
+            ContinousFire[Access] = false;
             SelectedWeapon.Value.ShootEnd();
         }
 
@@ -154,8 +142,14 @@ namespace NeonShooter.Players
             damage += (int)(8 * Mathf.Sqrt(paidCost));
             //return lost cost and add what was taken
             //CellsIncorporator.amount += damage + costPayed;
-            enemy.GetComponent<IPlayer>().DealDamage(damage, weapon.DamageEffect);
-            GainLife(damage); // <--- TEMP
+            EnemyPlayer enemyScript = enemy.GetComponent<EnemyPlayer>();
+            enemy.GetComponent<EnemyPlayer>().DealDamage(new Damage(this, enemyScript, damage, weapon.DamageEffect));
+            //if (weapon.DamageEffect == DamageEffect.Suction)
+            //{
+
+            //    Instantiate(cubelingPrefab, transform.localPosition + cell.Value, transform.rotation);
+            //}
+            //GainLife(damage); // <--- TEMP
 
             Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.getWeaponName() + " for " + damage + " damage");
             //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
@@ -163,15 +157,14 @@ namespace NeonShooter.Players
 
         void ChangeWeaponToNext()
         {
-            var index = weapons.IndexOf(SelectedWeapon.Value);
-            for (int i = 0; i < weapons.Count; i++)
+            var index = Weapons.IndexOf(SelectedWeapon.Value);
+            for (int i = 0; i < Weapons.Count; i++)
             {
-                index = (index + 1) % weapons.Count;
-                var candidate = weapons[index];
+                index = (index + 1) % Weapons.Count;
+                var candidate = Weapons[index];
                 if (CanUseWeapon(candidate))
                 {
-                    ContinuousFire[access] = false;
-                    SelectedWeapon[access] = candidate;
+                    SelectedWeapon[Access] = candidate;
                     break;
                 }
             }
@@ -179,43 +172,34 @@ namespace NeonShooter.Players
 
         bool CanUseWeapon(Weapon weapon)
         {
-            return DEBUGCanUseAnyWeapon || weapon == defaultWeapon ||
+            return DEBUGCanUseAnyWeapon || weapon == DefaultWeapon ||
                 CellsIncorporator.amount >= weapon.lifeRequiredToOwn();
         }
 
         public void GainLife(int amount)
         {
-            cubeStructure.AppendCells(amount);
+            CubeStructure.AppendCells(amount);
         }
 
-        public void DealDamage(int amount, DamageEffect damageEffect)
+        protected override void ChangeSizeDetails(float oldRadius, float newRadius)
         {
-            List<IVector3> cubelingPositions = cubeStructure.RetrieveCells(amount);
-            //foreach (var v in cubelingPositions)
-            //{
-            //    Instantiate(cubelingPrefab, transform.localPosition + v, transform.rotation);
-            //}
-        }
-
-        void ChangeSize(int currentRadius, int newRadius)
-        {
-            var pos = transform.position;
-            var currentR = CalculateColliderRadius(currentRadius);
-            var newR = CalculateColliderRadius(newRadius);
-            var dr = newR - currentR;
-
             var collider = GetComponent<CharacterController>();
-            collider.radius = newR;
-            collider.height = 2 * newR;
-            transform.position += Vector3.up * dr;
+            collider.radius = newRadius;
+            collider.height = 2 * newRadius;
 
             var character = GameObject.FindGameObjectWithTag("CameraScale");
-            character.transform.localScale = Vector3.one * newR * 2;
+            character.transform.localScale = Vector3.one * newRadius * 2;
         }
 
-        float CalculateColliderRadius(int structureRadius)
+        void DamageDealt_Action(Damage damage)
         {
-            return Mathf.Max(0, structureRadius - 0.5f);
+            List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
+        }
+
+        void CubeStructure_CellChanged(IVector3 position, bool cellValue)
+        {
+            if (cellValue) CellsInStructure.Add(position);
+            else CellsInStructure.Remove(position);
         }
     }
 }

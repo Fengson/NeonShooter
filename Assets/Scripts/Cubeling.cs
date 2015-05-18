@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using NeonShooter.Players;
+using NeonShooter.Utils;
 
 namespace NeonShooter
 {
-    public class FlyToPlayer : MonoBehaviour
+    public class Cubeling : MonoBehaviour
     {
         public float speed;
 

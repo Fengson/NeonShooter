@@ -3,14 +3,17 @@ using NeonShooter.Utils;
 using UnityEngine;
 using System.Collections;
 using NeonShooter.AppWarp;
+using UnityEditor;
 
 namespace NeonShooter.Players.Weapons
 {
     public class RailGun : Weapon
     {
+        public override int Id { get { return 1; } }
         public override DamageEffect DamageEffect { get { return DamageEffect.Destruction; } }
         public override FireType FireType { get { return FireType.Single; } }
         public override float CoolDownTime { get { return 1; } }
+        public override Color ProjectileColor { get { return Color.green; } }
 
         public RailGun()
             : base(150, 900, 0, 35)
@@ -20,11 +23,12 @@ namespace NeonShooter.Players.Weapons
         public override void shoot(Player shooter, int paidCost)
         {
             shootSound(shooter);
-            Vector3 startingPosition = shooter.Position[null] + new Vector3(0, 0.8f, 0);
+            Vector3 startingPosition = shooter.Position.Value + new Vector3(0, 0.8f, 0);
             Vector3 endingPosition =
-                Vector3.MoveTowards(startingPosition, startingPosition + this.Reach * shooter.Direction[null], (int)Reach);
+                Vector3.MoveTowards(startingPosition, startingPosition + this.Reach * shooter.Direction, (int)Reach);
             RaycastHit hitInfo;
             bool enemyShot = false;
+            var projectileStartPosition = startingPosition + 2 * shooter.Direction;
             if (shootLine(startingPosition, endingPosition, out hitInfo))
             {
                 foreach (GameObject target in appwarp.enemies.Values)
@@ -34,7 +38,7 @@ namespace NeonShooter.Players.Weapons
                         enemyShot = true;
                         endingPosition = hitInfo.point;
                         shooter.enemyShot(this, target, Damage, paidCost);
-                        GameObject projectile = createProjectileAndApplyForce(shooter, startingPosition, Color.green, paidCost);
+                        GameObject projectile = CreateProjectileAndApplyForce(shooter, projectileStartPosition, ProjectileColor, paidCost);
                         shooter.StartCoroutine(hitAndDestroyProjectile(shooter, projectile, startingPosition, endingPosition));
                         break;
                     }
@@ -42,7 +46,7 @@ namespace NeonShooter.Players.Weapons
             }
             if (!enemyShot)
             {
-                GameObject projectile = createProjectileAndApplyForce(shooter, startingPosition, Color.red, paidCost);
+                GameObject projectile = CreateProjectileAndApplyForce(shooter, projectileStartPosition, Color.red, paidCost);
                 shooter.StartCoroutine(destroyProjectile(shooter, projectile));
             }
         }
@@ -64,7 +68,7 @@ namespace NeonShooter.Players.Weapons
 
         public override void shootSound(Player player)
         {
-            player.sounds[1].Play();
+            if (player.sounds[2] != null) player.sounds[2].Play();
         }
 
         public override string getWeaponName()

@@ -48,6 +48,12 @@ namespace NeonShooter.Cube
             GameObject sideObject = CubeGameObjectMaker.CreateCubeCellPlane(side, parentStructure.Visible);
             GameObjectHelper.SetParentDontMessUpCoords(sideObject, sidesParent);
 
+            Material material = (parentStructure.Visible || Globals.Instance == null) ?
+                null : Globals.Instance.invisibleShadowCasterMaterial;
+            if (material == null) material = Globals.DefaultMaterial;
+            var renderer = sideObject.GetComponent<MeshRenderer>();
+            renderer.material = material;
+
             sides.Add(side, sideObject);
         }
 

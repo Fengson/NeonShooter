@@ -7,15 +7,17 @@ namespace NeonShooter.Players.Weapons
     {
         float currentCoolDownTime;
 
+        public abstract int Id { get; }
+        public abstract DamageEffect DamageEffect { get; }
+        public abstract FireType FireType { get; }
+        public abstract float CoolDownTime { get; }
+        public virtual Color ProjectileColor { get { return Color.white; } }
+
         public int Damage { get; private set; }
         public float Reach { get; private set; }
         public int AmmoCost { get; private set; }
         protected float ConeAngleRadians { get; private set; }
         public double ConeAngleCos { get; private set; }
-
-        public abstract DamageEffect DamageEffect { get; }
-        public abstract FireType FireType { get; }
-        public abstract float CoolDownTime { get; }
 
         public Weapon(int dmg, float reach, float cone_angle_radians, int ammo_cost)
         {
@@ -67,23 +69,29 @@ namespace NeonShooter.Players.Weapons
 
         public abstract void shootSound(Player player);
 
-        public GameObject createProjectile(Player shooter, Vector3 startingPosition, Color color, int costPaid)
+        public GameObject CreateProjectile<T>(BasePlayer shooter, Vector3 startingPosition, Color? color = null)
+            where T : BaseProjectile
         {
-            var projectile = Object.Instantiate(shooter.projectilePrefab);
-            projectile.transform.position = startingPosition + 2 * shooter.Direction.Value;
-            projectile.GetComponent<Renderer>().material.color = color;
-            var script = projectile.AddComponent<Projectile>();
-            script.ParentWeapon = this;
-            script.CubeValue = costPaid;
-            shooter.LaunchedProjectiles.Add(script);
-            return projectile;
+            if (!color.HasValue) color = ProjectileColor;
+
+            var projectileObject = Object.Instantiate(Globals.Instance.projectilePrefab);
+            projectileObject.transform.position = startingPosition;
+            projectileObject.GetComponent<Renderer>().material.color = color.Value;
+            var projectile = projectileObject.AddComponent<T>();
+            projectile.ParentWeapon = this;
+            shooter.LaunchedProjectiles.Add(projectile);
+            if (projectile.Id != BaseProjectile.NullId)
+                shooter.ProjectilesById[projectile.Id] = projectile;
+            return projectileObject;
         }
 
-        public GameObject createProjectileAndApplyForce(Player shooter, Vector3 startingPosition, Color color, int costPaid)
+        public GameObject CreateProjectileAndApplyForce(BasePlayer shooter, Vector3 startingPosition, Color color, int costPaid)
         {
-            var projectile = createProjectile(shooter, startingPosition, color, costPaid);
-            projectile.GetComponent<ConstantForce>().force = shooter.Direction.Value.normalized * (projectileSpeed() * projectileForceModifier());
-            projectile.GetComponent<ConstantForce>().torque = shooter.Direction.Value * 10;
+            var projectile = CreateProjectile<Projectile>(shooter, startingPosition, color);
+            var script = projectile.GetComponent<Projectile>();
+            script.CubeValue = costPaid;
+            projectile.GetComponent<ConstantForce>().force = shooter.Direction.normalized * (projectileSpeed() * projectileForceModifier());
+            projectile.GetComponent<ConstantForce>().torque = shooter.Direction * 10;
             return projectile;
         }
 

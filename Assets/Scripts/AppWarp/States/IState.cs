@@ -5,8 +5,10 @@ namespace NeonShooter.AppWarp.States
     public interface IState
     {
         bool Changed { get; }
+        IJsonObject RelativeJson { get; }
+        IJsonObject AbsoluteJson { get; }
 
-        void Clear();
-        JsonObject ToJson();
+        void ClearChanges();
+        void ApplyTo(object o);
     }
 }

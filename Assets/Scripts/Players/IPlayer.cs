@@ -1,20 +1,22 @@
 ﻿using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NeonShooter.Players
 {
     public interface IPlayer
     {
+        INotifyingList<IVector3> CellsInStructure { get; }
+
         NotifyingProperty<Vector3> Position { get; }
         NotifyingProperty<Vector2> Rotations { get; }
-        NotifyingProperty<Vector3> Direction { get; }
 
         NotifyingProperty<Weapon> SelectedWeapon { get; }
+        NotifyingProperty<bool> ContinousFire { get; }
 
-        NotifyingList<Projectile> LaunchedProjectiles { get; }
+        INotifyingList<BaseProjectile> LaunchedProjectiles { get; }
 
-        void GainLife(int amount);
-        void DealDamage(int amount, DamageEffect damageEffect);
+        InvokableAction<Damage> DamageDealt { get; }
     }
 }

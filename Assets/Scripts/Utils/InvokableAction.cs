@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NeonShooter.PlayerControl
+namespace NeonShooter.Utils
 {
     public class InvokableAction<T>
     {

@@ -12,11 +12,14 @@ namespace NeonShooter.AppWarp.Json
         public JsonObject(params JsonPair[] pairs)
         {
             this.pairs = new Dictionary<string, JsonPair>();
-            foreach (var p in pairs) this.pairs[p.Key] = p;
+            foreach (var p in pairs)
+                if (!(p == null || p.IsNull))
+                    this.pairs[p.Key] = p;
         }
 
         public void Append(JsonPair pair)
         {
+            if (pair == null || pair.IsNull) return;
             pairs[pair.Key] = pair;
         }
 

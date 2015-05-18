@@ -17,9 +17,10 @@ Weapons:
    - enemy is dealt damage (what effect of damage)
 CubeStructure:
  + better method for gaining and losing cells
- - keep NotifyingProperty for:
-   - CubeStructure
+ + keep NotifyingList for:
+   + CubeStructure
  + grow colliders when radius++, shrink when radius--
+ + add CubeStructure to EnemyPlayer
 Network:
  - Read proper NotifyingProperties and InvokableActions from Player and send them
    + NP Player.Position

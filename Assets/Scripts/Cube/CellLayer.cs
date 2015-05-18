@@ -19,6 +19,9 @@ namespace NeonShooter.Cube
         public bool Empty { get { return CellSpacesCount == 0; } }
         public bool Full { get { return FreeSpacesCount == 0; } }
 
+        public IEnumerable<IVector3> CellSpacesEnumerable { get { return cellSpaces; } }
+        public IEnumerable<IVector3> FreeSpacesEnumerable { get { return freeSpaces; } }
+
         public CellLayer(int index)
         {
             cellSpaces = new List<IVector3>();

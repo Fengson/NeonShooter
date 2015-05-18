@@ -14,7 +14,7 @@ namespace NeonShooter
         void Start()
         {
             lifeText = GetComponent<Text>();
-            player = playerObject.GetComponent<Player>();
+            player = playerObject == null ? null : playerObject.GetComponent<Player>();
         }
 
         void Update()
@@ -25,7 +25,8 @@ namespace NeonShooter
             {
                 weaponText = "Weapon:\n" + selectedWeapon.getWeaponName() + "\n";
             }
-            lifeText.text = weaponText + "Life: " + CellsIncorporator.amount;
+            int life = player == null ? CellsIncorporator.amount : player.Life;
+            lifeText.text = weaponText + "Life: " + life;
         }
     }
 }
