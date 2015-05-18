@@ -1,5 +1,6 @@
 using NeonShooter.Players;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 using com.shephertz.app42.gaming.multiplayer.client;
@@ -8,6 +9,7 @@ using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 using NeonShooter.AppWarp.Json;
 using NeonShooter.AppWarp.States;
 using NeonShooter.Utils;
+using NeonShooter.AppWarp.Events;
 //using com.shephertz.app42.gaming.multiplayer.client.events;
 //using com.shephertz.app42.gaming.multiplayer.client.listener;
 //using com.shephertz.app42.gaming.multiplayer.client.command;
@@ -35,6 +37,7 @@ namespace NeonShooter.AppWarp
 
         Player player;
         PlayerState playerState;
+        PlayerEvents playerEvents;
 
         public static Vector3 newPos = new Vector3(0, 0, 0);
         void Start()
@@ -47,6 +50,7 @@ namespace NeonShooter.AppWarp
 
             player = GetComponent<Player>();
             playerState = new PlayerState(player);
+            playerEvents = new PlayerEvents(this, player);
 
             //For weapon tests
             //addPlayer("TestPlayer");
@@ -78,7 +82,7 @@ namespace NeonShooter.AppWarp
 
         public void removePlayer(string playerName)
         {
-            enemies[playerName].GetComponent<EnemyPlayer>().SetLeft();
+            enemies[playerName].GetComponent<EnemyPlayer>().SetLeftGame();
             enemies.Remove(playerName);
         }
 
@@ -105,6 +109,12 @@ namespace NeonShooter.AppWarp
             WarpClient.GetInstance().Update();
         }
 
+        public void SendEvent(JsonObject json, EnemyPlayer receiver = null)
+        {
+            json.Append(new JsonPair("Type", "PlayerEvent"));
+            listener.sendMsg(json.ToString(), receiver != null ? receiver.NetworkName : null);
+        }
+
         public void InterpretMessage(string message, string sender)
         {
             Debug.Log(message);
@@ -118,6 +128,17 @@ namespace NeonShooter.AppWarp
             {
                 var enemyState = PlayerState.FromJSONNode(json, enemy);
                 enemyState.ApplyTo(enemy);
+            }
+            else if (type.Value == "PlayerEvent")
+            {
+                if (json.Childs.Count() != 2)
+                    throw new System.FormatException("Invalid format of JSON object with Type : PlayerEvent; " +
+                        "JSON object should have exactly two values (including Type).");
+                foreach (var kv in json.AsObject.getDictionary())
+                {
+                    if (kv.Key == "PlayerEvent") continue;
+                    playerEvents[kv.Key].OnActionReceived(enemy, kv.Value);
+                }
             }
         }
 

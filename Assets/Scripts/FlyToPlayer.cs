@@ -5,7 +5,7 @@ using NeonShooter.Utils;
 
 namespace NeonShooter
 {
-    public class Cubeling : MonoBehaviour
+    public class FlyToPlayer : MonoBehaviour
     {
         public float speed;
 

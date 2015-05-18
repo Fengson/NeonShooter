@@ -8,7 +8,7 @@ namespace NeonShooter.Players
 {
     public class EnemyPlayer : BasePlayer
     {
-        private bool left;
+        private bool leftGame;
 
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Vector2> rotationsLerp;
@@ -72,13 +72,14 @@ namespace NeonShooter.Players
 
             ContinousFire.ValueChanged += ContinousFire_ValueChanged;
 
+            DamageDealt.Action += DamageDealt_Action;
         }
 
         protected override void OnUpdate()
         {
             base.OnUpdate();
 
-            if (left)
+            if (leftGame)
             {
                 Object.Destroy(gameObject);
             }
@@ -88,11 +89,6 @@ namespace NeonShooter.Players
             rotationsLerp.Update(dProgress);
 
             SelectedWeapon.Value.Update();
-        }
-
-        public void DealDamage(Damage damage)
-        {
-            DamageDealt.Invoke(damage, Access);
         }
 
         protected override void ChangeSizeDetails(float oldRadius, float newRadius)
@@ -146,9 +142,15 @@ namespace NeonShooter.Players
             else SelectedWeapon.Value.OnShootEnd();
         }
 
-        public void SetLeft()
+        void DamageDealt_Action(Damage damage)
         {
-            left = true;
+            Debug.Log("Received Action");
+            List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
+        }
+
+        public void SetLeftGame()
+        {
+            leftGame = true;
         }
     }
 }

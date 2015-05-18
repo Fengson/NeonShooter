@@ -1,4 +1,5 @@
 ﻿using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
+using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,11 @@ namespace NeonShooter.AppWarp.Json
                 new JsonPair("Z", vector.Z));
         }
 
+        public static JsonValue ToJson(this Enum enumValue)
+        {
+            return new JsonValue(enumValue.ToString());
+        }
+
         public static long AsLong(this JSONNode json)
         {
             return Convert.ToInt64(json.Value);
@@ -75,6 +81,11 @@ namespace NeonShooter.AppWarp.Json
             var y = json["Y"].AsInt;
             var z = json["Z"].AsInt;
             return new IVector3(x, y, z);
+        }
+
+        public static T AsEnum<T>(this JSONNode json)
+        {
+            return (T)Enum.Parse(typeof(T), json.Value);
         }
 
         public static List<T> AsList<T>(this JSONNode jsonArray, Func<JSONNode, T> converter)

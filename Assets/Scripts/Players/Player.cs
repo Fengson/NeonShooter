@@ -32,7 +32,7 @@ namespace NeonShooter.Players
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
 
-            DamageDealt = InvokableAction<Damage>.Public();
+            DamageDealt = InvokableAction<Damage>.Private(Access);
         }
 
         protected override void OnAwake()
@@ -46,7 +46,6 @@ namespace NeonShooter.Players
             //Application.runInBackground = true;
 
             CubeStructure.CellChanged += CubeStructure_CellChanged;
-            DamageDealt.Action += DamageDealt_Action;
         }
 
         protected override void OnUpdate()
@@ -138,7 +137,7 @@ namespace NeonShooter.Players
             //return lost cost and add what was taken
             //CellsIncorporator.amount += damage + costPayed;
             EnemyPlayer enemyScript = enemy.GetComponent<EnemyPlayer>();
-            enemy.GetComponent<EnemyPlayer>().DealDamage(new Damage(this, enemyScript, damage, weapon.DamageEffect));
+            DamageDealt.Invoke(new Damage(this, enemyScript, damage, weapon.DamageEffect), Access);
             //if (weapon.DamageEffect == DamageEffect.Suction)
             //{
 
@@ -184,11 +183,6 @@ namespace NeonShooter.Players
 
             var character = GameObject.FindGameObjectWithTag("CameraScale");
             character.transform.localScale = Vector3.one * newRadius * 2;
-        }
-
-        void DamageDealt_Action(Damage damage)
-        {
-            List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
         }
 
         void CubeStructure_CellChanged(IVector3 position, bool cellValue)
