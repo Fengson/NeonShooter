@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 using NeonShooter.AppWarp.Json;
 using NeonShooter.AppWarp.States;
+using NeonShooter.Utils;
 //using com.shephertz.app42.gaming.multiplayer.client.events;
 //using com.shephertz.app42.gaming.multiplayer.client.listener;
 //using com.shephertz.app42.gaming.multiplayer.client.command;
@@ -17,9 +18,11 @@ namespace NeonShooter.AppWarp
 {
     public class appwarp : MonoBehaviour
     {
+        float timer = 0;
+        WarpClient warpClient;
+
         public float interval = 0.1f;
         public GameObject enemyPrefab;
-        float timer = 0;
 
         //please update with values you get after signing up
         public static string apiKey = "a01d3f81260e3915d082aa969051eb562be504f9c5bed8b4870f9046da9d4625";
@@ -36,19 +39,11 @@ namespace NeonShooter.AppWarp
         public static Vector3 newPos = new Vector3(0, 0, 0);
         void Start()
         {
-            listener.appwarp = this.GetComponent<appwarp>();
-            WarpClient.initialize(apiKey, secretKey);
-            WarpClient.GetInstance().AddConnectionRequestListener(listener);
-            WarpClient.GetInstance().AddChatRequestListener(listener);
-            WarpClient.GetInstance().AddUpdateRequestListener(listener);
-            WarpClient.GetInstance().AddLobbyRequestListener(listener);
-            WarpClient.GetInstance().AddNotificationListener(listener);
-            WarpClient.GetInstance().AddRoomRequestListener(listener);
-            WarpClient.GetInstance().AddZoneRequestListener(listener);
-            WarpClient.GetInstance().AddTurnBasedRoomRequestListener(listener);
-            // join with a unique name (current time stamp)
+            listener.appwarp = GetComponent<appwarp>();
+            InitializeWarpClient();
+
             username = System.DateTime.UtcNow.Ticks.ToString();
-            WarpClient.GetInstance().Connect(username);
+            warpClient.Connect(username);
 
             player = GetComponent<Player>();
             playerState = new PlayerState(player);
@@ -59,28 +54,40 @@ namespace NeonShooter.AppWarp
 
         public static ArrayList playerNames = new ArrayList();
         public static Dictionary<string, GameObject> enemies = new Dictionary<string, GameObject>();
+
         public void addPlayer(string playerName)
         {
             playerNames.Add(playerName);
-            var enemyObject = (GameObject)Object.Instantiate(enemyPrefab, new Vector3(0.65f, 0.98f, 1f), Quaternion.identity);
+
+            var enemyObject = (GameObject)Object.Instantiate(enemyPrefab, new Vector3(0.65f, 0.98f, 1), Quaternion.identity);
             var enemy = enemyObject.GetComponent<EnemyPlayer>();
+
             enemy.NetworkName = playerName;
             enemies[enemy.NetworkName] = enemyObject;
-            listener.Log("dodano gracza: " + enemy.NetworkName);
+            
+            var json = playerState.AbsoluteJson as JsonObject;
+            json.Append(new JsonPair("Type", "PlayerState"));
+            listener.sendMsg(json.ToString(), playerName);
+        }
+
+        public void removePlayer(string playerName)
+        {
+            // TODO: ...
         }
 
         void Update()
         {
             timer -= Time.deltaTime;
-            if (timer < 0)
+            if (listener.CanSendMessages && timer < 0)
             {
-                var json = playerState.ToJson();
+                var json = playerState.RelativeJson as JsonObject;
                 json.Append(new JsonPair("Type", "PlayerState"));
-                playerState.Clear();
+                playerState.ClearChanges();
                 listener.sendMsg(json.ToString());
 
                 timer = interval;
             }
+            
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -98,13 +105,8 @@ namespace NeonShooter.AppWarp
 
             if (type.Value == "PlayerState")
             {
-                var jsonPosition = json["Position"];
-                if (jsonPosition != null)
-                    enemy.Position.Value = JsonConverter.ToVector3(jsonPosition);
-
-                var jsonRotations = json["Rotations"];
-                if (jsonRotations != null)
-                    enemy.Rotations.Value = JsonConverter.ToVector2(jsonRotations);
+                var enemyState = PlayerState.FromJSONNode(json, enemy);
+                enemyState.ApplyTo(enemy);
             }
         }
 
@@ -117,6 +119,20 @@ namespace NeonShooter.AppWarp
         void OnApplicationQuit()
         {
             WarpClient.GetInstance().Disconnect();
+        }
+
+        void InitializeWarpClient()
+        {
+            WarpClient.initialize(apiKey, secretKey);
+            warpClient = WarpClient.GetInstance();
+            warpClient.AddConnectionRequestListener(listener);
+            warpClient.AddChatRequestListener(listener);
+            warpClient.AddUpdateRequestListener(listener);
+            warpClient.AddLobbyRequestListener(listener);
+            warpClient.AddNotificationListener(listener);
+            warpClient.AddRoomRequestListener(listener);
+            warpClient.AddZoneRequestListener(listener);
+            warpClient.AddTurnBasedRoomRequestListener(listener);
         }
     }
 

@@ -5,6 +5,14 @@ namespace NeonShooter.Utils
 {
     public static class CollectionHelper
     {
+        public static V TryGet<K,V>(this Dictionary<K,V> dictionary, K key)
+        {
+            V val;
+            bool success = dictionary.TryGetValue(key, out val);
+            if (!success) return default(V);
+            else return val;
+        }
+
         public static V TryRemove<K,V>(this Dictionary<K,V> dictionary, K key)
             where V : class
         {

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace NeonShooter.AppWarp.Json
@@ -13,26 +14,35 @@ namespace NeonShooter.AppWarp.Json
         public IJsonObject this[int index]
         {
             get { return objects[index]; }
-            set { objects[index] = value; }
+            set
+            {
+                if (value == null || value is JsonNull) objects.RemoveAt(index);
+                else objects[index] = value;
+            }
         }
 
         public JsonArray(params IJsonObject[] objects)
+            : this((IEnumerable<IJsonObject>)objects)
         {
-            this.objects = new List<IJsonObject>(objects);
         }
 
         public JsonArray(IEnumerable<IJsonObject> objects)
         {
-            this.objects = new List<IJsonObject>(objects);
+            this.objects = new List<IJsonObject>(
+                from js in objects
+                where !(js == null || js is JsonNull) 
+                select js);
         }
 
         public void Add(IJsonObject o)
         {
+            if (o == null || o is JsonNull) return;
             objects.Add(o);
         }
 
         public void Remove(IJsonObject o)
         {
+            if (o == null || o is JsonNull) return;
             objects.Remove(o);
         }
 

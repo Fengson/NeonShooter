@@ -8,9 +8,12 @@ namespace NeonShooter.Players.Weapons
 {
     public class RocketLauncher : Weapon
     {
+        public override int Id { get { return 2; } }
+
         public override DamageEffect DamageEffect { get { return DamageEffect.Destruction; } }
         public override FireType FireType { get { return FireType.Single; } }
         public override float CoolDownTime { get { return 0.3f; } }
+        public override Color ProjectileColor { get { return Color.black; } }
 
         public float ExplosionReach { get; private set; }
 
@@ -35,10 +38,10 @@ namespace NeonShooter.Players.Weapons
         */
         public IEnumerator rocketLauncherShoot(Player shooter, int paidCost)
         {
-            Vector3 startingPosition = shooter.Position[null] + new Vector3(0, 0.8f, 0);
+            Vector3 startingPosition = shooter.Position.Value + new Vector3(0, 0.8f, 0);
             Vector3 finalEndingPosition =
-                Vector3.MoveTowards(startingPosition, startingPosition + Reach * shooter.Direction[null], (int)Reach);
-            GameObject projectile = createProjectileAndApplyForce(shooter, startingPosition, Color.black, paidCost);
+                Vector3.MoveTowards(startingPosition, startingPosition + Reach * shooter.Direction, (int)Reach);
+            GameObject projectile = CreateProjectileAndApplyForce(shooter, startingPosition + 2 * shooter.Direction, ProjectileColor, paidCost);
             Vector3 endingPosition = startingPosition;
             //this makes length=1 for every part of rocket projectile, so rocket speed = projectileSpeed()
             int partsNumber = (int)(Reach / 2);
@@ -115,7 +118,7 @@ namespace NeonShooter.Players.Weapons
 
         public override void shootSound(Player player)
         {
-            player.sounds[2].Play();
+            if (player.sounds[3] != null) player.sounds[3].Play();
         }
 
         public override string getWeaponName()

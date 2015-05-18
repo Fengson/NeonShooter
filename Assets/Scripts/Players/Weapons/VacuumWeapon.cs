@@ -10,11 +10,12 @@ namespace NeonShooter.Players.Weapons
         private GameObject vacuumCone;
         private Player shooter;
 
-        public GameObject VacuumConePrefab { get; set; }
-
+        public override int Id { get { return 0; } }
         public override DamageEffect DamageEffect { get { return DamageEffect.Suction; } }
         public override FireType FireType { get { return FireType.Continous; } }
         public override float CoolDownTime { get { return 0; } }
+
+        public GameObject VacuumConePrefab { get; set; }
 
         public VacuumWeapon() : base(50, 10, 10 * Mathf.Deg2Rad, 0) { }
 
@@ -48,14 +49,14 @@ namespace NeonShooter.Players.Weapons
             foreach (GameObject target in appwarp.enemies.Values)
             {
                 Vector3 heading = (target.transform.position - shooter.Position.Value).normalized;
-                double angle_cos = Vector3.Dot(heading, shooter.Direction.Value.normalized);
+                double angle_cos = Vector3.Dot(heading, shooter.Direction.normalized);
                 if (angle_cos > this.ConeAngleCos)
                 {
                     RaycastHit hit;
                     if (Physics.Raycast(shooter.Position.Value, heading, out hit, this.Reach) && hit.collider.gameObject == target)
                     {
-						Debug.Log(hit.collider.name);
-						shooter.enemyShot(this, target, integerDamage, paidCost);
+                        Debug.Log(hit.collider.name);
+                        shooter.enemyShot(this, target, integerDamage, paidCost);
                     }
                 }
             }
@@ -86,7 +87,7 @@ namespace NeonShooter.Players.Weapons
 
         public override void shootSound(Player player)
         {
-            player.sounds[0].Play();
+            if (player.sounds[1] != null) player.sounds[1].Play();
         }
 
         public override string getWeaponName()

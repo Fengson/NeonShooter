@@ -1,52 +1,46 @@
-﻿using NeonShooter.Players.Weapons;
+﻿using NeonShooter.Cube;
+using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NeonShooter.Players
 {
-    public class EnemyPlayer : MonoBehaviour, IPlayer
+    public class EnemyPlayer : BasePlayer
     {
-        public const float DefaultLerpFactor = 10;
-
-        public string NetworkName { get; set; }
-
-        public float LerpFactor
-        {
-            get
-            {
-                if (Globals.Instance == null) return DefaultLerpFactor;
-                return Globals.Instance.enemyLerpFactor;
-            }
-        }
-
-        public NotifyingProperty<Vector3> Position { get; private set; }
-        public NotifyingProperty<Vector2> Rotations { get; private set; }
-        public NotifyingProperty<Vector3> Direction { get; private set; }
-
-        public NotifyingProperty<Weapon> SelectedWeapon { get; private set; }
-
-        public NotifyingList<Projectile> LaunchedProjectiles { get; private set; }
-
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Vector2> rotationsLerp;
 
+        public string NetworkName { get; set; }
+
+        public bool DontLerp { get; set; }
+
         public EnemyPlayer()
         {
+            DontLerp = true;
+
+            CellsInStructure = new NotifyingList<IVector3>();
+
             Position = NotifyingProperty<Vector3>.PublicBoth();
             Rotations = NotifyingProperty<Vector2>.PublicBoth();
-            Direction = NotifyingProperty<Vector3>.PublicBoth();
+            Rotations.ValueChanged += (oldVal, newVal) => RecalculateDirection();
 
+            ContinousFire = NotifyingProperty<bool>.PublicBoth();
             SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth();
 
-            LaunchedProjectiles = new NotifyingList<Projectile>();
+            LaunchedProjectiles = new NotifyingList<BaseProjectile>();
+
+            DamageDealt = InvokableAction<Damage>.Private(Access);
         }
 
-        void Awake()
+        protected override void OnAwake()
         {
+            base.OnAwake();
+
             positionLerp = new PropertyInterpolator<Vector3>(
                 () => transform.position,
                 v => transform.position = v,
-                (v1, v2, p) => Vector3.Lerp(v1, v2, p));
+                PropertyInterpolator.Vector3Lerp);
             rotationsLerp = new PropertyInterpolator<Vector2>(
                 () => transform.localEulerAngles,
                 v =>
@@ -54,38 +48,80 @@ namespace NeonShooter.Players
                     var rot = transform.localEulerAngles;
                     transform.localEulerAngles = new Vector3(rot.x, v.y, rot.z);
                 },
-                (v1, v2, p) => new Vector2(
-                    Mathf.LerpAngle(v1.x, v2.x, p),
-                    Mathf.LerpAngle(v1.y, v2.y, p)));
+                PropertyInterpolator.Vector2LerpAngle);
         }
 
-        void Start()
+        protected override void OnStart()
         {
+            base.OnStart();
+
             Position.Value = transform.position;
+            Rotations.Value = new Vector2(transform.eulerAngles.x, transform.eulerAngles.y);
 
-            var cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
-            Rotations.Value = new Vector2(
-                cameraObject.transform.eulerAngles.y,
-                cameraObject.transform.eulerAngles.x);
-            Direction.Value = Quaternion.Euler(Rotations.Value.x, Rotations.Value.y, 0) * Vector3.forward;
+            Position.ValueChanged += Position_ValueChanged;
+            Rotations.ValueChanged += Rotations_ValueChanged;
 
-            Position.ValueChanged += (oldVal, newVal) => positionLerp.TargetValue = newVal;
-            Rotations.ValueChanged += (oldVal, newVal) => rotationsLerp.TargetValue = newVal;
+            CellsInStructure.ListChanged += CellsInStructure_ListChanged;
         }
 
-        void Update()
+
+        protected override void OnUpdate()
         {
-            float dProgress = Time.deltaTime * LerpFactor;
+            base.OnUpdate();
+
+            float dProgress = Time.deltaTime * Globals.LerpFactor;
             positionLerp.Update(dProgress);
             rotationsLerp.Update(dProgress);
         }
 
-        public void GainLife(int amount)
+        public void DealDamage(Damage damage)
         {
+            DamageDealt.Invoke(damage, Access);
         }
 
-        public void DealDamage(int amount, DamageEffect damageEffect)
+        protected override void ChangeSizeDetails(float oldRadius, float newRadius)
         {
+            var collider = GetComponent<CapsuleCollider>();
+            collider.radius = newRadius;
+            collider.height = 2 * newRadius;
+        }
+
+        void CellsInStructure_ListChanged(NotifyingListEventArgs<IVector3> e)
+        {
+            switch (e.Change)
+            {
+                case NotifyingListEventArgs.ListChange.Add:
+                    CubeStructure.AddCellAt(e.Item);
+                    break;
+                case NotifyingListEventArgs.ListChange.AddMany:
+                    CubeStructure.AddCellsAt(e.Items);
+                    break;
+                case NotifyingListEventArgs.ListChange.Remove:
+                    CubeStructure.RemoveCellAt(e.Item);
+                    break;
+                case NotifyingListEventArgs.ListChange.RemoveMany:
+                    CubeStructure.RemoveCellsAt(e.Items);
+                    break;
+                case NotifyingListEventArgs.ListChange.Set:
+                    CubeStructure.RemoveCellAt(e.OldItem);
+                    CubeStructure.AddCellAt(e.NewItem);
+                    break;
+                case NotifyingListEventArgs.ListChange.Clear:
+                    CubeStructure.RetrieveCells(CubeStructure.Count);
+                    break;
+            }
+        }
+
+        void Position_ValueChanged(Vector3 oldValue, Vector3 newValue)
+        {
+            positionLerp.TargetValue = newValue;
+            if (DontLerp) positionLerp.Progress = 1;
+        }
+
+        void Rotations_ValueChanged(Vector2 oldValue, Vector2 newValue)
+        {
+            rotationsLerp.TargetValue = newValue;
+            if (DontLerp) positionLerp.Progress = 1;
         }
     }
 }

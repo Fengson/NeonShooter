@@ -4,6 +4,8 @@ namespace NeonShooter
 {
     public class Globals : MonoBehaviour
     {
+        public const float DefaultLerpFactor = 5;
+
         static Globals instance;
         public static Globals Instance
         {
@@ -16,6 +18,15 @@ namespace NeonShooter
                         instance = gameObject.GetComponent<Globals>();
                 }
                 return instance;
+            }
+        }
+
+        public static float LerpFactor
+        {
+            get
+            {
+                if (Instance == null) return DefaultLerpFactor;
+                return Instance.enemyLerpFactor;
             }
         }
 
@@ -32,5 +43,6 @@ namespace NeonShooter
 
         public float enemyLerpFactor = 5; // seems the best value. Not too jittery, but not too slow also
         public Material invisibleShadowCasterMaterial;
+        public GameObject projectilePrefab;
     }
 }

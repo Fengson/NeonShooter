@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace NeonShooter.Utils
 {
@@ -34,8 +35,7 @@ namespace NeonShooter.Utils
             {
                 if (!PublicSet && (access == null || !access.Equals(this.access)))
                     throw new InvalidOperationException("Cannot set property value - it is defined as private and given access object does not match the required one.");
-                if (this.value == null && value == null ||
-                    this.value.Equals(value)) return;
+                if (System.Object.Equals(this.value, value)) return;
 
                 var oldValue = this.value;
                 this.value = value;

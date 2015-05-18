@@ -1,29 +1,24 @@
-﻿using NeonShooter.Utils;
+﻿using NeonShooter.AppWarp.States;
+using NeonShooter.Utils;
 using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
-    public class Projectile : MonoBehaviour
+    public class Projectile : BaseProjectile
     {
-        private readonly System.Object access;
-
-        public Weapon ParentWeapon { get; set; }
         public int CubeValue { get; set; }
 
-        public NotifyingProperty<Vector3> Position { get; private set; }
-        public NotifyingProperty<Quaternion> Rotation { get; private set; }
-
         public Projectile()
+            : base(System.DateTime.UtcNow.Ticks)
         {
-            access = new System.Object();
-            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(access);
-            Rotation = NotifyingProperty<Quaternion>.PublicGetPrivateSet(access);
+            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
+            Rotation = NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
         }
 
         void Update()
         {
-            Position[access] = transform.position;
-            Rotation[access] = transform.rotation;
+            Position[Access] = transform.position;
+            Rotation[Access] = transform.rotation;
         }
     }
 }

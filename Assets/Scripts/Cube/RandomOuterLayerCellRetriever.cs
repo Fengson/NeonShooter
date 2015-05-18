@@ -21,7 +21,7 @@ namespace NeonShooter.Cube
                 structure.SetCell(position.Value, false);
                 removedCells.Add(position.Value);
 
-                if (structure.CanShrink()) structure.Shrink();
+                structure.TryShrink();
             }
 
             return removedCells;
