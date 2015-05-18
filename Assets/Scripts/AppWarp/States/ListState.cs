@@ -10,7 +10,6 @@ namespace NeonShooter.AppWarp.States
     public class ListState<TList, TState> : IState
         where TState : class, IState
     {
-        public const string AllKey = "All";
         public const string AddedKey = "Added";
         public const string ObservedKey = "Observed";
         public const string RemovedKey = "Removed";
@@ -76,7 +75,7 @@ namespace NeonShooter.AppWarp.States
             get
             {
                 var json = new JsonObject();
-                json.Append(new JsonPair(AllKey, new JsonArray(
+                json.Append(new JsonPair(AddedKey, new JsonArray(
                     from i in AllItems select (IJsonObject)i.Value.RelativeJson)));
                 return json;
             }

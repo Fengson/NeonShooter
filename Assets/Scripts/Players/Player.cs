@@ -13,11 +13,6 @@ namespace NeonShooter.Players
         float aimRotationSpeed = -90;
         public GameObject aim;
 
-        public GameObject projectilePrefab;
-        public GameObject railGunShotPrefab;
-        public GameObject vacuumConePrefab;
-        public GameObject cubelingPrefab;
-
         /// <summary>
         /// Debug value - set to true to use any weapon regardless of the cost.
         /// </summary>
@@ -127,13 +122,13 @@ namespace NeonShooter.Players
         void onShootStart()
         {
             ContinousFire[Access] = true;
-            SelectedWeapon.Value.ShootStart(this);
+            SelectedWeapon.Value.OnShootStart(this);
         }
 
         void onShootEnd()
         {
             ContinousFire[Access] = false;
-            SelectedWeapon.Value.ShootEnd();
+            SelectedWeapon.Value.OnShootEnd();
         }
 
         public void enemyShot(Weapon weapon, GameObject enemy, int damage, int paidCost)

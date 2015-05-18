@@ -44,13 +44,13 @@ namespace NeonShooter.Players.Weapons
             return currentCoolDownTime > 0;
         }
 
-        public virtual void ShootStart(Player shooter)
+        public virtual void OnShootStart(BasePlayer shooter)
         {
         }
 
         public abstract void shoot(Player shooter, int costPayed);
 
-        public virtual void ShootEnd()
+        public virtual void OnShootEnd()
         {
         }
 

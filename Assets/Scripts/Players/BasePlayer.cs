@@ -14,6 +14,10 @@ namespace NeonShooter.Players
         public bool cubeStructureVisible = false;
 
         public AudioSource[] sounds;
+        public GameObject projectilePrefab;
+        public GameObject railGunShotPrefab;
+        public GameObject vacuumConePrefab;
+        public GameObject cubelingPrefab;
 
         protected object Access { get; private set; }
 

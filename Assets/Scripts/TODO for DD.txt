@@ -29,6 +29,7 @@ Network:
  - Set proper incoming NotifyingProperties and invoke InvokableActions on EnemyPlayer
    + NP EnemyPlayer.Position
    + NP EnemyPlayer.Rotations
+ + Repair problem with messages longer than 1000 chars
 EnemyPlayer & Player:
  - Implement events for proper NotifyingProperties and InvokableActions
 Player:

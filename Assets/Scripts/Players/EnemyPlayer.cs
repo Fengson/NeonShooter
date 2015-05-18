@@ -11,12 +11,16 @@ namespace NeonShooter.Players
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Vector2> rotationsLerp;
 
+        float vacuumConeXRotation;
+
         public string NetworkName { get; set; }
 
         public bool DontLerp { get; set; }
 
         public EnemyPlayer()
         {
+            ((VacuumWeapon)DefaultWeapon).ConeXRotation = () => vacuumConeXRotation;
+
             DontLerp = true;
 
             CellsInStructure = new NotifyingList<IVector3>();
@@ -42,11 +46,12 @@ namespace NeonShooter.Players
                 v => transform.position = v,
                 PropertyInterpolator.Vector3Lerp);
             rotationsLerp = new PropertyInterpolator<Vector2>(
-                () => transform.localEulerAngles,
+                () => new Vector2(vacuumConeXRotation, transform.localEulerAngles.y),
                 v =>
                 {
                     var rot = transform.localEulerAngles;
                     transform.localEulerAngles = new Vector3(rot.x, v.y, rot.z);
+                    vacuumConeXRotation = v.x;
                 },
                 PropertyInterpolator.Vector2LerpAngle);
         }
@@ -58,12 +63,14 @@ namespace NeonShooter.Players
             Position.Value = transform.position;
             Rotations.Value = new Vector2(transform.eulerAngles.x, transform.eulerAngles.y);
 
+            CellsInStructure.ListChanged += CellsInStructure_ListChanged;
+
             Position.ValueChanged += Position_ValueChanged;
             Rotations.ValueChanged += Rotations_ValueChanged;
 
-            CellsInStructure.ListChanged += CellsInStructure_ListChanged;
-        }
+            ContinousFire.ValueChanged += ContinousFire_ValueChanged;
 
+        }
 
         protected override void OnUpdate()
         {
@@ -72,6 +79,8 @@ namespace NeonShooter.Players
             float dProgress = Time.deltaTime * Globals.LerpFactor;
             positionLerp.Update(dProgress);
             rotationsLerp.Update(dProgress);
+
+            SelectedWeapon.Value.Update();
         }
 
         public void DealDamage(Damage damage)
@@ -122,6 +131,12 @@ namespace NeonShooter.Players
         {
             rotationsLerp.TargetValue = newValue;
             if (DontLerp) positionLerp.Progress = 1;
+        }
+
+        void ContinousFire_ValueChanged(bool oldValue, bool newValue)
+        {
+            if (newValue) SelectedWeapon.Value.OnShootStart(this);
+            else SelectedWeapon.Value.OnShootEnd();
         }
     }
 }

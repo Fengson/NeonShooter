@@ -57,6 +57,8 @@ namespace NeonShooter.AppWarp.States
             return playerState;
         }
 
+        public bool IsNewcomer { get; private set; }
+
         public bool Changed
         {
             get
@@ -122,6 +124,7 @@ namespace NeonShooter.AppWarp.States
 
         public PlayerState(Player player)
         {
+            IsNewcomer = true;
             DontLerp = true;
 
             CellsInStructure = new ListState<IVector3, CellState>(player.CellsInStructure, v => new CellState(v));
@@ -136,6 +139,7 @@ namespace NeonShooter.AppWarp.States
         public void ClearChanges()
         {
             DontLerp = null;
+            IsNewcomer = false;
 
             CellsInStructure.ClearChanges();
             Position.ClearChanges();

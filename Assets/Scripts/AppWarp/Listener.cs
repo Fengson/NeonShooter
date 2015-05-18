@@ -48,8 +48,8 @@ namespace NeonShooter.AppWarp
 		}
 
 		public bool sendMsg(string msg, string username = null)
-		{
-            //Debug.Log(msg);
+        {
+            Debug.Log(msg);
 
             if (!CanSendMessages) return false;
 
@@ -334,7 +334,6 @@ namespace NeonShooter.AppWarp
 		{
             Log("onPrivateChatReceived : " + sender);
 
-            Debug.Log(message ?? "NULL");
             receiveMessage(sender, message);
 		}
 		

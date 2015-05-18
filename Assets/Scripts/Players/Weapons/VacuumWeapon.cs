@@ -8,26 +8,29 @@ namespace NeonShooter.Players.Weapons
     {
         private float damageLeftover;
         private GameObject vacuumCone;
-        private Player shooter;
+        private BasePlayer shooter;
 
         public override int Id { get { return 0; } }
         public override DamageEffect DamageEffect { get { return DamageEffect.Suction; } }
         public override FireType FireType { get { return FireType.Continous; } }
         public override float CoolDownTime { get { return 0; } }
 
-        public GameObject VacuumConePrefab { get; set; }
+        public System.Func<float> ConeXRotation { get; set; }
 
-        public VacuumWeapon() : base(50, 10, 10 * Mathf.Deg2Rad, 0) { }
+        public VacuumWeapon() : base(50, 10, 10 * Mathf.Deg2Rad, 0)
+        {
+            ConeXRotation = () => shooter.Rotations.Value.x;
+        }
 
         public override void Update()
         {
             base.Update();
 
             if (shooter != null && vacuumCone != null)
-                vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
+                vacuumCone.transform.localRotation = Quaternion.Euler(ConeXRotation(), 0, 0);
         }
 
-        public override void ShootStart(Player shooter)
+        public override void OnShootStart(BasePlayer shooter)
         {
             this.shooter = shooter;
 
@@ -62,7 +65,7 @@ namespace NeonShooter.Players.Weapons
             }
         }
 
-        public override void ShootEnd()
+        public override void OnShootEnd()
         {
             Object.Destroy(vacuumCone);
         }
