@@ -1,4 +1,5 @@
-﻿namespace NeonShooter.AppWarp.Json
+﻿using System.Text;
+namespace NeonShooter.AppWarp.Json
 {
     public class JsonPair
     {
@@ -20,7 +21,10 @@
 
         public override string ToString()
         {
-            return string.Format("{0} : {1}", Key, Value);
+            return new StringBuilder(Key)
+                .Append(" : ")
+                .Append(Value.ToString())
+                .ToString();
         }
     }
 }

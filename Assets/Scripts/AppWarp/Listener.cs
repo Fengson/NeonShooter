@@ -79,6 +79,7 @@ namespace NeonShooter.AppWarp
 
             foreach (var part in parts.Reverse())
             {
+                Debug.Log(part);
                 if (username == null) WarpClient.GetInstance().SendChat(part);
                 else WarpClient.GetInstance().sendPrivateChat(username, part);
             }

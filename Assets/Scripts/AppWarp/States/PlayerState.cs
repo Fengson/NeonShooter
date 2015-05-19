@@ -1,6 +1,7 @@
 ﻿using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 using NeonShooter.AppWarp.Json;
 using NeonShooter.Players;
+using NeonShooter.Players.Cube;
 using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace NeonShooter.AppWarp.States
         public const string SelectedWeaponIdKey = "SelectedWeaponId";
         public const string ContinousFireKey = "ContinousFire";
         public const string LaunchedProjectilesKey = "LaunchedProjectiles";
+        public const string SpawnedCubelingsKey = "SpawnedCubelings";
 
         public static PlayerState FromJSONNode(JSONNode jsonNode, EnemyPlayer enemy)
         {
@@ -51,6 +53,11 @@ namespace NeonShooter.AppWarp.States
                 playerState.LaunchedProjectiles = ListState<BaseProjectile, ProjectileState>.FromJSONNode(
                     jsonLaunchedProjectiles, js => ProjectileState.FromJSONNode(js, enemy),
                     ps => ps.CreateProjectile(), ps => enemy.ProjectilesById[ps.Id]);
+
+                var jsonSpawnedCubelings = jsonNode[SpawnedCubelingsKey];
+                playerState.SpawnedCubelings = ListState<BaseCubeling, CubelingState>.FromJSONNode(
+                    jsonSpawnedCubelings, js => CubelingState.FromJSONNode(js, enemy),
+                    cs => cs.CreateCubeling(), cs => enemy.CubelingsById[cs.Id]);
             }
 
             return playerState;
@@ -69,7 +76,8 @@ namespace NeonShooter.AppWarp.States
                     Rotations.Changed ||
                     SelectedWeaponId.Changed ||
                     ContinousFire.Changed ||
-                    LaunchedProjectiles.Changed;
+                    LaunchedProjectiles.Changed ||
+                    SpawnedCubelings.Changed;
             }
         }
 
@@ -85,6 +93,7 @@ namespace NeonShooter.AppWarp.States
                 if (ContinousFire.Changed) json.Append(new JsonPair(ContinousFireKey, ContinousFire.RelativeJson));
                 if (SelectedWeaponId.Changed) json.Append(new JsonPair(SelectedWeaponIdKey, SelectedWeaponId.RelativeJson));
                 if (LaunchedProjectiles.Changed) json.Append(new JsonPair(LaunchedProjectilesKey, LaunchedProjectiles.RelativeJson));
+                if (SpawnedCubelings.Changed) json.Append(new JsonPair(SpawnedCubelingsKey, SpawnedCubelings.RelativeJson));
                 return json;
             }
         }
@@ -101,6 +110,7 @@ namespace NeonShooter.AppWarp.States
                 json.Append(new JsonPair(ContinousFireKey, ContinousFire.AbsoluteJson));
                 json.Append(new JsonPair(SelectedWeaponIdKey, SelectedWeaponId.AbsoluteJson));
                 json.Append(new JsonPair(LaunchedProjectilesKey, LaunchedProjectiles.AbsoluteJson));
+                json.Append(new JsonPair(SpawnedCubelingsKey, SpawnedCubelings.AbsoluteJson));
                 return json;
             }
         }
@@ -116,6 +126,7 @@ namespace NeonShooter.AppWarp.States
         public PropertyState<bool, bool> ContinousFire { get; private set; }
 
         public ListState<BaseProjectile, ProjectileState> LaunchedProjectiles { get; private set; }
+        public ListState<BaseCubeling, CubelingState> SpawnedCubelings { get; private set; }
 
         private PlayerState()
         {
@@ -133,6 +144,8 @@ namespace NeonShooter.AppWarp.States
             ContinousFire = new PropertyState<bool, bool>(player.ContinousFire, p => p, s => new JsonValue(s));
             LaunchedProjectiles = new ListState<BaseProjectile, ProjectileState>(
                 player.LaunchedProjectiles, p => new ProjectileState((Projectile)p));
+            SpawnedCubelings = new ListState<BaseCubeling, CubelingState>(
+                player.SpawnedCubelings, p => new CubelingState((Cubeling)p));
         }
 
         public void ClearChanges()
@@ -146,6 +159,7 @@ namespace NeonShooter.AppWarp.States
             SelectedWeaponId.ClearChanges();
             ContinousFire.ClearChanges();
             LaunchedProjectiles.ClearChanges();
+            SpawnedCubelings.ClearChanges();
         }
 
         public void ApplyTo(object o)
@@ -163,6 +177,7 @@ namespace NeonShooter.AppWarp.States
             if (SelectedWeaponId.Changed) SelectedWeaponId.ApplyTo(enemy.SelectedWeapon);
             if (ContinousFire.Changed) ContinousFire.ApplyTo(enemy.ContinousFire);
             if (LaunchedProjectiles.Changed) LaunchedProjectiles.ApplyTo(enemy.LaunchedProjectiles);
+            if (SpawnedCubelings.Changed) SpawnedCubelings.ApplyTo(enemy.SpawnedCubelings);
         }
     }
 }

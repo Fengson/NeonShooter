@@ -1,46 +1,42 @@
 ﻿using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 using NeonShooter.AppWarp.Json;
 using NeonShooter.Players;
+using NeonShooter.Players.Cube;
 using NeonShooter.Players.Weapons;
 using UnityEngine;
 
 namespace NeonShooter.AppWarp.States
 {
-    public class ProjectileState : IState
+    public class CubelingState : IState
     {
         public const string IdKey = "Id";
         public const string DontLerpKey = "DontLerp";
-        public const string ParentWeaponIdKey = "ParentWeaponId";
         public const string PositionKey = "Position";
         public const string RotationKey = "Rotation";
 
-        public static ProjectileState FromJSONNode(JSONNode jsonNode, EnemyPlayer enemy)
+        public static CubelingState FromJSONNode(JSONNode jsonNode, EnemyPlayer enemy)
         {
-            var projectileState = new ProjectileState();
-            
-            projectileState.parentEnemy = enemy;
+            var cubelingState = new CubelingState();
+
+            cubelingState.parentEnemy = enemy;
 
             if (jsonNode != null)
             {
-                projectileState.Id = jsonNode[IdKey].AsLong();
+                cubelingState.Id = jsonNode[IdKey].AsLong();
 
                 var jsonDontLerp = jsonNode[DontLerpKey];
-                projectileState.DontLerp = jsonDontLerp == null ? false : jsonDontLerp.AsBool;
-
-                var jsonParentWeaponId = jsonNode[ParentWeaponIdKey];
-                projectileState.ParentWeaponId = ReadOnlyState<Projectile, int>.FromJSONNode(
-                    jsonParentWeaponId, js => js.AsInt, (po, s) => po.ParentWeapon = enemy.WeaponsById[s]);
+                cubelingState.DontLerp = jsonDontLerp == null ? false : jsonDontLerp.AsBool;
 
                 var jsonPosition = jsonNode[PositionKey];
-                projectileState.Position = PropertyState<Vector3, Vector3>.FromJSONNode(
+                cubelingState.Position = PropertyState<Vector3, Vector3>.FromJSONNode(
                     jsonPosition, js => js.AsVector3(), (p, s) => p.Value = s);
 
                 var jsonRotations = jsonNode[RotationKey];
-                projectileState.Rotation = PropertyState<Quaternion, Quaternion>.FromJSONNode(
+                cubelingState.Rotation = PropertyState<Quaternion, Quaternion>.FromJSONNode(
                     jsonRotations, js => js.AsQuaternion(), (p, s) => p.Value = s);
             }
 
-            return projectileState;
+            return cubelingState;
         }
 
         public bool Changed
@@ -49,7 +45,6 @@ namespace NeonShooter.AppWarp.States
             {
                 return
                     DontLerp.HasValue ||
-                    ParentWeaponId.Changed ||
                     Position.Changed ||
                     Rotation.Changed;
             }
@@ -62,7 +57,6 @@ namespace NeonShooter.AppWarp.States
                 var json = new JsonObject();
                 json.Append(new JsonPair(IdKey, Id));
                 if (DontLerp.HasValue) json.Append(new JsonPair(DontLerpKey, DontLerp.Value));
-                if (ParentWeaponId.Changed) json.Append(new JsonPair(ParentWeaponIdKey, ParentWeaponId.RelativeJson));
                 if (Position.Changed) json.Append(new JsonPair(PositionKey, Position.RelativeJson));
                 if (Rotation.Changed) json.Append(new JsonPair(RotationKey, Rotation.RelativeJson));
                 return json;
@@ -76,7 +70,6 @@ namespace NeonShooter.AppWarp.States
                 var json = new JsonObject();
                 json.Append(new JsonPair(IdKey, Id));
                 json.Append(new JsonPair(DontLerpKey, true));
-                json.Append(new JsonPair(ParentWeaponIdKey, ParentWeaponId.AbsoluteJson));
                 json.Append(new JsonPair(PositionKey, Position.AbsoluteJson));
                 json.Append(new JsonPair(RotationKey, Rotation.AbsoluteJson));
                 return json;
@@ -88,30 +81,27 @@ namespace NeonShooter.AppWarp.States
         public long Id { get; private set; }
 
         public bool? DontLerp { get; private set; }
-        public ReadOnlyState<Projectile, int> ParentWeaponId { get; private set; }
 
         public PropertyState<Vector3, Vector3> Position { get; private set; }
         public PropertyState<Quaternion, Quaternion> Rotation { get; private set; }
         
-        private ProjectileState()
+        private CubelingState()
         {
         }
 
-        public ProjectileState(Projectile projectile)
+        public CubelingState(Cubeling cubeling)
         {
-            Id = projectile.Id;
+            Id = cubeling.Id;
 
             DontLerp = true;
-            ParentWeaponId = new ReadOnlyState<Projectile,int>(projectile.ParentWeapon.Id);
 
-            Position = new PropertyState<Vector3, Vector3>(projectile.Position, p => p, s => s.ToJson());
-            Rotation = new PropertyState<Quaternion, Quaternion>(projectile.Rotation, p => p, s => s.ToJson());
+            Position = new PropertyState<Vector3, Vector3>(cubeling.Position, p => p, s => s.ToJson());
+            Rotation = new PropertyState<Quaternion, Quaternion>(cubeling.Rotation, p => p, s => s.ToJson());
         }
 
         public void ClearChanges()
         {
             DontLerp = null;
-            ParentWeaponId.ClearChanges();
 
             Position.ClearChanges();
             Rotation.ClearChanges();
@@ -119,29 +109,26 @@ namespace NeonShooter.AppWarp.States
 
         public void ApplyTo(object o)
         {
-            var projectile = o as EnemyProjectile;
-            if (projectile != null) ApplyTo(projectile);
+            var cubeling = o as EnemyCubeling;
+            if (cubeling != null) ApplyTo(cubeling);
         }
 
-        public void ApplyTo(EnemyProjectile projectile)
+        public void ApplyTo(EnemyCubeling cubeling)
         {
-            projectile.DontLerp = DontLerp.HasValue && DontLerp.Value;
-            if (ParentWeaponId.Changed) ParentWeaponId.ApplyTo(projectile);
-            if (Position.Changed) Position.ApplyTo(projectile.Position);
-            if (Rotation.Changed) Rotation.ApplyTo(projectile.Rotation);
+            cubeling.DontLerp = DontLerp.HasValue && DontLerp.Value;
+            if (Position.Changed) Position.ApplyTo(cubeling.Position);
+            if (Rotation.Changed) Rotation.ApplyTo(cubeling.Rotation);
         }
 
-        public EnemyProjectile CreateProjectile()
+        public EnemyCubeling CreateCubeling()
         {
             if (parentEnemy == null || !DontLerp.HasValue || DontLerp.Value == false) return null;
 
-            var weapon = parentEnemy.WeaponsById[ParentWeaponId.Value];
-            var projectileObject = weapon.CreateProjectile<EnemyProjectile>(parentEnemy, Position.Value);
-            projectileObject.transform.rotation = Rotation.Value;
-            var projectile = projectileObject.GetComponent<EnemyProjectile>();
-            projectile.Id = Id;
-            parentEnemy.ProjectilesById[Id] = projectile;
-            return projectile;
+            var cubelingObject = parentEnemy.SpawnCubeling(Position.Value, Rotation.Value);
+            var cubeling = cubelingObject.GetComponent<EnemyCubeling>();
+            cubeling.Id = Id;
+            parentEnemy.CubelingsById[Id] = cubeling;
+            return cubeling;
         }
     }
 }

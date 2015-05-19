@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace NeonShooter.AppWarp.Json
@@ -6,6 +7,7 @@ namespace NeonShooter.AppWarp.Json
     public class JsonObject : IJsonObject
     {
         Dictionary<string, JsonPair> pairs;
+        List<JsonPair> arrayPairs;
 
         public bool Empty { get { return pairs.Count == 0; } }
 
@@ -15,27 +17,22 @@ namespace NeonShooter.AppWarp.Json
             foreach (var p in pairs)
                 if (!(p == null || p.IsNull))
                     this.pairs[p.Key] = p;
+            arrayPairs = new List<JsonPair>(pairs);
         }
 
         public void Append(JsonPair pair)
         {
             if (pair == null || pair.IsNull) return;
             pairs[pair.Key] = pair;
+            arrayPairs.Add(pair);
         }
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder("{ ");
-            int i = 0;
-            foreach (var pair in pairs.Values)
-            {
-                sb.AppendFormat("{0}", pair);
-                if (i < pairs.Count - 1) sb.Append(',');
-                sb.Append(' ');
-                i++;
-            }
-            sb.Append("}");
-            return sb.ToString();
+            return new StringBuilder("{ ")
+                .Append(string.Join(", ", (from p in pairs select p.Value.ToString()).ToArray()))
+                .Append("}")
+                .ToString();
         }
     }
 }

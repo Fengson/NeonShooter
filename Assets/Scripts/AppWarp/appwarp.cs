@@ -144,10 +144,9 @@ namespace NeonShooter.AppWarp
 
         public void SendMessage(JsonObject json, string type, string receiver = null)
         {
-            string message = json.ToString();
-            //Debug.Log(message);
             json.Append(new JsonPair("Type", type));
-            listener.sendMsg(json.ToString(), receiver);
+            string message = json.ToString();
+            listener.sendMsg(message, receiver);
         }
 
         #endregion

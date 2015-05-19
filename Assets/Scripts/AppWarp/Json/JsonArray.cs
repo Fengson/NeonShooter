@@ -53,17 +53,10 @@ namespace NeonShooter.AppWarp.Json
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder("[ ");
-            int i = 0;
-            foreach (var o in objects)
-            {
-                sb.AppendFormat("{0}", o);
-                if (i < objects.Count - 1) sb.Append(',');
-                sb.Append(' ');
-                i++;
-            }
-            sb.Append("]");
-            return sb.ToString();
+            return new StringBuilder("[ ")
+                .Append(string.Join(", ", (from o in objects select o.ToString()).ToArray<string>()))
+                .Append("]")
+                .ToString();
         }
 
         public IEnumerator<IJsonObject> GetEnumerator()
