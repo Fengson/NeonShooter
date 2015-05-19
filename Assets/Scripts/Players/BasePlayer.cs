@@ -27,6 +27,7 @@ namespace NeonShooter.Players
         public Dictionary<int, Weapon> WeaponsById { get; private set; }
 
         public Dictionary<long, BaseProjectile> ProjectilesById { get; private set; }
+        public Dictionary<long, BaseCubeling> CubelingsById { get; private set; }
 
         public Vector3 Direction { get; private set; }
 
@@ -39,8 +40,11 @@ namespace NeonShooter.Players
         public NotifyingProperty<bool> ContinousFire { get; protected set; }
 
         public INotifyingList<BaseProjectile> LaunchedProjectiles { get; protected set; }
+        public INotifyingList<BaseCubeling> SpawnedCubelings { get; protected set; }
 
         public InvokableAction<Damage> DamageDealt { get; protected set; }
+        public InvokableAction<PickUp> CubelingPickedUp { get; protected set; }
+        public InvokableAction<PickUpAcknowledge> CubelingPickUpAcknowledged { get; protected set; }
 
         protected BasePlayer()
         {
@@ -52,6 +56,7 @@ namespace NeonShooter.Players
             foreach (var w in Weapons)
                 WeaponsById[w.Id] = w;
             ProjectilesById = new Dictionary<long, BaseProjectile>();
+            CubelingsById = new Dictionary<long, BaseCubeling>();
         }
 
         void Awake()

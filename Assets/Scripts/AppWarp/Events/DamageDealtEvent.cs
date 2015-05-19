@@ -4,7 +4,6 @@ using NeonShooter.Players;
 using NeonShooter.Players.Cube;
 using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
-using System;
 
 namespace NeonShooter.AppWarp.Events
 {
@@ -14,6 +13,7 @@ namespace NeonShooter.AppWarp.Events
         public const string EffectKey = "Effect";
 
         public override string Key { get { return "DamageDealt"; } }
+        public override string[] SubKeys { get { return new[] { AmountKey, EffectKey }; } }
 
         protected override JsonObject ToJson(Damage damage)
         {
@@ -24,8 +24,6 @@ namespace NeonShooter.AppWarp.Events
         
         protected override Damage ToArg(EnemyPlayer sender, JSONNode json)
         {
-            if (json == null || json[AmountKey] == null || json[EffectKey] == null)
-                throw new ArgumentException(string.Format("Invalid JSONNode (null or missing valid keys: {0}, {1}.", AmountKey, EffectKey));
             return new Damage(sender, Parent, json[AmountKey].AsInt, json[EffectKey].AsEnum<CubelingSpawnEffect>());
         }
 

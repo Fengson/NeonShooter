@@ -30,8 +30,11 @@ namespace NeonShooter.Players
             ContinousFire = NotifyingProperty<bool>.PublicGetPrivateSet(Access);
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
+            SpawnedCubelings = new NotifyingList<BaseCubeling>();
 
             DamageDealt = InvokableAction<Damage>.Private(Access);
+            CubelingPickedUp = InvokableAction<PickUp>.Private(Access);
+            CubelingPickUpAcknowledged = InvokableAction<PickUpAcknowledge>.Private(Access);
         }
 
         protected override void OnAwake()
@@ -94,10 +97,18 @@ namespace NeonShooter.Players
                 var cubeling = other.GetComponent<BaseCubeling>();
                 if (cubeling != null && cubeling.Pickable)
                 {
-                    Destroy(other.gameObject);
-                    GainLife(1);
-                    if (sounds[0] != null)
-                        GetComponent<AudioSource>().PlayOneShot(sounds[0].clip);
+                    // TODO: polymorphic
+                    if (cubeling is Cubeling)
+                    {
+                        Destroy(other.gameObject);
+                        GainLife(1);
+                        if (sounds[0] != null)
+                            GetComponent<AudioSource>().PlayOneShot(sounds[0].clip);
+                    }
+                    else if (cubeling is EnemyCubeling)
+                    {
+                        CubelingPickedUp.Invoke(new PickUp(cubeling.Spawner, this, cubeling.Id), Access);
+                    }
                 }
             }
         }
@@ -184,6 +195,23 @@ namespace NeonShooter.Players
             SpawnCubelings(cubelingPositions, oldPosition, damage.Effect);
         }
 
+        public void AcknowledgePickUp(PickUp pickUp)
+        {
+            bool accepted = false;
+            lock (CubelingsById)
+            {
+                BaseCubeling cubeling = CubelingsById.TryGet(pickUp.Id);
+                if (cubeling != null)
+                {
+                    SpawnedCubelings.Remove(cubeling);
+                    CubelingsById.Remove(pickUp.Id);
+                    Destroy(cubeling.gameObject);
+                    accepted = true;
+                }
+            }
+            CubelingPickUpAcknowledged.Invoke(new PickUpAcknowledge(pickUp, accepted), Access);
+        }
+
         protected override void ChangeSizeDetails(float oldRadius, float newRadius)
         {
             var collider = GetComponent<CharacterController>();
@@ -211,13 +239,17 @@ namespace NeonShooter.Players
             GameObject cubelingObject = (GameObject)Instantiate(
                 Globals.Instance.playerCubelingPrefab,
                 position, transform.rotation);
+            Cubeling cubeling = cubelingObject.GetComponent<Cubeling>();
+            CubelingsById[cubeling.Id] = cubeling;
+            cubeling.Spawner = this;
+            SpawnedCubelings.Add(cubeling);
             switch (effect)
             {
                 case CubelingSpawnEffect.Scatter:
                     cubelingObject.GetComponent<Rigidbody>().velocity = scatterVelocity;
                     break;
                 case CubelingSpawnEffect.FlyToPlayer:
-                    cubelingObject.GetComponent<Cubeling>().SpawnerPickDelay = Globals.CubelingSpawnerPickDelay;
+                    cubeling.SpawnerPickDelay = Globals.CubelingSpawnerPickDelay;
                     break;
             }
         }

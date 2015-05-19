@@ -1,4 +1,5 @@
-﻿using NeonShooter.Players.Weapons;
+﻿using NeonShooter.Players.Cube;
+using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
 using System.Collections.Generic;
 using UnityEngine;
@@ -36,8 +37,11 @@ namespace NeonShooter.Players
             SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth(DefaultWeapon);
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
+            SpawnedCubelings = new NotifyingList<BaseCubeling>();
 
             DamageDealt = InvokableAction<Damage>.Public();
+            CubelingPickedUp = InvokableAction<PickUp>.Public();
+            CubelingPickUpAcknowledged = InvokableAction<PickUpAcknowledge>.Public();
         }
 
         protected override void OnAwake()
@@ -74,6 +78,8 @@ namespace NeonShooter.Players
             ContinousFire.ValueChanged += ContinousFire_ValueChanged;
 
             DamageDealt.Action += DamageDealt_Action;
+            CubelingPickedUp.Action += CubelingPickedUp_Action;
+            CubelingPickUpAcknowledged.Action += CubelingPickUpAcknowledged_Action;
         }
 
         protected override void OnUpdate()
@@ -146,6 +152,19 @@ namespace NeonShooter.Players
         void DamageDealt_Action(Damage damage)
         {
             Player.GetDamaged(damage);
+        }
+
+        void CubelingPickedUp_Action(PickUp pickUp)
+        {
+            Player.AcknowledgePickUp(pickUp);
+        }
+
+        void CubelingPickUpAcknowledged_Action(PickUpAcknowledge pickUpAcknowledge)
+        {
+            BaseCubeling cubeling = CubelingsById[pickUpAcknowledge.Id];
+            SpawnedCubelings.Remove(cubeling);
+            CubelingsById.Remove(pickUpAcknowledge.Id);
+            Destroy(cubeling.gameObject);
         }
 
         public void SetLeftGame()

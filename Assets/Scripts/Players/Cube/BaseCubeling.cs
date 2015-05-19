@@ -5,6 +5,7 @@ namespace NeonShooter.Players.Cube
 {
     public abstract class BaseCubeling : Atom
     {
+        public BasePlayer Spawner { get; set; }
         public abstract bool Pickable { get; }
     }
 }
