@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NeonShooter.Utils;
 using UnityEngine;
 
-namespace NeonShooter.Cube
+namespace NeonShooter.Players.Cube
 {
     public class CubeCell
     {

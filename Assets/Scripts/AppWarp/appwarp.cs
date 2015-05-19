@@ -69,6 +69,8 @@ namespace NeonShooter.AppWarp
             enemy.NetworkName = playerName;
             enemies[enemy.NetworkName] = enemyObject;
 
+            enemy.Player = player;
+
             lock (playerState)
             {
                 if (!playerState.IsNewcomer)

@@ -2,9 +2,9 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using NeonShooter.Cube;
 using NeonShooter.Players.Weapons;
 using System;
+using NeonShooter.Players.Cube;
 
 namespace NeonShooter.Players
 {
@@ -13,14 +13,12 @@ namespace NeonShooter.Players
         float aimRotationSpeed = -90;
         public GameObject aim;
 
-
-
         /// <summary>
         /// Debug value - set to true to use any weapon regardless of the cost.
         /// </summary>
         public bool DEBUGCanUseAnyWeapon;
 
-        public Player()
+        private Player()
         {
             CellsInStructure = new NotifyingList<IVector3>();
 
@@ -92,12 +90,16 @@ namespace NeonShooter.Players
         {
             base.TriggerEnter(other);
 
-            if (other.gameObject.CompareTag("Cubeling") && other.gameObject.GetComponent<IsCubelingPickabe>().pickable)
+            if (other.CompareTag("Cubeling"))
             {
-                Destroy(other.gameObject);
-                GainLife(1);
-                if (sounds[0] != null)
-                    GetComponent<AudioSource>().PlayOneShot(sounds[0].clip);
+                var cubeling = other.GetComponent<BaseCubeling>();
+                if (cubeling != null && cubeling.Pickable)
+                {
+                    Destroy(other.gameObject);
+                    GainLife(1);
+                    if (sounds[0] != null)
+                        GetComponent<AudioSource>().PlayOneShot(sounds[0].clip);
+                }
             }
         }
 
@@ -176,6 +178,12 @@ namespace NeonShooter.Players
             CubeStructure.AppendCells(amount);
         }
 
+        public void GetDamaged(Damage damage)
+        {
+            List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
+            SpawnCubelings(cubelingPositions, damage);
+        }
+
         protected override void ChangeSizeDetails(float oldRadius, float newRadius)
         {
             var collider = GetComponent<CharacterController>();
@@ -190,6 +198,21 @@ namespace NeonShooter.Players
         {
             if (cellValue) CellsInStructure.Add(position);
             else CellsInStructure.Remove(position);
+        }
+
+        public void SpawnCubelings(List<IVector3> positions, Damage damage)
+        {
+            foreach (IVector3 p in positions)
+            {
+                switch (damage.Effect)
+                {
+                    case DamageEffect.Destruction:
+                        break;
+                    case DamageEffect.Suction:
+                        Instantiate(cubelingPrefab, transform.localPosition + p, transform.rotation);
+                        break;
+                }
+            }
         }
     }
 }

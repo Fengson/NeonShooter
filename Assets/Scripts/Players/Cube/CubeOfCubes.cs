@@ -2,7 +2,7 @@
 using System.Collections;
 using NeonShooter.Utils;
 
-namespace NeonShooter.Cube
+namespace NeonShooter.Players.Cube
 {
     public class CubeOfCubes : MonoBehaviour
     {

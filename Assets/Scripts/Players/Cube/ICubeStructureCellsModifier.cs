@@ -1,7 +1,7 @@
 ﻿using NeonShooter.Utils;
 using System.Collections.Generic;
 
-namespace NeonShooter.Cube
+namespace NeonShooter.Players.Cube
 {
     public interface ICubeStructureCellsModifier
     {

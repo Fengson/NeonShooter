@@ -1,5 +1,4 @@
-﻿using NeonShooter.Cube;
-using NeonShooter.Players.Weapons;
+﻿using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,9 +16,11 @@ namespace NeonShooter.Players
 
         public string NetworkName { get; set; }
 
+        public Player Player { get; set; }
+
         public bool DontLerp { get; set; }
 
-        public EnemyPlayer()
+        private EnemyPlayer()
         {
             ((VacuumWeapon)DefaultWeapon).ConeXRotation = () => vacuumConeXRotation;
 
@@ -144,8 +145,7 @@ namespace NeonShooter.Players
 
         void DamageDealt_Action(Damage damage)
         {
-            Debug.Log("Received Action");
-            List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
+            Player.GetDamaged(damage);
         }
 
         public void SetLeftGame()

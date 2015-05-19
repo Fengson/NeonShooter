@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace NeonShooter.Cube
+namespace NeonShooter.Players.Cube
 {
     /// <summary>
     /// Class representing structure of the cube with given radius. Radius is its most important property. Instance of this class can be adressed with index operator [x, y, z] to get CubeCell at given coordinates of the structure. Note that coords must always be lower than the Radius. When the Radius is 0, there are no cells. When the Radius is 1, it's a cube 1x1x1 and max (and only) absolute value of coord is 0. When the Radius is 2, it's a cube 3x3x3 and max absolute value of coord is 1. And so on.
