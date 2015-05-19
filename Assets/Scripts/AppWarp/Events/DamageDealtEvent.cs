@@ -4,6 +4,7 @@ using NeonShooter.Players;
 using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
 using System;
+using UnityEngine;
 
 namespace NeonShooter.AppWarp.Events
 {
@@ -20,7 +21,7 @@ namespace NeonShooter.AppWarp.Events
                 new JsonPair(AmountKey, damage.Amount),
                 new JsonPair(EffectKey, damage.Effect.ToJson()));
         }
-
+        
         protected override Damage ToArg(EnemyPlayer sender, JSONNode json)
         {
             if (json == null || json[AmountKey] == null || json[EffectKey] == null)

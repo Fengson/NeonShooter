@@ -36,7 +36,7 @@ namespace NeonShooter.Players
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
 
-            DamageDealt = InvokableAction<Damage>.Private(Access);
+            DamageDealt = InvokableAction<Damage>.Public();
         }
 
         protected override void OnAwake()

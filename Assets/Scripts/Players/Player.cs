@@ -13,6 +13,8 @@ namespace NeonShooter.Players
         float aimRotationSpeed = -90;
         public GameObject aim;
 
+
+
         /// <summary>
         /// Debug value - set to true to use any weapon regardless of the cost.
         /// </summary>
@@ -140,7 +142,6 @@ namespace NeonShooter.Players
             DamageDealt.Invoke(new Damage(this, enemyScript, damage, weapon.DamageEffect), Access);
             //if (weapon.DamageEffect == DamageEffect.Suction)
             //{
-
             //    Instantiate(cubelingPrefab, transform.localPosition + cell.Value, transform.rotation);
             //}
             //GainLife(damage); // <--- TEMP

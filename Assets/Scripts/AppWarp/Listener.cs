@@ -47,10 +47,8 @@ namespace NeonShooter.AppWarp
 			Log (message);
 		}
 
-		public bool sendMsg(string msg, string username = null)
+		public bool sendMsg(string msg, string username)
         {
-            Debug.Log(msg);
-
             if (!CanSendMessages) return false;
 
             Stack<string> parts = new Stack<string>();

@@ -75,7 +75,7 @@ namespace NeonShooter.AppWarp
                 {
                     var json = playerState.AbsoluteJson as JsonObject;
                     json.Append(new JsonPair("Type", "PlayerState"));
-                    listener.sendMsg(json.ToString(), playerName);
+                    SendPlayerState(json, playerName);
                 }
             }
         }
@@ -94,9 +94,8 @@ namespace NeonShooter.AppWarp
                 lock (playerState)
                 {
                     var json = playerState.RelativeJson as JsonObject;
-                    json.Append(new JsonPair("Type", "PlayerState"));
                     playerState.ClearChanges();
-                    listener.sendMsg(json.ToString());
+                    SendPlayerState(json);
                 }
 
                 timer = interval;
@@ -109,15 +108,51 @@ namespace NeonShooter.AppWarp
             WarpClient.GetInstance().Update();
         }
 
-        public void SendEvent(JsonObject json, EnemyPlayer receiver = null)
+        #region Sending
+
+        public void SendPlayerState(JsonObject json)
         {
-            json.Append(new JsonPair("Type", "PlayerEvent"));
-            listener.sendMsg(json.ToString(), receiver != null ? receiver.NetworkName : null);
+            SendPlayerState(json, (string)null);
         }
+
+        public void SendPlayerState(JsonObject json, EnemyPlayer receiver)
+        {
+            SendPlayerState(json, receiver == null ? null : receiver.NetworkName);
+        }
+
+        public void SendPlayerState(JsonObject json, string receiver)
+        {
+            SendMessage(json, "PlayerState", receiver);
+        }
+
+        public void SendPlayerEvent(JsonObject json)
+        {
+            SendPlayerEvent(json, (string)null);
+        }
+
+        public void SendPlayerEvent(JsonObject json, EnemyPlayer receiver)
+        {
+            SendPlayerEvent(json, receiver == null ? null : receiver.NetworkName);
+        }
+
+        public void SendPlayerEvent(JsonObject json, string receiver)
+        {
+            SendMessage(json, "PlayerEvent", receiver);
+        }
+
+        public void SendMessage(JsonObject json, string type, string receiver = null)
+        {
+            string message = json.ToString();
+            //Debug.Log(message);
+            json.Append(new JsonPair("Type", type));
+            listener.sendMsg(json.ToString(), receiver);
+        }
+
+        #endregion
 
         public void InterpretMessage(string message, string sender)
         {
-            Debug.Log(message);
+            //Debug.Log(message);
 
             var enemy = enemies[sender].GetComponent<EnemyPlayer>();
 
@@ -136,7 +171,7 @@ namespace NeonShooter.AppWarp
                         "JSON object should have exactly two values (including Type).");
                 foreach (var kv in json.AsObject.getDictionary())
                 {
-                    if (kv.Key == "PlayerEvent") continue;
+                    if (kv.Key == "Type") continue;
                     playerEvents[kv.Key].OnActionReceived(enemy, kv.Value);
                 }
             }

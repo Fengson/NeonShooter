@@ -25,7 +25,7 @@ namespace NeonShooter.AppWarp.Events
         protected BaseEvent(appwarp appwarp, TParent parent)
         {
             Parent = parent;
-            GetAction(parent).Action += arg => appwarp.SendEvent(
+            GetAction(parent).Action += arg => appwarp.SendPlayerEvent(
                 new JsonObject(new JsonPair(Key, ToJson(arg))));
         }
 
