@@ -1,16 +1,18 @@
 ﻿using NeonShooter.Utils;
 using UnityEngine;
 
-namespace NeonShooter.Players.Weapons
+namespace NeonShooter.Players.Cube
 {
-    public class EnemyProjectile : BaseProjectile
+    public class EnemyCubeling : BaseCubeling
     {
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Quaternion> rotationLerp;
 
+        public override bool Pickable { get { return true; } }
+
         public bool DontLerp { get; set; }
 
-        private EnemyProjectile()
+        private EnemyCubeling()
         {
             DontLerp = true;
         }
@@ -28,7 +30,7 @@ namespace NeonShooter.Players.Weapons
         protected override void OnAwake()
         {
             base.OnAwake();
-            
+
             positionLerp = new PropertyInterpolator<Vector3>(
                 () => transform.position,
                 v => transform.position = v,
@@ -42,15 +44,15 @@ namespace NeonShooter.Players.Weapons
         protected override void OnStart()
         {
             base.OnStart();
-            
+
             Position.ValueChanged += Position_ValueChanged;
             Rotation.ValueChanged += Rotation_ValueChanged;
         }
-        
+
         protected override void OnUpdate()
         {
             base.OnUpdate();
-            
+
             float dProgress = Time.deltaTime * Globals.LerpFactor;
             positionLerp.Update(dProgress);
             rotationLerp.Update(dProgress);

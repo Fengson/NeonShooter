@@ -2,7 +2,7 @@
 using NeonShooter.Utils;
 using UnityEngine;
 
-namespace NeonShooter.Cube
+namespace NeonShooter.Players.Cube
 {
     public static class CubeGameObjectMaker
     {

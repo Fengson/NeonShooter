@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using NeonShooter.Cube;
+using NeonShooter.Players.Cube;
 
 namespace NeonShooter
 {

@@ -3,7 +3,7 @@
 Weapons:
  + effect of damage (destruction / suction)
  + type of fire (single / continous)
- - inflict damage on enemy when hit (take cells from CubeStructure)
+ + inflict damage on enemy when hit (take cells from CubeStructure)
  - decompose projectile into collectible cubelings on hit
  - keep NotifyingProperties/List for:
    + launched projectiles
@@ -14,7 +14,7 @@ Weapons:
    - cubelings ripped off of us (if we were dealt destruction damage)
  - use InvokableActions when:
    - projectile hits something (which projectile)
-   - enemy is dealt damage (what effect of damage)
+   + enemy is dealt damage (what effect of damage)
 CubeStructure:
  + better method for gaining and losing cells
  + keep NotifyingList for:
@@ -23,15 +23,25 @@ CubeStructure:
  + add CubeStructure to EnemyPlayer
 Network:
  - Read proper NotifyingProperties and InvokableActions from Player and send them
+   + NP Player.CellsInStructure
    + NP Player.Position
    + NP Player.Rotations
+   + NP Player.SelectedWeapon
    + NP Player.ContinousWeapon
+   + NP Player.LaunchedProjectiles
+   + IA Player.DamageDealt
  - Set proper incoming NotifyingProperties and invoke InvokableActions on EnemyPlayer
+   + NP EnemyPlayer.CellsInStructure
    + NP EnemyPlayer.Position
    + NP EnemyPlayer.Rotations
+   + NP EnemyPlayer.SelectedWeapon
+   + NP EnemyPlayer.ContinousWeapon
+   + NP EnemyPlayer.LaunchedProjectiles
+   + IA EnemyPlayer.DamageDealt
  + Repair problem with messages longer than 1000 chars
 EnemyPlayer & Player:
- - Implement events for proper NotifyingProperties and InvokableActions
+ + Implement events for proper NotifyingProperties and InvokableActions
+     (done in form of State & Event API)
 Player:
  - Dying effect?
  - Invokable Action "I'm dead :("

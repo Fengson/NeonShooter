@@ -4,7 +4,8 @@ namespace NeonShooter
 {
     public class Globals : MonoBehaviour
     {
-        public const float DefaultLerpFactor = 5;
+        public const float DefaultLerpFactor = 5; // seems the best value. Not too jittery, but not too slow also
+        public const float DefaultCubelingSuckSpeed = 25;
 
         static Globals instance;
         public static Globals Instance
@@ -30,6 +31,15 @@ namespace NeonShooter
             }
         }
 
+        public static float CubelingSuckSpeed
+        {
+            get
+            {
+                if (Instance == null) return DefaultCubelingSuckSpeed;
+                return Instance.cubelingsSuckSpeed;
+            }
+        }
+
         static Material defaultMaterial;
         public static Material DefaultMaterial
         {
@@ -41,7 +51,8 @@ namespace NeonShooter
             }
         }
 
-        public float enemyLerpFactor = 5; // seems the best value. Not too jittery, but not too slow also
+        public float enemyLerpFactor = DefaultLerpFactor;
+        public float cubelingsSuckSpeed = DefaultCubelingSuckSpeed;
         public Material invisibleShadowCasterMaterial;
         public GameObject projectilePrefab;
     }

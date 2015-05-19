@@ -1,4 +1,4 @@
-﻿using NeonShooter.Cube;
+﻿using NeonShooter.Players.Cube;
 using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
 using System.Collections.Generic;
@@ -14,7 +14,6 @@ namespace NeonShooter.Players
         public bool cubeStructureVisible = false;
 
         public AudioSource[] sounds;
-        public GameObject projectilePrefab;
         public GameObject railGunShotPrefab;
         public GameObject vacuumConePrefab;
         public GameObject cubelingPrefab;

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NeonShooter.Cube
+namespace NeonShooter.Players.Cube
 {
     public class RandomOuterLayerCellAppender : ICubeStructureCellsModifier
     {

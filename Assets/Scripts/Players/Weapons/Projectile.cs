@@ -1,5 +1,4 @@
-﻿using NeonShooter.AppWarp.States;
-using NeonShooter.Utils;
+﻿using NeonShooter.Utils;
 using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
@@ -8,15 +7,25 @@ namespace NeonShooter.Players.Weapons
     {
         public int CubeValue { get; set; }
 
-        public Projectile()
-            : base(System.DateTime.UtcNow.Ticks)
+        private Projectile()
         {
-            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-            Rotation = NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
+            Id = System.DateTime.UtcNow.Ticks;
         }
 
-        void Update()
+        protected override NotifyingProperty<Vector3> CreatePositionProperty()
         {
+            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
+        }
+
+        protected override NotifyingProperty<Quaternion> CreateRotationProperty()
+        {
+            return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
+        }
+
+        protected override void OnUpdate()
+        {
+            base.OnUpdate();
+
             Position[Access] = transform.position;
             Rotation[Access] = transform.rotation;
         }
