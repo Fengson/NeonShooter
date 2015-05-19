@@ -1,3 +1,4 @@
+using NeonShooter.Players.Cube;
 using System.Collections;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace NeonShooter.Players.Weapons
         float currentCoolDownTime;
 
         public abstract int Id { get; }
-        public abstract DamageEffect DamageEffect { get; }
+        public abstract CubelingSpawnEffect DamageEffect { get; }
         public abstract FireType FireType { get; }
         public abstract float CoolDownTime { get; }
         public virtual Color ProjectileColor { get { return Color.white; } }

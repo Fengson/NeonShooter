@@ -15,8 +15,6 @@ namespace NeonShooter.Players
 
         public AudioSource[] sounds;
         public GameObject railGunShotPrefab;
-        public GameObject vacuumConePrefab;
-        public GameObject cubelingPrefab;
 
         protected object Access { get; private set; }
 
@@ -58,11 +56,8 @@ namespace NeonShooter.Players
 
         void Awake()
         {
-            OnAwake();
-        }
+            gameObject.layer = Globals.PlayersLayer;
 
-        protected virtual void OnAwake()
-        {
             CubeStructure = new CubeStructure(gameObject, InitialRadius);
             CubeStructure.CellAppender = new RandomOuterLayerCellAppender();
             CubeStructure.CellRetriever = new RandomOuterLayerCellRetriever();
@@ -70,6 +65,12 @@ namespace NeonShooter.Players
             ChangeSize(1, InitialRadius);
             CubeStructure.RadiusChanged += CubeStructure_RadiusChanged;
             CellsInStructure.AddMany(from cell in CubeStructure select cell.Position);
+
+            OnAwake();
+        }
+
+        protected virtual void OnAwake()
+        {
         }
 
         void Start()
@@ -83,12 +84,13 @@ namespace NeonShooter.Players
 
         void Update()
         {
+            CubeStructure.Visible = cubeStructureVisible;
+
             OnUpdate();
         }
 
         protected virtual void OnUpdate()
         {
-            CubeStructure.Visible = cubeStructureVisible;
         }
 
         void OnTriggerEnter(Collider other)

@@ -1,4 +1,5 @@
 ﻿using NeonShooter.AppWarp;
+using NeonShooter.Players.Cube;
 using NeonShooter.Utils;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace NeonShooter.Players.Weapons
         private BasePlayer shooter;
 
         public override int Id { get { return 0; } }
-        public override DamageEffect DamageEffect { get { return DamageEffect.Suction; } }
+        public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.FlyToPlayer; } }
         public override FireType FireType { get { return FireType.Continous; } }
         public override float CoolDownTime { get { return 0; } }
 
@@ -35,7 +36,7 @@ namespace NeonShooter.Players.Weapons
             this.shooter = shooter;
 
             damageLeftover = 0;
-            vacuumCone = Object.Instantiate(shooter.vacuumConePrefab);
+            vacuumCone = Object.Instantiate(Globals.Instance.vacuumConePrefab);
             GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.gameObject);
             var xyScale = Reach * Mathf.Tan(ConeAngleRadians);
             vacuumCone.transform.localScale = new Vector3(xyScale, xyScale, Reach);

@@ -1,10 +1,10 @@
 ﻿using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 using NeonShooter.AppWarp.Json;
 using NeonShooter.Players;
+using NeonShooter.Players.Cube;
 using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
 using System;
-using UnityEngine;
 
 namespace NeonShooter.AppWarp.Events
 {
@@ -26,7 +26,7 @@ namespace NeonShooter.AppWarp.Events
         {
             if (json == null || json[AmountKey] == null || json[EffectKey] == null)
                 throw new ArgumentException(string.Format("Invalid JSONNode (null or missing valid keys: {0}, {1}.", AmountKey, EffectKey));
-            return new Damage(sender, Parent, json[AmountKey].AsInt, json[EffectKey].AsEnum<DamageEffect>());
+            return new Damage(sender, Parent, json[AmountKey].AsInt, json[EffectKey].AsEnum<CubelingSpawnEffect>());
         }
 
         protected override InvokableAction<Damage> GetAction(Player parent)

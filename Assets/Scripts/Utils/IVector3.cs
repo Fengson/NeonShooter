@@ -26,14 +26,19 @@ namespace NeonShooter.Utils
             return new Vector3(iVector.X, iVector.Y, iVector.Z);
         }
 
-        public static bool operator == (IVector3 v1, IVector3 v2)
+        public static bool operator ==(IVector3 v1, IVector3 v2)
         {
             return v1.X == v2.X && v1.Y == v2.Y && v1.Z == v2.Z;
         }
 
-        public static bool operator != (IVector3 v1, IVector3 v2)
+        public static bool operator !=(IVector3 v1, IVector3 v2)
         {
             return !(v1 == v2);
+        }
+
+        public static Vector3 operator *(IVector3 v, float a)
+        {
+            return new Vector3(v.X * a, v.Y * a, v.Z * a);
         }
 
         public override bool Equals(object obj)

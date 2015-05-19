@@ -1,16 +1,13 @@
-﻿using NeonShooter;
-using NeonShooter.Utils;
+﻿using NeonShooter.AppWarp;
+using NeonShooter.Players.Cube;
 using UnityEngine;
-using System.Collections;
-using NeonShooter.AppWarp;
-using UnityEditor;
 
 namespace NeonShooter.Players.Weapons
 {
     public class RailGun : Weapon
     {
         public override int Id { get { return 1; } }
-        public override DamageEffect DamageEffect { get { return DamageEffect.Destruction; } }
+        public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.Scatter; } }
         public override FireType FireType { get { return FireType.Single; } }
         public override float CoolDownTime { get { return 1; } }
         public override Color ProjectileColor { get { return Color.green; } }

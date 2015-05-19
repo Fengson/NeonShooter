@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using NeonShooter.Players.Weapons;
-using System;
 using NeonShooter.Players.Cube;
 
 namespace NeonShooter.Players
@@ -180,8 +179,9 @@ namespace NeonShooter.Players
 
         public void GetDamaged(Damage damage)
         {
+            Vector3 oldPosition = transform.position;
             List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
-            SpawnCubelings(cubelingPositions, damage);
+            SpawnCubelings(cubelingPositions, oldPosition, damage.Effect);
         }
 
         protected override void ChangeSizeDetails(float oldRadius, float newRadius)
@@ -200,18 +200,25 @@ namespace NeonShooter.Players
             else CellsInStructure.Remove(position);
         }
 
-        public void SpawnCubelings(List<IVector3> positions, Damage damage)
+        private void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
         {
-            foreach (IVector3 p in positions)
+            foreach (IVector3 p in relativePositions)
+                SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect);
+        }
+
+        public void SpawnCubeling(Vector3 position, Vector3 scatterVelocity, CubelingSpawnEffect effect)
+        {
+            GameObject cubelingObject = (GameObject)Instantiate(
+                Globals.Instance.playerCubelingPrefab,
+                position, transform.rotation);
+            switch (effect)
             {
-                switch (damage.Effect)
-                {
-                    case DamageEffect.Destruction:
-                        break;
-                    case DamageEffect.Suction:
-                        Instantiate(cubelingPrefab, transform.localPosition + p, transform.rotation);
-                        break;
-                }
+                case CubelingSpawnEffect.Scatter:
+                    cubelingObject.GetComponent<Rigidbody>().velocity = scatterVelocity;
+                    break;
+                case CubelingSpawnEffect.FlyToPlayer:
+                    cubelingObject.GetComponent<Cubeling>().SpawnerPickDelay = Globals.CubelingSpawnerPickDelay;
+                    break;
             }
         }
     }

@@ -1,8 +1,7 @@
-﻿using NeonShooter;
-using NeonShooter.Utils;
-using UnityEngine;
+﻿using NeonShooter.AppWarp;
+using NeonShooter.Players.Cube;
 using System.Collections;
-using NeonShooter.AppWarp;
+using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
@@ -10,7 +9,7 @@ namespace NeonShooter.Players.Weapons
     {
         public override int Id { get { return 2; } }
 
-        public override DamageEffect DamageEffect { get { return DamageEffect.Destruction; } }
+        public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.Scatter; } }
         public override FireType FireType { get { return FireType.Single; } }
         public override float CoolDownTime { get { return 0.3f; } }
         public override Color ProjectileColor { get { return Color.black; } }
