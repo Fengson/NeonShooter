@@ -9,19 +9,19 @@ namespace NeonShooter.AppWarp.Json
 {
     public static class JsonConverter
     {
+        public static JsonObject ToJson(this Vector2 vector)
+        {
+            return new JsonObject(
+                new JsonPair("X", vector.x),
+                new JsonPair("Y", vector.y));
+        }
+
         public static JsonObject ToJson(this Vector3 vector)
         {
             return new JsonObject(
                 new JsonPair("X", vector.x),
                 new JsonPair("Y", vector.y),
                 new JsonPair("Z", vector.z));
-        }
-
-        public static JsonObject ToJson(this Vector2 vector)
-        {
-            return new JsonObject(
-                new JsonPair("X", vector.x),
-                new JsonPair("Y", vector.y));
         }
 
         public static JsonObject ToJson(this Quaternion quaternion)

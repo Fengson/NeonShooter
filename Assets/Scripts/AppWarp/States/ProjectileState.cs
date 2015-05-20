@@ -2,6 +2,8 @@
 using NeonShooter.AppWarp.Json;
 using NeonShooter.Players;
 using NeonShooter.Players.Weapons;
+using NeonShooter.Utils;
+using System.IO;
 using UnityEngine;
 
 namespace NeonShooter.AppWarp.States
@@ -13,35 +15,6 @@ namespace NeonShooter.AppWarp.States
         public const string ParentWeaponIdKey = "ParentWeaponId";
         public const string PositionKey = "Position";
         public const string RotationKey = "Rotation";
-
-        public static ProjectileState FromJSONNode(JSONNode jsonNode, EnemyPlayer enemy)
-        {
-            var projectileState = new ProjectileState();
-            
-            projectileState.parentEnemy = enemy;
-
-            if (jsonNode != null)
-            {
-                projectileState.Id = jsonNode[IdKey].AsLong();
-
-                var jsonDontLerp = jsonNode[DontLerpKey];
-                projectileState.DontLerp = jsonDontLerp == null ? false : jsonDontLerp.AsBool;
-
-                var jsonParentWeaponId = jsonNode[ParentWeaponIdKey];
-                projectileState.ParentWeaponId = ReadOnlyState<Projectile, int>.FromJSONNode(
-                    jsonParentWeaponId, js => js.AsInt, (po, s) => po.ParentWeapon = enemy.WeaponsById[s]);
-
-                var jsonPosition = jsonNode[PositionKey];
-                projectileState.Position = PropertyState<Vector3, Vector3>.FromJSONNode(
-                    jsonPosition, js => js.AsVector3(), (p, s) => p.Value = s);
-
-                var jsonRotations = jsonNode[RotationKey];
-                projectileState.Rotation = PropertyState<Quaternion, Quaternion>.FromJSONNode(
-                    jsonRotations, js => js.AsQuaternion(), (p, s) => p.Value = s);
-            }
-
-            return projectileState;
-        }
 
         public bool Changed
         {
@@ -83,18 +56,60 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
+        public int AbsoluteBinarySize { get { return 3 + 8 + 1 + 4 + 3 * 4 + 4 * 4; } }
+
         EnemyPlayer parentEnemy;
 
         public long Id { get; private set; }
 
         public bool? DontLerp { get; private set; }
-        public ReadOnlyState<Projectile, int> ParentWeaponId { get; private set; }
+        public ReadOnlyCustomBinaryState<Projectile, int> ParentWeaponId { get; private set; }
 
-        public PropertyState<Vector3, Vector3> Position { get; private set; }
-        public PropertyState<Quaternion, Quaternion> Rotation { get; private set; }
-        
-        private ProjectileState()
+        public PropertyVector3State<Vector3> Position { get; private set; }
+        public PropertyQuaternionState<Quaternion> Rotation { get; private set; }
+
+        public ProjectileState(JSONNode jsonNode, EnemyPlayer enemy)
         {
+            parentEnemy = enemy;
+
+            if (jsonNode != null)
+            {
+                Id = jsonNode[IdKey].AsLong();
+
+                var jsonDontLerp = jsonNode[DontLerpKey];
+                DontLerp = jsonDontLerp == null ? false : jsonDontLerp.AsBool;
+
+                var jsonParentWeaponId = jsonNode[ParentWeaponIdKey];
+                ParentWeaponId = new ReadOnlyCustomBinaryState<Projectile, int>(jsonParentWeaponId,
+                    js => js.AsInt, (p, s) => p.ParentWeapon = enemy.WeaponsById[s]);
+
+                var jsonPosition = jsonNode[PositionKey];
+                Position = new PropertyVector3State<Vector3>(jsonPosition,
+                    js => js.AsVector3(), (p, s) => p.Value = s);
+
+                var jsonRotations = jsonNode[RotationKey];
+                Rotation = new PropertyQuaternionState<Quaternion>(jsonRotations,
+                    js => js.AsQuaternion(), (p, s) => p.Value = s);
+            }
+        }
+
+        public ProjectileState(BinaryReader br, EnemyPlayer enemy)
+        {
+            parentEnemy = enemy;
+
+            bool hasParentWeaponIdKey = br.ReadBoolean();
+            bool hasPosition = br.ReadBoolean();
+            bool hasRotation = br.ReadBoolean();
+
+            Id = br.ReadInt64();
+            DontLerp = br.ReadBoolean();
+
+            ParentWeaponId = new ReadOnlyCustomBinaryState<Projectile, int>(hasParentWeaponIdKey,
+                br, _br => _br.ReadInt32(), (p, s) => p.ParentWeapon = enemy.WeaponsById[s]);
+            Position = new PropertyVector3State<Vector3>(hasPosition,
+                br, _br => _br.ReadVector3(), (p, s) => p.Value = s);
+            Rotation = new PropertyQuaternionState<Quaternion>(hasRotation,
+                br, _br => _br.ReadQuaternion(), (p, s) => p.Value = s);
         }
 
         public ProjectileState(Projectile projectile)
@@ -102,10 +117,41 @@ namespace NeonShooter.AppWarp.States
             Id = projectile.Id;
 
             DontLerp = true;
-            ParentWeaponId = new ReadOnlyState<Projectile,int>(projectile.ParentWeapon.Id);
+            ParentWeaponId = new ReadOnlyCustomBinaryState<Projectile, int>(
+                projectile.ParentWeapon.Id, (bw, i) => bw.Write(i));
 
-            Position = new PropertyState<Vector3, Vector3>(projectile.Position, p => p, s => s.ToJson());
-            Rotation = new PropertyState<Quaternion, Quaternion>(projectile.Rotation, p => p, s => s.ToJson());
+            Position = new PropertyVector3State<Vector3>(projectile.Position, p => p, s => s.ToJson());
+            Rotation = new PropertyQuaternionState<Quaternion>(projectile.Rotation, p => p, s => s.ToJson());
+        }
+
+        public void WriteRelativeBinaryTo(BinaryWriter bw)
+        {
+            bool hasParentWeaponIdKey = ParentWeaponId.Changed;
+            bool hasPosition = Position.Changed;
+            bool hasRotation = Rotation.Changed;
+
+            bw.Write(hasParentWeaponIdKey);
+            bw.Write(hasPosition);
+            bw.Write(hasRotation);
+
+            bw.Write(Id);
+            bw.Write(DontLerp.HasValue && DontLerp.Value);
+            if (hasParentWeaponIdKey) bw.WriteRelative(ParentWeaponId);
+            if (hasPosition) bw.WriteRelative(Position);
+            if (hasRotation) bw.WriteRelative(Rotation);
+        }
+
+        public void WriteAbsoluteBinaryTo(BinaryWriter bw)
+        {
+            bw.Write(true);
+            bw.Write(true);
+            bw.Write(true);
+
+            bw.Write(Id);
+            bw.Write(true);
+            bw.WriteAbsolute(ParentWeaponId);
+            bw.WriteAbsolute(Position);
+            bw.WriteAbsolute(Rotation);
         }
 
         public void ClearChanges()

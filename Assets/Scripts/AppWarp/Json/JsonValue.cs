@@ -12,9 +12,9 @@ namespace NeonShooter.AppWarp.Json
             Value = value.ToString();
         }
 
-        public override string ToString()
+        public StringBuilder AppendTo(StringBuilder sb)
         {
-            return Value;
+            return sb.Append(Value);
         }
     }
 }

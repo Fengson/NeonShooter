@@ -1,7 +1,9 @@
-﻿using System.Text;
+﻿using NeonShooter.Utils;
+using System.Text;
+
 namespace NeonShooter.AppWarp.Json
 {
-    public class JsonPair
+    public class JsonPair : StringBuilderExtensions.IAppendable
     {
         public string Key { get; private set; }
         public IJsonObject Value { get; private set; }
@@ -19,12 +21,12 @@ namespace NeonShooter.AppWarp.Json
         {
         }
 
-        public override string ToString()
+        public StringBuilder AppendTo(StringBuilder sb)
         {
-            return new StringBuilder(Key)
+            return sb
+                .Append(Key)
                 .Append(" : ")
-                .Append(Value.ToString())
-                .ToString();
+                .AppendOne(Value);
         }
     }
 }

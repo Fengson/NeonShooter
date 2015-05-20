@@ -1,4 +1,5 @@
 using NeonShooter.Players;
+using NeonShooter.Utils;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -8,8 +9,9 @@ using System.Collections.Generic;
 using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 using NeonShooter.AppWarp.Json;
 using NeonShooter.AppWarp.States;
-using NeonShooter.Utils;
 using NeonShooter.AppWarp.Events;
+using System.Text;
+using System.IO;
 //using com.shephertz.app42.gaming.multiplayer.client.events;
 //using com.shephertz.app42.gaming.multiplayer.client.listener;
 //using com.shephertz.app42.gaming.multiplayer.client.command;
@@ -51,9 +53,6 @@ namespace NeonShooter.AppWarp
             player = GetComponent<Player>();
             playerState = new PlayerState(player);
             playerEvents = new PlayerEvents(this, player);
-
-            //For weapon tests
-            //addPlayer("TestPlayer");
         }
 
         public static ArrayList playerNames = new ArrayList();
@@ -75,9 +74,22 @@ namespace NeonShooter.AppWarp
             {
                 if (!playerState.IsNewcomer)
                 {
-                    var json = playerState.AbsoluteJson as JsonObject;
-                    json.Append(new JsonPair("Type", "PlayerState"));
-                    SendPlayerState(json, playerName);
+                    //var ms = new MemoryStream();
+                    //var bw = new BinaryWriter(ms);
+                    //bw.Write((byte)0); // type of msg
+                    lock (playerState)
+                    {
+                        var json = playerState.AbsoluteJson as JsonObject;
+                        json.Append(new JsonPair("Type", "PlayerState"));
+                        SendPlayerState(json, playerName);
+
+                        //bw.WriteAbsolute(playerState);
+                        //playerState.ClearChanges();
+                    }
+                    //bw.Flush();
+                    //ms.Position = 0;
+
+                    //SendMessage(ms, playerName);
                 }
             }
         }
@@ -93,12 +105,22 @@ namespace NeonShooter.AppWarp
             timer -= Time.deltaTime;
             if (listener.CanSendMessages && timer < 0)
             {
+                //var ms = new MemoryStream();
+                //var bw = new BinaryWriter(ms);
+                //bw.Write((byte)0); // type of msg
                 lock (playerState)
                 {
                     var json = playerState.RelativeJson as JsonObject;
                     playerState.ClearChanges();
                     SendPlayerState(json);
+
+                    //bw.WriteRelative(playerState);
+                    //playerState.ClearChanges();
                 }
+                //bw.Flush();
+                //ms.Position = 0;
+
+                //SendMessage(ms);
 
                 timer = interval;
             }            
@@ -145,16 +167,35 @@ namespace NeonShooter.AppWarp
         public void SendMessage(JsonObject json, string type, string receiver = null)
         {
             json.Append(new JsonPair("Type", type));
-            string message = json.ToString();
-            listener.sendMsg(message, receiver);
+
+            string message = json.BuildString();
+            listener.sendJsonMsg(message, receiver);
+        }
+
+        public void SendMessage(MemoryStream binary, string receiver = null)
+        {
+            listener.sendBinaryMsg(binary, receiver);
         }
 
         #endregion
 
-        public void InterpretMessage(string message, string sender)
+        public void InterpretMessage(Listener.SingleMessage message)
         {
             //Debug.Log(message);
 
+            switch (message.Type)
+            {
+                case Listener.MessageType.Json:
+                    InterpretJsonMessage(message.Sender, message.Contents);
+                    break;
+                case Listener.MessageType.Binary:
+                    InterpretBinaryMessage(message.Sender, message.Contents);
+                    break;
+            }
+        }
+
+        private void InterpretJsonMessage(string sender, string message)
+        {
             var enemy = enemies[sender].GetComponent<EnemyPlayer>();
 
             var json = JSON.Parse(message);
@@ -162,7 +203,7 @@ namespace NeonShooter.AppWarp
 
             if (type.Value == "PlayerState")
             {
-                var enemyState = PlayerState.FromJSONNode(json, enemy);
+                var enemyState = new PlayerState(json, enemy);
                 enemyState.ApplyTo(enemy);
             }
             else if (type.Value == "PlayerEvent")
@@ -176,6 +217,37 @@ namespace NeonShooter.AppWarp
                     playerEvents[kv.Key].OnActionReceived(enemy, kv.Value);
                 }
             }
+        }
+
+        private void InterpretBinaryMessage(string sender, string message)
+        {
+            var enemy = enemies[sender].GetComponent<EnemyPlayer>();
+
+            byte[] bytes = System.Convert.FromBase64String(message);
+            Debug.Log(System.BitConverter.ToString(bytes).Replace('-', ' '));
+            var ms = new MemoryStream(bytes);
+            var br = new BinaryReader(ms);
+
+            int type = br.ReadByte();
+
+            // PlayerState
+            if (type == 0)
+            {
+                var enemyState = new PlayerState(br, enemy);
+                enemyState.ApplyTo(enemy);
+            }
+            // NOT IMPLEMENTED
+            //else if (type.Value == "PlayerEvent")
+            //{
+            //    if (json.Childs.Count() != 2)
+            //        throw new System.FormatException("Invalid format of JSON object with Type : PlayerEvent; " +
+            //            "JSON object should have exactly two values (including Type).");
+            //    foreach (var kv in json.AsObject.getDictionary())
+            //    {
+            //        if (kv.Key == "Type") continue;
+            //        playerEvents[kv.Key].OnActionReceived(enemy, kv.Value);
+            //    }
+            //}
         }
 
         void OnGUI()

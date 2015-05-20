@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NeonShooter.Utils;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -27,12 +28,12 @@ namespace NeonShooter.AppWarp.Json
             arrayPairs.Add(pair);
         }
 
-        public override string ToString()
+        public StringBuilder AppendTo(StringBuilder sb)
         {
-            return new StringBuilder("{ ")
-                .Append(string.Join(", ", (from p in pairs select p.Value.ToString()).ToArray()))
-                .Append("}")
-                .ToString();
+            return sb
+                .Append("{ ")
+                .AppendJoin(", ", from kv in pairs select kv.Value as StringBuilderExtensions.IAppendable)
+                .Append("}");
         }
     }
 }

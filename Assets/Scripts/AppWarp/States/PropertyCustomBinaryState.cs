@@ -5,28 +5,31 @@ using System.IO;
 
 namespace NeonShooter.AppWarp.States
 {
-    public class PropertyState<TProperty, TState> : BasePropertyState<TProperty, TState>
-        where TState : BinaryConvert.IBinaryWritable
+    public class PropertyCustomBinaryState<TProperty, TState> : BasePropertyState<TProperty, TState>
     {
-        public PropertyState(
+        Action<BinaryWriter, TState> customBinaryWriter;
+
+        public PropertyCustomBinaryState(
             JSONNode jsonNode, Func<JSONNode, TState> toStateConverter,
             Action<NotifyingProperty<TProperty>, TState> stateApplier)
             : base(jsonNode, toStateConverter, stateApplier)
         {
         }
 
-        public PropertyState(bool valueInReader,
+        public PropertyCustomBinaryState(bool valueInReader,
             BinaryReader br, Func<BinaryReader, TState> toStateReader,
             Action<NotifyingProperty<TProperty>, TState> stateApplier)
             : base(valueInReader, br, toStateReader, stateApplier)
         {
         }
 
-        public PropertyState(NotifyingProperty<TProperty> property,
+        public PropertyCustomBinaryState(NotifyingProperty<TProperty> property,
             Func<TProperty, TState> stateSelector,
-            Func<TState, IJsonObject> toJsonConverter)
+            Func<TState, IJsonObject> toJsonConverter,
+            Action<BinaryWriter, TState> customBinaryWriter)
             : base(property, stateSelector, toJsonConverter)
         {
+            this.customBinaryWriter = customBinaryWriter;
         }
 
         public override void WriteRelativeBinaryTo(BinaryWriter bw)
@@ -36,7 +39,7 @@ namespace NeonShooter.AppWarp.States
 
         public override void WriteAbsoluteBinaryTo(BinaryWriter bw)
         {
-            bw.Write(Value);
+            customBinaryWriter(bw, Value);
         }
     }
 

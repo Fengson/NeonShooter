@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 namespace NeonShooter.Utils
 {
-    public struct IVector3
+    public struct IVector3 : BinaryConvert.IBinaryWritable
     {
         private const int Prime1 = 179424691;
         private const int Prime2 = 512927377;
@@ -60,6 +61,11 @@ namespace NeonShooter.Utils
         public override string ToString()
         {
             return string.Format("IVector3 [ {0}, {1}, {2} ]", X, Y, Z);
+        }
+
+        public void WriteTo(BinaryWriter bw)
+        {
+            bw.Write(this);
         }
     }
 }

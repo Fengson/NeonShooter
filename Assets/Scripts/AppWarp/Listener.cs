@@ -13,12 +13,15 @@ using System.Linq;
 using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
 
 using NeonShooter.Utils;
+using System.Text;
+using System.IO;
 
 namespace NeonShooter.AppWarp
 {
 	public class Listener : ConnectionRequestListener, LobbyRequestListener, ZoneRequestListener, RoomRequestListener, ChatRequestListener, UpdateRequestListener, NotifyListener, TurnBasedRoomListener
     {
         const int maxMessageLength = 1000;
+        const int maxBinaryMessageLength = ((maxMessageLength + 3) / 4) * 3; // bacause base 64 is longer than byte[] it was created from
         const string partWrapper1 = "{ Type : Parts, Id : ";
         const string partWrapper2 = ", Count : ";
         const string partWrapper3 = ", Index : ";
@@ -47,7 +50,7 @@ namespace NeonShooter.AppWarp
 			Log (message);
 		}
 
-		public bool sendMsg(string msg, string username)
+		public bool sendJsonMsg(string msg, string username)
         {
             if (!CanSendMessages) return false;
 
@@ -79,12 +82,56 @@ namespace NeonShooter.AppWarp
 
             foreach (var part in parts.Reverse())
             {
-                Debug.Log(part);
                 if (username == null) WarpClient.GetInstance().SendChat(part);
                 else WarpClient.GetInstance().sendPrivateChat(username, part);
             }
             return true;
 		}
+
+        public bool sendBinaryMsg(MemoryStream ms, string username)
+        {
+            if (!CanSendMessages) return false;
+
+            var headerSize = 8 + 2 + 2;
+            int indexPos = 8 + 2;
+            byte[] header = new byte[headerSize];
+
+            var maxPartSize = maxBinaryMessageLength - headerSize;
+            short partCount = (short)(ms.Length / maxPartSize + 1);
+            byte[][] parts = new byte[partCount][];
+
+            MemoryStream headerStream = new MemoryStream(header);
+            var bw = new BinaryWriter(headerStream);
+            bw.Write(DateTime.UtcNow.Ticks);
+            bw.Write(partCount);
+            bw.Flush();
+
+            ms.Position = 0;
+            var br = new BinaryReader(ms);
+            for (short i = 0; i < partCount; i++)
+            {
+                bw = new BinaryWriter(headerStream);
+                bw.Seek(indexPos, SeekOrigin.Begin);
+                bw.Write(i);
+                bw.Flush();
+                
+                int left = Math.Min(maxPartSize, (int)(ms.Length - ms.Position));
+                parts[i] = new byte[headerSize + left];
+                for (int j = 0; j < headerSize; j++)
+                    parts[i][j] = header[j];
+                br.Read(parts[i], headerSize, left);
+            }
+
+            for (int i = 0; i < partCount; i++)
+            {
+                //Debug.Log(BitConverter.ToString(parts[i]).Replace('-', ' '));
+
+                if (username == null) WarpClient.GetInstance().SendChat(Convert.ToBase64String(parts[i]));
+                else WarpClient.GetInstance().sendPrivateChat(username, Convert.ToBase64String(parts[i]));
+            }
+
+            return true;
+        }
 
 		//ConnectionRequestListener
 		#region ConnectionRequestListener
@@ -346,14 +393,23 @@ namespace NeonShooter.AppWarp
             receiveMessage(eventObj.getSender(), eventObj.getMessage());
 		}
 
-        private abstract class GeneralMessage
+        #region Queueing
+
+        public enum MessageType
+        {
+            Json,
+            Binary
+        }
+
+        public abstract class GeneralMessage
         {
             public string Sender { get; set; }
+            public MessageType Type { get; set; }
 
             public abstract SingleMessage CompleteMessage { get; }
         }
 
-        private class SingleMessage : GeneralMessage
+        public class SingleMessage : GeneralMessage
         {
             public string Contents { get; set; }
             public override SingleMessage CompleteMessage { get { return this; } }
@@ -374,11 +430,14 @@ namespace NeonShooter.AppWarp
                     return new SingleMessage
                     {
                         Sender = Sender,
+                        Type = Type,
                         Contents = String.Concat(Messages)
                     };
                 }
             }
         }
+
+        #endregion
 
         Queue<GeneralMessage> messageQueue = new Queue<GeneralMessage>();
         Dictionary<string, Dictionary<string, MessageSequence>> messageSequences = new Dictionary<string, Dictionary<string, MessageSequence>>();
@@ -387,20 +446,23 @@ namespace NeonShooter.AppWarp
         {
             if (sender == appwarp.username) return;
 
-            EnqueueMessage(sender, message);
+            bool success = TryEnqueueJsonMessage(sender, message);
+            if (!success) TryEnqueueBinaryMessage(sender, message);
 
             while (true)
             {
                 var singleMessage = TryDequeueMessage();
                 if (singleMessage == null) break;
 
-                ProcessMessage(singleMessage.Sender, singleMessage.Contents);
+                ProcessMessage(singleMessage);
             }
         }
 
-        private void EnqueueMessage(string sender, string message)
+        private bool TryEnqueueJsonMessage(string sender, string message)
         {
             var json = JSON.Parse(message);
+            if (json == null) return false;
+
             var type = json["Type"];
             if (type.Value == "Parts")
             {
@@ -409,43 +471,67 @@ namespace NeonShooter.AppWarp
                 int index = json["Index"].AsInt;
                 string contents = json["Contents"];
 
-                bool isNew = false;
-
-                var innerDict = messageSequences.TryGet(sender);
-                if (innerDict == null)
-                {
-                    innerDict = new Dictionary<string, MessageSequence>();
-                    messageSequences[sender] = innerDict;
-                    isNew = true;
-                }
-                
-                MessageSequence seq = null;
-                if (!isNew) seq = innerDict.TryGet(id);
-                if (seq == null)
-                {
-                    seq = new MessageSequence
-                    {
-                        Sender = sender,
-                        Id = id,
-                        Count = count,
-                        Received = 0,
-                        Messages = new string[count]
-                    };
-                    innerDict[id] = seq;
-                    messageQueue.Enqueue(seq);
-                }
-
-                seq.Messages[index] = contents;
-                seq.Received++;
+                EnqueueSequenceMessage(sender, MessageType.Json, id, count, index, contents);
             }
             else
             {
                 messageQueue.Enqueue(new SingleMessage
                 {
                     Sender = sender,
+                    Type = MessageType.Json,
                     Contents = message
                 });
             }
+
+            return true;
+        }
+
+        private bool TryEnqueueBinaryMessage(string sender, string message)
+        {
+            byte[] part = Convert.FromBase64String(message);
+            var ms = new MemoryStream(part);
+            var br = new BinaryReader(ms);
+            string id = br.ReadInt64().ToString();
+            int count = br.ReadInt16();
+            int index = br.ReadInt16();
+            var contents = Convert.ToBase64String(part, (int)ms.Position, (int)(ms.Length - ms.Position));
+
+            EnqueueSequenceMessage(sender, MessageType.Binary, id, count, index, contents);
+
+            return true;
+        }
+
+        private void EnqueueSequenceMessage(string sender, MessageType type, string id, int count, int index, string contents)
+        {
+            bool isNew = false;
+
+            var innerDict = messageSequences.TryGet(sender);
+            if (innerDict == null)
+            {
+                innerDict = new Dictionary<string, MessageSequence>();
+                messageSequences[sender] = innerDict;
+                isNew = true;
+            }
+
+            MessageSequence seq = null;
+            if (!isNew) seq = innerDict.TryGet(id);
+            if (seq == null)
+            {
+                seq = new MessageSequence
+                {
+                    Sender = sender,
+                    Id = id,
+                    Count = count,
+                    Received = 0,
+                    Messages = new string[count],
+                    Type = type
+                };
+                innerDict[id] = seq;
+                messageQueue.Enqueue(seq);
+            }
+
+            seq.Messages[index] = contents;
+            seq.Received++;
         }
 
         private SingleMessage TryDequeueMessage()
@@ -457,14 +543,14 @@ namespace NeonShooter.AppWarp
             return message;
         }
 
-        private void ProcessMessage(string sender, string message)
+        private void ProcessMessage(SingleMessage message)
         {
-            if (!appwarp.playerNames.Contains(sender))
+            if (!appwarp.playerNames.Contains(message.Sender))
             {
-                appwarp.addPlayer(sender);
+                appwarp.addPlayer(message.Sender);
             }
 
-            appwarp.InterpretMessage(message, sender);
+            appwarp.InterpretMessage(message);
         }
 		
 		public void onUpdatePeersReceived (UpdateEvent eventObj)

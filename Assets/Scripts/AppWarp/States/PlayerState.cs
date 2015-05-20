@@ -4,6 +4,7 @@ using NeonShooter.Players;
 using NeonShooter.Players.Cube;
 using NeonShooter.Players.Weapons;
 using NeonShooter.Utils;
+using System.IO;
 using UnityEngine;
 
 namespace NeonShooter.AppWarp.States
@@ -18,50 +19,6 @@ namespace NeonShooter.AppWarp.States
         public const string ContinousFireKey = "ContinousFire";
         public const string LaunchedProjectilesKey = "LaunchedProjectiles";
         public const string SpawnedCubelingsKey = "SpawnedCubelings";
-
-        public static PlayerState FromJSONNode(JSONNode jsonNode, EnemyPlayer enemy)
-        {
-            var playerState = new PlayerState();
-
-            if (jsonNode != null)
-            {
-                var jsonBrandNew = jsonNode[DontLerpKey];
-                playerState.DontLerp = jsonBrandNew == null ? false : jsonBrandNew.AsBool;
-
-                var jsonCellsInStructure = jsonNode[PlayerState.CellsInStructureKey];
-                playerState.CellsInStructure = ListState<IVector3, CellState>.FromJSONNode(
-                    jsonCellsInStructure, js => new CellState(js.AsIVector3()),
-                    cs => cs.Position, cs => cs.Position);
-
-                var jsonPosition = jsonNode[PositionKey];
-                playerState.Position = PropertyState<Vector3, Vector3>.FromJSONNode(
-                    jsonPosition, js => js.AsVector3(), (p, s) => p.Value = s);
-
-                var jsonRotations = jsonNode[RotationsKey];
-                playerState.Rotations = PropertyState<Vector2, Vector2>.FromJSONNode(
-                    jsonRotations, js => js.AsVector2(), (p, s) => p.Value = s);
-
-                var jsonSelectedWeaponId = jsonNode[SelectedWeaponIdKey];
-                playerState.SelectedWeaponId = PropertyState<Weapon, int>.FromJSONNode(
-                    jsonSelectedWeaponId, js => js.AsInt, (p, s) => p.Value = enemy.WeaponsById[s]);
-
-                var jsonContinousFire = jsonNode[ContinousFireKey];
-                playerState.ContinousFire = PropertyState<bool, bool>.FromJSONNode(
-                    jsonContinousFire, js => js.AsBool, (p, s) => p.Value = s);
-
-                var jsonLaunchedProjectiles = jsonNode[LaunchedProjectilesKey];
-                playerState.LaunchedProjectiles = ListState<BaseProjectile, ProjectileState>.FromJSONNode(
-                    jsonLaunchedProjectiles, js => ProjectileState.FromJSONNode(js, enemy),
-                    ps => ps.CreateProjectile(), ps => enemy.ProjectilesById[ps.Id]);
-
-                var jsonSpawnedCubelings = jsonNode[SpawnedCubelingsKey];
-                playerState.SpawnedCubelings = ListState<BaseCubeling, CubelingState>.FromJSONNode(
-                    jsonSpawnedCubelings, js => CubelingState.FromJSONNode(js, enemy),
-                    cs => cs.CreateCubeling(), cs => enemy.CubelingsById[cs.Id]);
-            }
-
-            return playerState;
-        }
 
         public bool IsNewcomer { get; private set; }
 
@@ -90,11 +47,27 @@ namespace NeonShooter.AppWarp.States
                 if (CellsInStructure.Changed) json.Append(new JsonPair(CellsInStructureKey, CellsInStructure.RelativeJson));
                 if (Position.Changed) json.Append(new JsonPair(PositionKey, Position.RelativeJson));
                 if (Rotations.Changed) json.Append(new JsonPair(RotationsKey, Rotations.RelativeJson));
-                if (ContinousFire.Changed) json.Append(new JsonPair(ContinousFireKey, ContinousFire.RelativeJson));
                 if (SelectedWeaponId.Changed) json.Append(new JsonPair(SelectedWeaponIdKey, SelectedWeaponId.RelativeJson));
+                if (ContinousFire.Changed) json.Append(new JsonPair(ContinousFireKey, ContinousFire.RelativeJson));
                 if (LaunchedProjectiles.Changed) json.Append(new JsonPair(LaunchedProjectilesKey, LaunchedProjectiles.RelativeJson));
                 if (SpawnedCubelings.Changed) json.Append(new JsonPair(SpawnedCubelingsKey, SpawnedCubelings.RelativeJson));
                 return json;
+            }
+        }
+
+        public int AbsoluteBinarySize
+        {
+            get
+            {
+                return 6 +
+                    1 +
+                    CellsInStructure.AbsoluteBinarySize +
+                    3 * 4 +
+                    2 * 4 +
+                    4 +
+                    1 +
+                    LaunchedProjectiles.AbsoluteBinarySize +
+                    SpawnedCubelings.AbsoluteBinarySize;
             }
         }
 
@@ -107,8 +80,8 @@ namespace NeonShooter.AppWarp.States
                 json.Append(new JsonPair(CellsInStructureKey, CellsInStructure.AbsoluteJson));
                 json.Append(new JsonPair(PositionKey, Position.AbsoluteJson));
                 json.Append(new JsonPair(RotationsKey, Rotations.AbsoluteJson));
-                json.Append(new JsonPair(ContinousFireKey, ContinousFire.AbsoluteJson));
                 json.Append(new JsonPair(SelectedWeaponIdKey, SelectedWeaponId.AbsoluteJson));
+                json.Append(new JsonPair(ContinousFireKey, ContinousFire.AbsoluteJson));
                 json.Append(new JsonPair(LaunchedProjectilesKey, LaunchedProjectiles.AbsoluteJson));
                 json.Append(new JsonPair(SpawnedCubelingsKey, SpawnedCubelings.AbsoluteJson));
                 return json;
@@ -117,19 +90,111 @@ namespace NeonShooter.AppWarp.States
 
         public bool? DontLerp { get; private set; }
 
-        public ListState<IVector3, CellState> CellsInStructure { get; private set; }
+        public BaseListState<IVector3, CellState> CellsInStructure { get; private set; }
 
-        public PropertyState<Vector3, Vector3> Position { get; private set; }
-        public PropertyState<Vector2, Vector2> Rotations { get; private set; }
+        public PropertyVector3State<Vector3> Position { get; private set; }
+        public PropertyVector2State<Vector2> Rotations { get; private set; }
 
-        public PropertyState<Weapon, int> SelectedWeaponId { get; private set; }
-        public PropertyState<bool, bool> ContinousFire { get; private set; }
+        public PropertyCustomBinaryState<Weapon, int> SelectedWeaponId { get; private set; }
+        public PropertyCustomBinaryState<bool, bool> ContinousFire { get; private set; }
 
         public ListState<BaseProjectile, ProjectileState> LaunchedProjectiles { get; private set; }
         public ListState<BaseCubeling, CubelingState> SpawnedCubelings { get; private set; }
 
-        private PlayerState()
+        public PlayerState(JSONNode jsonNode, EnemyPlayer enemy)
         {
+            if (jsonNode != null)
+            {
+                var jsonBrandNew = jsonNode[DontLerpKey];
+                DontLerp = jsonBrandNew == null ? false : jsonBrandNew.AsBool;
+
+                //var jsonCellsInStructure = jsonNode[PlayerState.CellsInStructureKey];
+                //CellsInStructure = new ListState<IVector3, CellState>(
+                //    jsonCellsInStructure, js => new CellState(js.AsIVector3()),
+                //    cs => cs.Position, cs => cs.Position);
+
+                var jsonCellsInStructure = jsonNode[PlayerState.CellsInStructureKey];
+                CellsInStructure = new ListState<IVector3, CellState>(
+                    jsonCellsInStructure, js => new CellState(js),
+                    cs => cs.Position, cs => cs.Position);
+
+                var jsonPosition = jsonNode[PositionKey];
+                Position = new PropertyVector3State<Vector3>(
+                    jsonPosition, js => js.AsVector3(), (p, s) => p.Value = s);
+
+                var jsonRotations = jsonNode[RotationsKey];
+                Rotations = new PropertyVector2State<Vector2>(
+                    jsonRotations, js => js.AsVector2(), (p, s) => p.Value = s);
+
+                var jsonSelectedWeaponId = jsonNode[SelectedWeaponIdKey];
+                SelectedWeaponId = new PropertyCustomBinaryState<Weapon, int>(
+                    jsonSelectedWeaponId, js => js.AsInt, (p, s) => p.Value = enemy.WeaponsById[s]);
+
+                var jsonContinousFire = jsonNode[ContinousFireKey];
+                ContinousFire = new PropertyCustomBinaryState<bool, bool>(
+                    jsonContinousFire, js => js.AsBool, (p, s) => p.Value = s);
+
+                var jsonLaunchedProjectiles = jsonNode[LaunchedProjectilesKey];
+                LaunchedProjectiles = new ListState<BaseProjectile, ProjectileState>(
+                    jsonLaunchedProjectiles, js => new ProjectileState(js, enemy),
+                    ps => ps.CreateProjectile(), ps => enemy.ProjectilesById[ps.Id]);
+
+                var jsonSpawnedCubelings = jsonNode[SpawnedCubelingsKey];
+                SpawnedCubelings = new ListState<BaseCubeling, CubelingState>(
+                    jsonSpawnedCubelings, js => new CubelingState(js, enemy),
+                    cs => cs.CreateCubeling(), cs => enemy.CubelingsById[cs.Id]);
+            }
+        }
+
+        public PlayerState(BinaryReader br, EnemyPlayer enemy)
+        {
+            bool hasCellsInStructure = br.ReadBoolean();
+            bool hasPosition = br.ReadBoolean();
+            bool hasRotations = br.ReadBoolean();
+            bool hasSelectedWeaponIdKey = br.ReadBoolean();
+            bool hasLaunchedProjectiles = br.ReadBoolean();
+            bool hasSpawnedCubelings = br.ReadBoolean();
+
+            DontLerp = br.ReadBoolean();
+            Debug.Log("DontLerp = " + DontLerp);
+
+            Debug.Log("hasCellsInStructure = " + hasCellsInStructure);
+            CellsInStructure = new ListState<IVector3, CellState>(hasCellsInStructure,
+                br, _br => new CellState(_br), cs => cs.Position, cs => cs.Position);
+            if (hasCellsInStructure) Debug.Log(CellsInStructure.RelativeJson.BuildString());
+
+            Debug.Log("hasPosition = " + hasPosition);
+            Position = new PropertyVector3State<Vector3>(hasPosition,
+                br, _br => _br.ReadVector3(), (p, s) => p.Value = s);
+            if (hasPosition) Debug.Log(Position.Value);
+
+            Debug.Log("hasRotations = " + hasRotations);
+            Rotations = new PropertyVector2State<Vector2>(hasRotations,
+                br, _br => _br.ReadVector2(), (p, s) => p.Value = s);
+            if (hasRotations) Debug.Log(Rotations.Value);
+
+            Debug.Log("hasSelectedWeaponIdKey = " + hasSelectedWeaponIdKey);
+            SelectedWeaponId = new PropertyCustomBinaryState<Weapon, int>(hasSelectedWeaponIdKey,
+                br, _br => _br.ReadInt32(), (p, s) => p.Value = enemy.WeaponsById[s]);
+            if (hasSelectedWeaponIdKey) Debug.Log(SelectedWeaponId.Value);
+
+            //Debug.Log(br.BaseStream.Position);
+
+            ContinousFire = new PropertyCustomBinaryState<bool, bool>(true,
+                br, _br => _br.ReadBoolean(), (p, s) => p.Value = s);
+            Debug.Log("ContinousFire = " + ContinousFire.Value);
+
+            Debug.Log("hasLaunchedProjectiles = " + hasLaunchedProjectiles);
+            LaunchedProjectiles = new ListState<BaseProjectile, ProjectileState>(hasLaunchedProjectiles,
+                br, _br => new ProjectileState(br, enemy),
+                ps => ps.CreateProjectile(), ps => enemy.ProjectilesById[ps.Id]);
+            //if (hasLaunchedProjectiles) Debug.Log(LaunchedProjectiles.RelativeJson.BuildString());
+
+            Debug.Log("hasSpawnedCubelings = " + hasSpawnedCubelings);
+            SpawnedCubelings = new ListState<BaseCubeling, CubelingState>(hasSpawnedCubelings,
+                br, _br => new CubelingState(br, enemy),
+                cs => cs.CreateCubeling(), ps => enemy.CubelingsById[ps.Id]);
+            //if (hasSpawnedCubelings) Debug.Log(SpawnedCubelings.RelativeJson.BuildString());
         }
 
         public PlayerState(Player player)
@@ -138,14 +203,64 @@ namespace NeonShooter.AppWarp.States
             DontLerp = true;
 
             CellsInStructure = new ListState<IVector3, CellState>(player.CellsInStructure, v => new CellState(v));
-            Position = new PropertyState<Vector3, Vector3>(player.Position, p => p, s => s.ToJson());
-            Rotations = new PropertyState<Vector2, Vector2>(player.Rotations, p => p, s => s.ToJson());
-            SelectedWeaponId = new PropertyState<Weapon, int>(player.SelectedWeapon, p => p.Id, s => new JsonValue(s));
-            ContinousFire = new PropertyState<bool, bool>(player.ContinousFire, p => p, s => new JsonValue(s));
+            Position = new PropertyVector3State<Vector3>(player.Position, p => p, s => s.ToJson());
+            Rotations = new PropertyVector2State<Vector2>(player.Rotations, p => p, s => s.ToJson());
+            SelectedWeaponId = new PropertyCustomBinaryState<Weapon, int>(
+                player.SelectedWeapon, p => p.Id, s => new JsonValue(s), (bw, i) => bw.Write(i));
+            ContinousFire = new PropertyCustomBinaryState<bool, bool>(
+                player.ContinousFire, p => p, s => new JsonValue(s), (bw, b) => bw.Write(b));
             LaunchedProjectiles = new ListState<BaseProjectile, ProjectileState>(
                 player.LaunchedProjectiles, p => new ProjectileState((Projectile)p));
             SpawnedCubelings = new ListState<BaseCubeling, CubelingState>(
                 player.SpawnedCubelings, p => new CubelingState((Cubeling)p));
+        }
+
+        public void WriteRelativeBinaryTo(BinaryWriter bw)
+        {
+            bool hasCellsInStructure = CellsInStructure.Changed;
+            bool hasPosition = Position.Changed;
+            bool hasRotations = Rotations.Changed;
+            bool hasSelectedWeaponIdKey = SelectedWeaponId.Changed;
+            bool hasLaunchedProjectiles = LaunchedProjectiles.Changed;
+            bool hasSpawnedCubelings = SpawnedCubelings.Changed;
+
+            bw.Write(hasCellsInStructure);
+            bw.Write(hasPosition);
+            bw.Write(hasRotations);
+            bw.Write(hasSelectedWeaponIdKey);
+            bw.Write(hasLaunchedProjectiles);
+            bw.Write(hasSpawnedCubelings);
+
+            bw.Write(DontLerp.HasValue && DontLerp.Value);
+
+            if (hasCellsInStructure) bw.WriteRelative(CellsInStructure);
+            if (hasPosition) bw.WriteRelative(Position);
+            if (hasRotations) bw.WriteRelative(Rotations);
+            if (hasSelectedWeaponIdKey) bw.WriteRelative(SelectedWeaponId);
+
+            bw.WriteAbsolute(ContinousFire);
+
+            if (hasLaunchedProjectiles) bw.WriteRelative(LaunchedProjectiles);
+            if (hasSpawnedCubelings)  bw.WriteRelative(SpawnedCubelings);
+        }
+
+        public void WriteAbsoluteBinaryTo(BinaryWriter bw)
+        {
+            bw.Write(true);
+            bw.Write(true);
+            bw.Write(true);
+            bw.Write(true);
+            bw.Write(true);
+            bw.Write(true);
+
+            bw.Write(DontLerp.HasValue && DontLerp.Value);
+            bw.WriteAbsolute(CellsInStructure);
+            bw.WriteAbsolute(Position);
+            bw.WriteAbsolute(Rotations);
+            bw.WriteAbsolute(SelectedWeaponId);
+            bw.WriteAbsolute(ContinousFire);
+            bw.WriteAbsolute(LaunchedProjectiles);
+            bw.WriteAbsolute(SpawnedCubelings);
         }
 
         public void ClearChanges()

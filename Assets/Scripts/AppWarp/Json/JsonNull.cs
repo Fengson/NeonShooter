@@ -1,10 +1,11 @@
-﻿namespace NeonShooter.AppWarp.Json
+﻿using System.Text;
+namespace NeonShooter.AppWarp.Json
 {
     public class JsonNull : IJsonObject
     {
-        public override string ToString()
+        public StringBuilder AppendTo(StringBuilder sb)
         {
-            return string.Empty;
+            return sb;
         }
     }
 }

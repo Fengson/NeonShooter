@@ -1,61 +1,41 @@
 ﻿using com.shephertz.app42.gaming.multiplayer.client.SimpleJSON;
-using NeonShooter.AppWarp.Json;
+using NeonShooter.Utils;
 using System;
+using System.IO;
 
 namespace NeonShooter.AppWarp.States
 {
-    public class ReadOnlyState<TPropertyOwner, TState> : IState
+    public class ReadOnlyState<TProperty, TState> : BaseReadOnlyState<TProperty, TState>
+        where TState : BinaryConvert.IBinaryWritable
     {
-        public static ReadOnlyState<TPropertyOwner, TState> FromJSONNode(
+        public ReadOnlyState(
             JSONNode jsonNode, Func<JSONNode, TState> toStateConverter,
-            Action<TPropertyOwner, TState> stateApplier)
-        {
-            var readOnlyState = new ReadOnlyState<TPropertyOwner, TState>(stateApplier);
-            if (jsonNode != null)
-            {
-                readOnlyState.Value = toStateConverter(jsonNode);
-                readOnlyState.Changed = true;
-            }
-            return readOnlyState;
-        }
-
-        Action<TPropertyOwner, TState> stateApplier;
-
-        public bool Changed { get; private set; }
-        public IJsonObject RelativeJson { get { return Changed ? AbsoluteJson : new JsonNull(); } }
-        public IJsonObject AbsoluteJson { get { return new JsonValue(Value); } }
-
-        public TState Value { get; private set; }
-
-        private ReadOnlyState()
+            Action<TProperty, TState> stateApplier)
+            : base(jsonNode, toStateConverter, stateApplier)
         {
         }
 
-        private ReadOnlyState(Action<TPropertyOwner, TState> stateApplier)
+        public ReadOnlyState(bool valueInReader,
+            BinaryReader br, Func<BinaryReader, TState> toStateReader,
+            Action<TProperty, TState> stateApplier)
+            : base(valueInReader, br, toStateReader, stateApplier)
         {
-            this.stateApplier = stateApplier;
         }
 
-        public ReadOnlyState(TState value)
+        public ReadOnlyState(TState state)
+            : base(state)
         {
-            Value = value;
-            Changed = true;
         }
 
-        public void ClearChanges()
+        public override void WriteRelativeBinaryTo(BinaryWriter bw)
         {
-            Changed = false;
+            if (Changed) WriteAbsoluteBinaryTo(bw);
         }
 
-        public void ApplyTo(object o)
+        public override void WriteAbsoluteBinaryTo(BinaryWriter bw)
         {
-            if (o is TPropertyOwner)
-                ApplyTo((TPropertyOwner)o);
-        }
-
-        public void ApplyTo(TPropertyOwner propertyOwner)
-        {
-            stateApplier(propertyOwner, Value);
+            bw.Write(Value);
         }
     }
+
 }

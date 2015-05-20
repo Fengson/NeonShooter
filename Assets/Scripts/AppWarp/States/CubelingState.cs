@@ -3,6 +3,9 @@ using NeonShooter.AppWarp.Json;
 using NeonShooter.Players;
 using NeonShooter.Players.Cube;
 using NeonShooter.Players.Weapons;
+using NeonShooter.Utils;
+using System;
+using System.IO;
 using UnityEngine;
 
 namespace NeonShooter.AppWarp.States
@@ -13,31 +16,6 @@ namespace NeonShooter.AppWarp.States
         public const string DontLerpKey = "DontLerp";
         public const string PositionKey = "Position";
         public const string RotationKey = "Rotation";
-
-        public static CubelingState FromJSONNode(JSONNode jsonNode, EnemyPlayer enemy)
-        {
-            var cubelingState = new CubelingState();
-
-            cubelingState.parentEnemy = enemy;
-
-            if (jsonNode != null)
-            {
-                cubelingState.Id = jsonNode[IdKey].AsLong();
-
-                var jsonDontLerp = jsonNode[DontLerpKey];
-                cubelingState.DontLerp = jsonDontLerp == null ? false : jsonDontLerp.AsBool;
-
-                var jsonPosition = jsonNode[PositionKey];
-                cubelingState.Position = PropertyState<Vector3, Vector3>.FromJSONNode(
-                    jsonPosition, js => js.AsVector3(), (p, s) => p.Value = s);
-
-                var jsonRotations = jsonNode[RotationKey];
-                cubelingState.Rotation = PropertyState<Quaternion, Quaternion>.FromJSONNode(
-                    jsonRotations, js => js.AsQuaternion(), (p, s) => p.Value = s);
-            }
-
-            return cubelingState;
-        }
 
         public bool Changed
         {
@@ -76,17 +54,52 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
+        public int AbsoluteBinarySize { get { return 2 + 8 + 1 + 3 * 4 + 4 * 4; } }
+
         EnemyPlayer parentEnemy;
 
         public long Id { get; private set; }
 
         public bool? DontLerp { get; private set; }
 
-        public PropertyState<Vector3, Vector3> Position { get; private set; }
-        public PropertyState<Quaternion, Quaternion> Rotation { get; private set; }
-        
-        private CubelingState()
+        public BasePropertyState<Vector3, Vector3> Position { get; private set; }
+        public BasePropertyState<Quaternion, Quaternion> Rotation { get; private set; }
+
+        public CubelingState(JSONNode jsonNode, EnemyPlayer enemy)
         {
+            parentEnemy = enemy;
+
+            if (jsonNode != null)
+            {
+                Id = jsonNode[IdKey].AsLong();
+
+                var jsonDontLerp = jsonNode[DontLerpKey];
+                DontLerp = jsonDontLerp == null ? false : jsonDontLerp.AsBool;
+
+                var jsonPosition = jsonNode[PositionKey];
+                Position = new PropertyVector3State<Vector3>(
+                    jsonPosition, js => js.AsVector3(), (p, s) => p.Value = s);
+
+                var jsonRotations = jsonNode[RotationKey];
+                Rotation = new PropertyQuaternionState<Quaternion>(
+                    jsonRotations, js => js.AsQuaternion(), (p, s) => p.Value = s);
+            }
+        }
+
+        public CubelingState(BinaryReader br, EnemyPlayer enemy)
+        {
+            parentEnemy = enemy;
+
+            bool hasPosition = br.ReadBoolean();
+            bool hasRotation = br.ReadBoolean();
+
+            Id = br.ReadInt64();
+            DontLerp = br.ReadBoolean();
+
+            Position = new PropertyVector3State<Vector3>(hasPosition,
+                br, _br => _br.ReadVector3(), (p, s) => p.Value = s);
+            Rotation = new PropertyQuaternionState<Quaternion>(hasRotation,
+                br, _br => _br.ReadQuaternion(), (p, s) => p.Value = s);
         }
 
         public CubelingState(Cubeling cubeling)
@@ -95,8 +108,33 @@ namespace NeonShooter.AppWarp.States
 
             DontLerp = true;
 
-            Position = new PropertyState<Vector3, Vector3>(cubeling.Position, p => p, s => s.ToJson());
-            Rotation = new PropertyState<Quaternion, Quaternion>(cubeling.Rotation, p => p, s => s.ToJson());
+            Position = new PropertyVector3State<Vector3>(cubeling.Position, p => p, s => s.ToJson());
+            Rotation = new PropertyQuaternionState<Quaternion>(cubeling.Rotation, p => p, s => s.ToJson());
+        }
+
+        public void WriteRelativeBinaryTo(BinaryWriter bw)
+        {
+            bool hasPosition = Position.Changed;
+            bool hasRotation = Rotation.Changed;
+
+            bw.Write(hasPosition);
+            bw.Write(hasRotation);
+
+            bw.Write(Id);
+            bw.Write(DontLerp.HasValue && DontLerp.Value);
+            if (hasPosition) bw.WriteRelative(Position);
+            if (hasRotation) bw.WriteRelative(Rotation);
+        }
+
+        public void WriteAbsoluteBinaryTo(BinaryWriter bw)
+        {
+            bw.Write(true);
+            bw.Write(true);
+
+            bw.Write(Id);
+            bw.Write(true);
+            bw.WriteAbsolute(Position);
+            bw.WriteAbsolute(Rotation);
         }
 
         public void ClearChanges()

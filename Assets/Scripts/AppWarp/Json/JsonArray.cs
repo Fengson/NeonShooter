@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using NeonShooter.Utils;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,12 +52,12 @@ namespace NeonShooter.AppWarp.Json
             objects.Clear();
         }
 
-        public override string ToString()
+        public StringBuilder AppendTo(StringBuilder sb)
         {
-            return new StringBuilder("[ ")
-                .Append(string.Join(", ", (from o in objects select o.ToString()).ToArray<string>()))
-                .Append("]")
-                .ToString();
+            return sb
+                .Append("[ ")
+                .AppendJoin(", ", objects.Cast<StringBuilderExtensions.IAppendable>())
+                .Append("]");
         }
 
         public IEnumerator<IJsonObject> GetEnumerator()
