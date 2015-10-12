@@ -112,7 +112,7 @@ namespace NeonShooter.Players.Weapons
 
         public IEnumerator destroyLaserProjectile(Player shooter, GameObject projectile)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.05f);
             Object.Destroy(projectile);
         }
 
