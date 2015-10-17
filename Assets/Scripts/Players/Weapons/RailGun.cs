@@ -35,16 +35,16 @@ namespace NeonShooter.Players.Weapons
                         enemyShot = true;
                         endingPosition = hitInfo.point;
                         shooter.enemyShot(this, target, Damage, paidCost);
-                        GameObject projectile = CreateProjectileAndApplyForce(shooter, projectileStartPosition, ProjectileColor, paidCost);
-                        shooter.StartCoroutine(hitAndDestroyProjectile(shooter, projectile, startingPosition, endingPosition));
+                        GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
+                        shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
                         break;
                     }
                 }
             }
             if (!enemyShot)
             {
-                GameObject projectile = CreateProjectileAndApplyForce(shooter, projectileStartPosition, Color.red, paidCost);
-                shooter.StartCoroutine(destroyProjectile(shooter, projectile));
+                GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
+                shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
             }
         }
 
