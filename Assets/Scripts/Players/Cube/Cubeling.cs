@@ -12,6 +12,7 @@ namespace NeonShooter.Players.Cube
 
         private Cubeling()
         {
+            // TODO: need better id-generation system?
             Id = System.DateTime.UtcNow.Ticks;
         }
 
@@ -36,7 +37,7 @@ namespace NeonShooter.Players.Cube
                 float step = Globals.CubelingSuckSpeed * Time.deltaTime;
 
                 transform.position = Vector3.MoveTowards(transform.position, TargetPlayer.transform.position, step);
-                transform.eulerAngles = new Vector3(1, 1, 1);
+                transform.eulerAngles = new Vector3(1, 1, 1); // TODO: what is this - fixed orientation 1 deg around every axis? what's the purpose?
             }
 
             Position[Access] = transform.position;

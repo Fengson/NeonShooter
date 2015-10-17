@@ -38,7 +38,7 @@ namespace NeonShooter.Utils
         public void Update(float dProgress)
         {
             if (Progress == 1) return;
-            Progress = Mathf.Min(1, Progress + dProgress);
+            Progress = Progress + dProgress;
         }
 
         protected void SetProgressNoUpdate(float progress)
