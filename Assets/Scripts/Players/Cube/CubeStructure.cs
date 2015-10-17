@@ -149,20 +149,22 @@ namespace NeonShooter.Players.Cube
         /// <param name="cellValue">If true, the cell will be created at given coords. If false, it will be erased.</param>
         public void SetCell(IVector3 position, bool cellValue)
         {
-            CubeCell oldValue = cells[position.X][position.Y][position.Z];
-            if (cellValue == (oldValue != null)) return;
+            CubeCell oldValue = cells[position.X][position.Y][position.Z]; // remember old cell
+            if (cellValue == (oldValue != null)) return; // if nothing changes
 
-            cells[position.X][position.Y][position.Z] = cellValue ? new CubeCell(this, owner, position) : null;
-            if (!cellValue) oldValue.ClearSides();
+            cells[position.X][position.Y][position.Z] = cellValue ?
+                new CubeCell(this, owner, position) : null; // create or destroy cell
+            if (!cellValue) oldValue.ClearSides(); // if cell is destroyed
 
-            int layerIndex = GetLayerIndex(position);
+            int layerIndex = GetLayerIndex(position); // adjust layer with this cell
             if (cellValue) cellLayers[layerIndex].AddCellSpace(position);
             else cellLayers[layerIndex].RemoveCellSpace(position);
 
+            // update geometry
             UpdateSides(position);
             UpdateNeighboursSides(position);
 
-            if (CellChanged != null)
+            if (CellChanged != null) // raise event
                 CellChanged(position, cellValue);
         }
 
@@ -240,11 +242,10 @@ namespace NeonShooter.Players.Cube
         {
             if (Radius == 0) return true;
             return GetLastLayer().Full;
-
         }
 
         /// <summary>
-        /// Calls the method LastLayerFull() and returns its value.
+        /// Alias for LastLayerFull().
         /// </summary>
         public bool ShouldExpand()
         {
@@ -257,12 +258,11 @@ namespace NeonShooter.Players.Cube
         public bool LastLayerEmpty()
         {
             if (Radius == 0) return false;
-            //Debug.Log(String.Format("Cells: {0}, Free: {1}", GetLastLayer().CellSpacesCount, GetLastLayer().FreeSpacesCount));
             return GetLastLayer().Empty;
         }
 
         /// <summary>
-        /// Calls the method LastLayerEmpty() and returns its value.
+        /// Alias for LastLayerEmpty().
         /// </summary>
         public bool CanShrink()
         {

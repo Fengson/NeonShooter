@@ -54,6 +54,7 @@ namespace NeonShooter.Utils
                 int hash = Prime1;
                 hash = hash * Prime2 + X.GetHashCode();
                 hash = hash * Prime2 + Y.GetHashCode();
+                hash = hash * Prime2 + Z.GetHashCode();
                 return hash;
             }
         }

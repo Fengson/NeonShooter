@@ -15,7 +15,7 @@ namespace NeonShooter.Players.Cube
         public Vector3 Translation { get; private set; }
         public Vector3 Rotation { get; private set; }
 
-        private CubeCellPlaneSide(Vector3 translation, Vector3 rotation)
+        CubeCellPlaneSide(Vector3 translation, Vector3 rotation)
         {
             Translation = translation;
             Rotation = rotation;

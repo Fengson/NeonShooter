@@ -47,12 +47,9 @@ namespace NeonShooter.Players.Cube
             }
             GameObject sideObject = CubeGameObjectMaker.CreateCubeCellPlane(side, parentStructure.Visible);
             GameObjectHelper.SetParentDontMessUpCoords(sideObject, sidesParent);
-
-            Material material = (parentStructure.Visible || Globals.Instance == null) ?
-                null : Globals.Instance.invisibleShadowCasterMaterial;
-            if (material == null) material = Globals.DefaultMaterial;
+            
             var renderer = sideObject.GetComponent<MeshRenderer>();
-            renderer.material = material;
+            renderer.material = AcquireMaterial();
 
             sides.Add(side, sideObject);
         }
@@ -97,14 +94,19 @@ namespace NeonShooter.Players.Cube
 
         public void UpdateVisible()
         {
-            Material material = (parentStructure.Visible || Globals.Instance == null) ?
-                null : Globals.Instance.invisibleShadowCasterMaterial;
-            if (material == null) material = Globals.DefaultMaterial;
+            var material = AcquireMaterial();
             foreach (var side in sides.Values)
             {
                 var renderer = side.GetComponent<MeshRenderer>();
                 renderer.material = material;
             }
+        }
+
+        Material AcquireMaterial()
+        {
+            Material material = (parentStructure.Visible || Globals.Instance == null) ?
+                Globals.DefaultMaterial : Globals.Instance.invisibleShadowCasterMaterial;
+            return material;
         }
     }
 }
