@@ -56,6 +56,8 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
+        // bool (has weapon id) + bool (has position) + bool (has rotation) + 
+        // + long (id) + bool (dont lerp) + Vector3 (position) + Quaternion (rotation)
         public int AbsoluteBinarySize { get { return 3 + 8 + 1 + 4 + 3 * 4 + 4 * 4; } }
 
         EnemyPlayer parentEnemy;

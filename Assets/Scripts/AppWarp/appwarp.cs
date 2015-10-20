@@ -80,7 +80,7 @@ namespace NeonShooter.AppWarp
                     lock (playerState)
                     {
                         var json = playerState.AbsoluteJson as JsonObject;
-                        json.Append(new JsonPair("Type", "PlayerState"));
+                        json.Append(new JsonPair("Type", "PlayerState")); // TODO: this leads to json with doubled Type : PlayerState. Is there any purpose?
                         SendPlayerState(json, playerName);
 
                         //bw.WriteAbsolute(playerState);
