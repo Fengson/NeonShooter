@@ -13,6 +13,7 @@ namespace NeonShooter.AppWarp.States
         public IJsonObject RelativeJson { get { return Position.ToJson(); } }
         public IJsonObject AbsoluteJson { get { return Position.ToJson(); } }
 
+        // Vector3 = 3 * float
         public int AbsoluteBinarySize { get { return 3 * 4; } }
 
         public IVector3 Position { get; private set; }

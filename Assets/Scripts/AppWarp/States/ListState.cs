@@ -14,10 +14,11 @@ namespace NeonShooter.AppWarp.States
             get
             {
                 return
-                    4 +
+                    4 + // int (items count)
+                    // TODO: it works only if this is list of the same-sized objects!
                     AllItems.Count > 0 ? AllItems.Count * AllItems.First().Value.AbsoluteBinarySize : 0 +
-                    4 +
-                    4;
+                    4 + // int (changed items count = 0)
+                    4; // int (removed items count = 0)
             }
         }
 

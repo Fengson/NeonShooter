@@ -44,7 +44,7 @@ namespace NeonShooter.AppWarp.States
 
                 return json;
 
-                // BINARY COMPRESSION
+                //// BINARY COMPRESSION
                 //int addedSize = AddedItems.Count == 0 ? 0 : AddedItems.First().Value.AbsoluteBinarySize;
                 //int observedSize = ObservedItems.Count == 0 ? 0 : ObservedItems.First().Value.AbsoluteBinarySize;
                 //int removedSize = RemovedItems.Count == 0 ? 0 : RemovedItems.First().Value.AbsoluteBinarySize;
