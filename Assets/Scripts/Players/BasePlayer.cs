@@ -46,6 +46,8 @@ namespace NeonShooter.Players
         public InvokableAction<PickUp> CubelingPickedUp { get; protected set; }
         public InvokableAction<PickUpAcknowledge> CubelingPickUpAcknowledged { get; protected set; }
 
+		public GameObject firstPersonCharacter;
+
         protected BasePlayer()
         {
             Access = new object();
