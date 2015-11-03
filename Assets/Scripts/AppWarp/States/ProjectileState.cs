@@ -184,7 +184,12 @@ namespace NeonShooter.AppWarp.States
             if (parentEnemy == null || !DontLerp.HasValue || DontLerp.Value == false) return null;
 
             var weapon = parentEnemy.WeaponsById[ParentWeaponId.Value];
-            var projectileObject = weapon.CreateProjectile<EnemyProjectile>(parentEnemy, Position.Value);
+            var projectileWeapon = weapon as ProjectileWeapon;
+            if (projectileWeapon == null)
+                throw new System.Exception(string.Format(
+                    "Projectile fired from non-projectile weapon! Weapon in question is: {0} (id = {1}).",
+                    weapon.GetWeaponName, weapon.Id));
+            var projectileObject = projectileWeapon.CreateProjectile<EnemyProjectile>(parentEnemy, Position.Value);
             projectileObject.transform.rotation = Rotation.Value;
             var projectile = projectileObject.GetComponent<EnemyProjectile>();
             projectile.Id = Id;

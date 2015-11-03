@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
-    public class RailGun : Weapon
+    public class RailGun : RayWeapon
     {
         public override int Id { get { return 1; } }
         public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.Scatter; } }
@@ -12,8 +12,8 @@ namespace NeonShooter.Players.Weapons
         public override float CoolDownTime { get { return 1; } }
         public override Color ProjectileColor { get { return Color.green; } }
 
-        public override float ProjectileSpeed { get { return 100.0f; } }
-        public override float ProjectileForceModifier { get { return 100.0f; } }
+        //public override float ProjectileSpeed { get { return 100.0f; } }
+        //public override float ProjectileForceModifier { get { return 100.0f; } }
         public override int LifeRequiredToOwn { get { return -100; } }
         public override string GetWeaponName { get { return "Rail Gun"; } }
 

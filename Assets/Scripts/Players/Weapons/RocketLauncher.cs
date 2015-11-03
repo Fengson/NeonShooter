@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
-    public class RocketLauncher : Weapon
+    public class RocketLauncher : ProjectileWeapon
     {
         public override int Id { get { return 2; } }
 

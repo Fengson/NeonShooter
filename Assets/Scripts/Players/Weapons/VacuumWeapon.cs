@@ -24,8 +24,8 @@ namespace NeonShooter.Players.Weapons
         /**
         suction speed in this case
         */
-        public override float ProjectileSpeed { get { return 1.0f; } }
-        public override float ProjectileForceModifier { get { return 100.0f; } }
+        //public override float ProjectileSpeed { get { return 1.0f; } }
+        //public override float ProjectileForceModifier { get { return 100.0f; } }
         public override int LifeRequiredToOwn { get { return int.MinValue; } }
         public override string GetWeaponName { get { return "Vacuum"; } }
 
