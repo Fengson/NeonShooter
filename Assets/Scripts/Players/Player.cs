@@ -115,7 +115,7 @@ namespace NeonShooter.Players
 
         void onShoot()
         {
-            if (SelectedWeapon.Value.IsCoolingDown()) return;
+            if (SelectedWeapon.Value.IsCoolingDown) return;
 
             SelectedWeapon.Value.RaiseCooldown();
 
@@ -123,7 +123,7 @@ namespace NeonShooter.Players
             CellsIncorporator.amount -= paidCost;
             if (CellsIncorporator.amount < 0) CellsIncorporator.amount = 0;
 
-            SelectedWeapon.Value.shoot(this, paidCost);
+            SelectedWeapon.Value.Shoot(this, paidCost);
             if (aimRotationSpeed > -1500)
                 aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
 
@@ -158,7 +158,7 @@ namespace NeonShooter.Players
             //}
             //GainLife(damage); // <--- TEMP
 
-            Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.getWeaponName() + " for " + damage + " damage");
+            Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.GetWeaponName + " for " + damage + " damage");
             //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
         }
 
@@ -180,7 +180,7 @@ namespace NeonShooter.Players
         bool CanUseWeapon(Weapon weapon)
         {
             return DEBUGCanUseAnyWeapon || weapon == DefaultWeapon ||
-                CellsIncorporator.amount >= weapon.lifeRequiredToOwn();
+                CellsIncorporator.amount >= weapon.LifeRequiredToOwn;
         }
 
         public void GainLife(int amount)

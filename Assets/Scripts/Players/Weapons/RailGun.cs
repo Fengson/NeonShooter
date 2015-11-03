@@ -12,12 +12,17 @@ namespace NeonShooter.Players.Weapons
         public override float CoolDownTime { get { return 1; } }
         public override Color ProjectileColor { get { return Color.green; } }
 
+        public override float ProjectileSpeed { get { return 100.0f; } }
+        public override float ProjectileForceModifier { get { return 100.0f; } }
+        public override int LifeRequiredToOwn { get { return -100; } }
+        public override string GetWeaponName { get { return "Rail Gun"; } }
+
         public RailGun()
             : base(150, 900, 35)
         {
         }
 
-        public override void shoot(Player shooter, int paidCost)
+        public override void Shoot(Player shooter, int paidCost)
         {
             shootSound(shooter);
             Vector3 startingPosition = shooter.Position.Value + new Vector3(0, 0.8f, 0);
@@ -48,29 +53,9 @@ namespace NeonShooter.Players.Weapons
             }
         }
 
-        public override float projectileSpeed()
-        {
-            return 100.0f;
-        }
-
-        public override float projectileForceModifier()
-        {
-            return 100.0f;
-        }
-
-        public override int lifeRequiredToOwn()
-        {
-            return -100;
-        }
-
         public override void shootSound(Player player)
         {
             if (player.sounds[2] != null) player.sounds[2].Play();
-        }
-
-        public override string getWeaponName()
-        {
-            return "Rail Gun";
         }
     }
 }

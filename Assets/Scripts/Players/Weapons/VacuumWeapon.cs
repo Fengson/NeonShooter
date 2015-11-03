@@ -20,6 +20,14 @@ namespace NeonShooter.Players.Weapons
         public double ConeAngleCos { get; private set; }
 
         public System.Func<float> ConeXRotation { get; set; }
+        
+        /**
+        suction speed in this case
+        */
+        public override float ProjectileSpeed { get { return 1.0f; } }
+        public override float ProjectileForceModifier { get { return 100.0f; } }
+        public override int LifeRequiredToOwn { get { return int.MinValue; } }
+        public override string GetWeaponName { get { return "Vacuum"; } }
 
         public VacuumWeapon()
             : base(50, 10, 0)
@@ -52,7 +60,7 @@ namespace NeonShooter.Players.Weapons
             vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
         }
 
-        public override void shoot(Player shooter, int paidCost)
+        public override void Shoot(Player shooter, int paidCost)
         {
             float fractionalDamage = Damage * Time.deltaTime + damageLeftover;
             int integerDamage = (int)fractionalDamage;
@@ -80,32 +88,9 @@ namespace NeonShooter.Players.Weapons
             Object.Destroy(vacuumCone);
         }
 
-        /**
-        suction speed in this case
-        */
-        public override float projectileSpeed()
-        {
-            return 1.0f;
-        }
-
-        public override float projectileForceModifier()
-        {
-            return 100.0f;
-        }
-
-        public override int lifeRequiredToOwn()
-        {
-            return int.MinValue;
-        }
-
         public override void shootSound(Player player)
         {
             if (player.sounds[1] != null) player.sounds[1].Play();
-        }
-
-        public override string getWeaponName()
-        {
-            return "Vacuum";
         }
     }
 }

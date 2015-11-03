@@ -9,14 +9,23 @@ namespace NeonShooter.Players.Weapons
         float currentCoolDownTime;
 
         public abstract int Id { get; }
+
         public abstract CubelingSpawnEffect DamageEffect { get; }
         public abstract FireType FireType { get; }
+
         public abstract float CoolDownTime { get; }
+        public bool IsCoolingDown { get { return currentCoolDownTime > 0; } }
+
         public virtual Color ProjectileColor { get { return Color.white; } }
 
         public int Damage { get; private set; }
         public float Reach { get; private set; }
         public int AmmoCost { get; private set; }
+
+        public abstract string GetWeaponName { get; }
+        public abstract float ProjectileSpeed { get; }
+        public abstract float ProjectileForceModifier { get; }
+        public abstract int LifeRequiredToOwn { get; }
 
         public Weapon(int dmg, float reach, int ammo_cost)
         {
@@ -36,33 +45,23 @@ namespace NeonShooter.Players.Weapons
             currentCoolDownTime = CoolDownTime;
         }
 
-        public bool IsCoolingDown()
-        {
-            return currentCoolDownTime > 0;
-        }
-
         public virtual void OnShootStart(BasePlayer shooter)
         {
         }
 
-        public abstract void shoot(Player shooter, int costPayed);
+        public abstract void Shoot(Player shooter, int costPayed);
 
         public virtual void OnShootEnd()
         {
         }
 
-        public abstract string getWeaponName();
 
         protected bool shootLine(Vector3 rayStart, Vector3 rayEnd, out RaycastHit hitInfo)
         {
             return Physics.Linecast(rayStart, rayEnd, out hitInfo);
         }
+        
 
-        public abstract float projectileSpeed();
-
-        public abstract float projectileForceModifier();
-
-        public abstract int lifeRequiredToOwn();
 
         public abstract void shootSound(Player player);
 
@@ -87,7 +86,7 @@ namespace NeonShooter.Players.Weapons
             var projectile = CreateProjectile<Projectile>(shooter, startingPosition, color);
             var script = projectile.GetComponent<Projectile>();
             script.CubeValue = costPaid;
-            projectile.GetComponent<ConstantForce>().force = shooter.Direction.normalized * (projectileSpeed() * projectileForceModifier());
+            projectile.GetComponent<ConstantForce>().force = shooter.Direction.normalized * (ProjectileSpeed * ProjectileForceModifier);
             projectile.GetComponent<ConstantForce>().torque = shooter.Direction * 10;
             return projectile;
         }
@@ -114,13 +113,13 @@ namespace NeonShooter.Players.Weapons
 
         public IEnumerator destroyProjectile(Player shooter, GameObject projectile)
         {
-            yield return new WaitForSeconds(Reach / projectileSpeed());
+            yield return new WaitForSeconds(Reach / ProjectileSpeed);
             DestroyProjectileNow(shooter, projectile);
         }
 
         public IEnumerator hitAndDestroyProjectile(Player shooter, GameObject projectile, Vector3 startingPosition, Vector3 endingPosition)
         {
-            yield return new WaitForSeconds((endingPosition - startingPosition).magnitude / projectileSpeed());
+            yield return new WaitForSeconds((endingPosition - startingPosition).magnitude / ProjectileSpeed);
             DestroyProjectileNow(shooter, projectile);
         }
 

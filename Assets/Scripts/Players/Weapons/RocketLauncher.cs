@@ -16,6 +16,11 @@ namespace NeonShooter.Players.Weapons
 
         public float ExplosionReach { get; private set; }
 
+        public override float ProjectileSpeed { get { return 40.0f; } }
+        public override float ProjectileForceModifier { get { return 2.5f; } }
+        public override int LifeRequiredToOwn { get { return 300; } }
+        public override string GetWeaponName { get { return "Rocket Launcher"; } }
+
         /**
         make sure to set Reach to whole number, so each flight part length is always 1
         */
@@ -25,7 +30,7 @@ namespace NeonShooter.Players.Weapons
             this.ExplosionReach = 5f;
         }
 
-        public override void shoot(Player shooter, int paidCost)
+        public override void Shoot(Player shooter, int paidCost)
         {
             shootSound(shooter);
             shooter.StartCoroutine(rocketLauncherShoot(shooter, paidCost));
@@ -47,7 +52,7 @@ namespace NeonShooter.Players.Weapons
             float step = Reach / partsNumber;
 
             int rocketId = (int)(1000 * Random.value);
-            Debug.Log("Rocket " + rocketId + " launched.\nSpeed: " + step + "point/" + projectileSpeed() + "sec. Reach point: " + finalEndingPosition);
+            Debug.Log("Rocket " + rocketId + " launched.\nSpeed: " + step + "point/" + ProjectileSpeed + "sec. Reach point: " + finalEndingPosition);
             for (int i = 0; i < partsNumber; i++)
             {
                 float beforeCalc = Time.time;
@@ -65,7 +70,7 @@ namespace NeonShooter.Players.Weapons
                     break;
                 }
                 float minusSeconds = Time.time - beforeCalc;
-                yield return new WaitForSeconds(Mathf.Max(0.1f, step / projectileSpeed() - minusSeconds));
+                yield return new WaitForSeconds(Mathf.Max(0.1f, step / ProjectileSpeed - minusSeconds));
             }
         }
 
@@ -100,30 +105,11 @@ namespace NeonShooter.Players.Weapons
             }
         }
 
-        public override float projectileSpeed()
-        {
-            return 40.0f;
-        }
-
-        public override float projectileForceModifier()
-        {
-            return 2.5f;
-        }
-
-        public override int lifeRequiredToOwn()
-        {
-            return 300;
-        }
-
         public override void shootSound(Player player)
         {
             if (player.sounds[3] != null) player.sounds[3].Play();
         }
 
-        public override string getWeaponName()
-        {
-            return "Rocket Launcher";
-        }
     }
 
 }
