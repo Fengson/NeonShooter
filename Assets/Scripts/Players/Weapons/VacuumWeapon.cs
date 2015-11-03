@@ -15,32 +15,27 @@ namespace NeonShooter.Players.Weapons
         public override FireType FireType { get { return FireType.Continous; } }
         public override float CoolDownTime { get { return 0; } }
 
-        protected float ConeAngleRadians { get; private set; }
-        public double ConeAngleCos { get; private set; }
+		private readonly double coneAngleCos;
+		private readonly double coneAngleTan;
 
         public System.Func<float> ConeXRotation { get; set; }
         
-        /**
-        suction speed in this case
-        */
-        //public override float ProjectileSpeed { get { return 1.0f; } }
-        //public override float ProjectileForceModifier { get { return 100.0f; } }
         public override int LifeRequiredToOwn { get { return int.MinValue; } }
         public override string Name { get { return "Vacuum"; } }
 
-        public VacuumWeapon(BasePlayer player)
-            : base(player, 50, 10, 0)
-        {
-            ConeAngleRadians = 10 * Mathf.Deg2Rad;
-            this.ConeAngleCos = Mathf.Cos(ConeAngleRadians);
-        }
+        public VacuumWeapon(BasePlayer player, double coneAngle = 10)
+			: base(player, 50, 10, 0)
+		{
+			this.coneAngleCos = System.Math.Cos(MathHelper.Deg2Rad(coneAngle));
+			this.coneAngleTan = System.Math.Tan(MathHelper.Deg2Rad(coneAngle));
+		}
 
         public override void OnShootStart(BasePlayer shooter)
         {
             damageLeftover = 0;
             vacuumCone = Object.Instantiate(Globals.Instance.vacuumConePrefab);
             GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.firstPersonCharacter);
-            var xyScale = Reach * Mathf.Tan(ConeAngleRadians);
+			float xyScale = (float)(Reach * coneAngleTan);
             vacuumCone.transform.localScale = new Vector3(xyScale, xyScale, Reach);
             vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
         }
@@ -56,7 +51,7 @@ namespace NeonShooter.Players.Weapons
             {
                 Vector3 heading = (target.transform.position - shooter.Position.Value).normalized;
                 double angle_cos = Vector3.Dot(heading, shooter.Direction.normalized);
-                if (angle_cos > this.ConeAngleCos)
+                if (angle_cos > this.coneAngleCos)
                 {
                     RaycastHit hit;
                     if (Physics.Raycast(shooter.Position.Value, heading, out hit, this.Reach) && hit.collider.gameObject == target)

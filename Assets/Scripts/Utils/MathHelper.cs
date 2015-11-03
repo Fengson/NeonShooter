@@ -27,5 +27,8 @@ namespace NeonShooter.Utils
                 result *= x;
             return result;
         }
+
+		public static double Deg2Rad(double x){ return x*Math.PI/180; }
+		public static double Rad2Deg(double x){ return x*180/Math.PI; }
     }
 }
