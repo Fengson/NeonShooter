@@ -17,16 +17,12 @@ namespace NeonShooter.Players.Weapons
         public int Damage { get; private set; }
         public float Reach { get; private set; }
         public int AmmoCost { get; private set; }
-        protected float ConeAngleRadians { get; private set; }
-        public double ConeAngleCos { get; private set; }
 
-        public Weapon(int dmg, float reach, float cone_angle_radians, int ammo_cost)
+        public Weapon(int dmg, float reach, int ammo_cost)
         {
             this.Damage = dmg;
             this.Reach = reach;
             this.AmmoCost = ammo_cost;
-            ConeAngleRadians = cone_angle_radians;
-            this.ConeAngleCos = Mathf.Cos(cone_angle_radians);
         }
 
         public virtual void Update()

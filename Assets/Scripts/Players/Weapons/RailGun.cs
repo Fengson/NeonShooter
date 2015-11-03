@@ -13,7 +13,7 @@ namespace NeonShooter.Players.Weapons
         public override Color ProjectileColor { get { return Color.green; } }
 
         public RailGun()
-            : base(150, 900, 0, 35)
+            : base(150, 900, 35)
         {
         }
 

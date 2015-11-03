@@ -16,11 +16,20 @@ namespace NeonShooter.Players.Weapons
         public override FireType FireType { get { return FireType.Continous; } }
         public override float CoolDownTime { get { return 0; } }
 
+        protected float ConeAngleRadians { get; private set; }
+        public double ConeAngleCos { get; private set; }
+
         public System.Func<float> ConeXRotation { get; set; }
 
-        public VacuumWeapon() : base(50, 10, 10 * Mathf.Deg2Rad, 0)
+        public VacuumWeapon()
+            : base(50, 10, 0)
         {
             ConeXRotation = () => shooter.Rotations.Value.x;
+
+            var cone_angle_radians = 10 * Mathf.Deg2Rad;
+
+            ConeAngleRadians = cone_angle_radians;
+            this.ConeAngleCos = Mathf.Cos(cone_angle_radians);
         }
 
         public override void Update()
