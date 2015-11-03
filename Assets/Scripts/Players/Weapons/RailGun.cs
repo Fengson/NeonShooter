@@ -15,7 +15,7 @@ namespace NeonShooter.Players.Weapons
         //public override float ProjectileSpeed { get { return 100.0f; } }
         //public override float ProjectileForceModifier { get { return 100.0f; } }
         public override int LifeRequiredToOwn { get { return -100; } }
-        public override string GetWeaponName { get { return "Rail Gun"; } }
+        public override string Name { get { return "Rail Gun"; } }
 
         public RailGun()
             : base(150, 900, 35)

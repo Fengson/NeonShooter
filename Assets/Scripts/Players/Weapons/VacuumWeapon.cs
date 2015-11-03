@@ -7,9 +7,9 @@ namespace NeonShooter.Players.Weapons
 {
     public class VacuumWeapon : Weapon
     {
-        private float damageLeftover;
-        private GameObject vacuumCone;
-        private BasePlayer shooter;
+        float damageLeftover;
+        GameObject vacuumCone;
+        BasePlayer shooter;
 
         public override int Id { get { return 0; } }
         public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.FlyToPlayer; } }
@@ -27,17 +27,14 @@ namespace NeonShooter.Players.Weapons
         //public override float ProjectileSpeed { get { return 1.0f; } }
         //public override float ProjectileForceModifier { get { return 100.0f; } }
         public override int LifeRequiredToOwn { get { return int.MinValue; } }
-        public override string GetWeaponName { get { return "Vacuum"; } }
+        public override string Name { get { return "Vacuum"; } }
 
         public VacuumWeapon()
             : base(50, 10, 0)
         {
             ConeXRotation = () => shooter.Rotations.Value.x;
-
-            var cone_angle_radians = 10 * Mathf.Deg2Rad;
-
-            ConeAngleRadians = cone_angle_radians;
-            this.ConeAngleCos = Mathf.Cos(cone_angle_radians);
+            ConeAngleRadians = 10 * Mathf.Deg2Rad;
+            this.ConeAngleCos = Mathf.Cos(ConeAngleRadians);
         }
 
         public override void Update()

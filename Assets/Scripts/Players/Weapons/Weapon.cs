@@ -9,6 +9,7 @@ namespace NeonShooter.Players.Weapons
         float currentCoolDownTime;
 
         public abstract int Id { get; }
+        public abstract string Name { get; }
 
         public abstract CubelingSpawnEffect DamageEffect { get; }
         public abstract FireType FireType { get; }
@@ -22,7 +23,6 @@ namespace NeonShooter.Players.Weapons
         public float Reach { get; private set; }
         public int AmmoCost { get; private set; }
 
-        public abstract string GetWeaponName { get; }
         public abstract int LifeRequiredToOwn { get; }
 
         public Weapon(int damage, float reach, int ammoCost)

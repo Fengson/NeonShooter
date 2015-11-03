@@ -72,15 +72,15 @@ namespace NeonShooter.Players
             {
                 case FireType.Single:
                     if (Input.GetMouseButtonDown(0))
-                        onShoot();
+                        OnShoot();
                     break;
                 case FireType.Continous:
                     if (Input.GetMouseButtonDown(0))
-                        onShootStart();
+                        OnShootStart();
                     if (Input.GetMouseButton(0))
-                        onShoot();
+                        OnShoot();
                     if (Input.GetMouseButtonUp(0))
-                        onShootEnd();
+                        OnShootEnd();
                     break;
             }
 
@@ -113,7 +113,7 @@ namespace NeonShooter.Players
             }
         }
 
-        void onShoot()
+        void OnShoot()
         {
             if (SelectedWeapon.Value.IsCoolingDown) return;
 
@@ -132,13 +132,13 @@ namespace NeonShooter.Players
                 ChangeWeaponToNext();
         }
 
-        void onShootStart()
+        void OnShootStart()
         {
             ContinousFire[Access] = true;
             SelectedWeapon.Value.OnShootStart(this);
         }
 
-        void onShootEnd()
+        void OnShootEnd()
         {
             ContinousFire[Access] = false;
             SelectedWeapon.Value.OnShootEnd();
@@ -158,7 +158,7 @@ namespace NeonShooter.Players
             //}
             //GainLife(damage); // <--- TEMP
 
-            Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.GetWeaponName + " for " + damage + " damage");
+            Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.Name + " for " + damage + " damage");
             //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
         }
 

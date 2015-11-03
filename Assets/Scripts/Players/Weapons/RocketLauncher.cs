@@ -19,7 +19,7 @@ namespace NeonShooter.Players.Weapons
         public override float ProjectileSpeed { get { return 40.0f; } }
         public override float ProjectileForceModifier { get { return 2.5f; } }
         public override int LifeRequiredToOwn { get { return 300; } }
-        public override string GetWeaponName { get { return "Rocket Launcher"; } }
+        public override string Name { get { return "Rocket Launcher"; } }
 
         /**
         make sure to set Reach to whole number, so each flight part length is always 1
