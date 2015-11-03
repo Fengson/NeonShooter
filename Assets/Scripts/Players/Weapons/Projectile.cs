@@ -16,6 +16,13 @@ namespace NeonShooter.Players.Weapons
         void OnTriggerEnter(Collider other)
         {
             Destroy(this.gameObject);
+
+            //TODO change this - separate enemy weapon and player weapon?
+            var player = ParentWeapon.Player as Player;
+            if (player == null)
+                throw new System.Exception("Player type expected, but got another (this should never happen).");
+
+            player.enemyShot(ParentWeapon, other.gameObject, ParentWeapon.Damage, ParentWeapon.AmmoCost);
         }
 
         protected override NotifyingProperty<Vector3> CreatePositionProperty()

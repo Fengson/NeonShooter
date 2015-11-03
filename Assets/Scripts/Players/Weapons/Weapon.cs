@@ -19,7 +19,7 @@ namespace NeonShooter.Players.Weapons
 
         public virtual Color ProjectileColor { get { return Color.white; } }
 
-        public BasePlayer { get; private set;  }
+        public BasePlayer Player { get; private set;  }
         public int Damage { get; private set; }
         public float Reach { get; private set; }
         public int AmmoCost { get; private set; }
@@ -31,7 +31,7 @@ namespace NeonShooter.Players.Weapons
             this.Damage = damage;
             this.Reach = reach;
             this.AmmoCost = ammoCost;
-            this.BasePlayer = player;
+            this.Player = player;
         }
 
         public virtual void Update()
