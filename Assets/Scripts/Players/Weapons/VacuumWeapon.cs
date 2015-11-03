@@ -29,8 +29,8 @@ namespace NeonShooter.Players.Weapons
         public override int LifeRequiredToOwn { get { return int.MinValue; } }
         public override string Name { get { return "Vacuum"; } }
 
-        public VacuumWeapon()
-            : base(50, 10, 0)
+        public VacuumWeapon(BasePlayer player)
+            : base(player, 50, 10, 0)
         {
             ConeXRotation = () => shooter.Rotations.Value.x;
             ConeAngleRadians = 10 * Mathf.Deg2Rad;

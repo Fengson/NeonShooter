@@ -8,8 +8,8 @@ namespace NeonShooter.Players.Weapons
         public abstract float ProjectileSpeed { get; }
         public abstract float ProjectileForceModifier { get; }
 
-        public ProjectileWeapon(int damage, float reach, int ammoCost)
-            : base (damage, reach, ammoCost)
+        public ProjectileWeapon(BasePlayer player, int damage, float reach, int ammoCost)
+            : base (player, damage, reach, ammoCost)
         {
         }
 
@@ -19,6 +19,7 @@ namespace NeonShooter.Players.Weapons
             if (!color.HasValue) color = ProjectileColor;
 
             var projectileObject = Object.Instantiate(Globals.Instance.projectilePrefab);
+            var projectileScript = projectileObject.GetComponent<Projectile>();
             projectileObject.transform.position = startingPosition;
             projectileObject.GetComponent<Renderer>().material.color = color.Value;
             var projectile = projectileObject.AddComponent<T>();

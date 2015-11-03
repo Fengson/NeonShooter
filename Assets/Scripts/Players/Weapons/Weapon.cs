@@ -19,17 +19,19 @@ namespace NeonShooter.Players.Weapons
 
         public virtual Color ProjectileColor { get { return Color.white; } }
 
+        public BasePlayer { get; private set;  }
         public int Damage { get; private set; }
         public float Reach { get; private set; }
         public int AmmoCost { get; private set; }
 
         public abstract int LifeRequiredToOwn { get; }
 
-        public Weapon(int damage, float reach, int ammoCost)
+        public Weapon(BasePlayer player, int damage, float reach, int ammoCost)
         {
             this.Damage = damage;
             this.Reach = reach;
             this.AmmoCost = ammoCost;
+            this.BasePlayer = player;
         }
 
         public virtual void Update()
