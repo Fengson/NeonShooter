@@ -5,8 +5,8 @@ namespace NeonShooter.Players.Weapons
 {
     public abstract class RayWeapon : Weapon
     {
-        public RayWeapon(int damage, float reach, int ammoCost)
-            : base (damage, reach, ammoCost)
+        public RayWeapon(BasePlayer player, int damage, float reach, int ammoCost)
+            : base (player, damage, reach, ammoCost)
         {
         }
 

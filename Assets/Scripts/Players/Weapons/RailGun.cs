@@ -17,8 +17,8 @@ namespace NeonShooter.Players.Weapons
         public override int LifeRequiredToOwn { get { return -100; } }
         public override string Name { get { return "Rail Gun"; } }
 
-        public RailGun()
-            : base(150, 900, 35)
+        public RailGun(BasePlayer player)
+            : base(player, 150, 900, 35)
         {
         }
 

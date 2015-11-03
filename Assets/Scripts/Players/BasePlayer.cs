@@ -52,8 +52,8 @@ namespace NeonShooter.Players
         {
             Access = new object();
 
-            DefaultWeapon = new VacuumWeapon();
-            Weapons = new List<Weapon> { DefaultWeapon, new RailGun(), new RocketLauncher() };
+            DefaultWeapon = new VacuumWeapon(this);
+            Weapons = new List<Weapon> { DefaultWeapon, new RailGun(this), new RocketLauncher(this) };
             WeaponsById = new Dictionary<int, Weapon>();
             foreach (var w in Weapons)
                 WeaponsById[w.Id] = w;

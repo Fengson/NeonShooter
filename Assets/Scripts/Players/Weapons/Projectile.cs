@@ -13,6 +13,11 @@ namespace NeonShooter.Players.Weapons
             Id = System.DateTime.UtcNow.Ticks;
         }
 
+        void OnTriggerEnter(Collider other)
+        {
+            Destroy(this.gameObject);
+        }
+
         protected override NotifyingProperty<Vector3> CreatePositionProperty()
         {
             return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
