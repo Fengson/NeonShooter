@@ -9,7 +9,6 @@ namespace NeonShooter.Players.Weapons
     {
         float damageLeftover;
         GameObject vacuumCone;
-        BasePlayer shooter;
 
         public override int Id { get { return 0; } }
         public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.FlyToPlayer; } }
@@ -32,26 +31,15 @@ namespace NeonShooter.Players.Weapons
         public VacuumWeapon(BasePlayer player)
             : base(player, 50, 10, 0)
         {
-            ConeXRotation = () => shooter.Rotations.Value.x;
             ConeAngleRadians = 10 * Mathf.Deg2Rad;
             this.ConeAngleCos = Mathf.Cos(ConeAngleRadians);
         }
 
-        public override void Update()
-        {
-            base.Update();
-
-            if (shooter != null && vacuumCone != null)
-                vacuumCone.transform.localRotation = Quaternion.Euler(ConeXRotation(), 0, 0);
-        }
-
         public override void OnShootStart(BasePlayer shooter)
         {
-            this.shooter = shooter;
-
             damageLeftover = 0;
             vacuumCone = Object.Instantiate(Globals.Instance.vacuumConePrefab);
-            GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.gameObject);
+            GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.firstPersonCharacter);
             var xyScale = Reach * Mathf.Tan(ConeAngleRadians);
             vacuumCone.transform.localScale = new Vector3(xyScale, xyScale, Reach);
             vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
