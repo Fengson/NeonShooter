@@ -69,5 +69,6 @@ namespace NeonShooter.Players.Cube
             rotationLerp.TargetValue = newValue;
             if (DontLerp) rotationLerp.Progress = 1;
         }
+
     }
 }
