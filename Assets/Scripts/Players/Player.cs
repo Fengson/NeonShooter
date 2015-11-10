@@ -164,6 +164,7 @@ namespace NeonShooter.Players
 
         void ChangeWeaponToNext()
         {
+            onShootEnd();
             var index = Weapons.IndexOf(SelectedWeapon.Value);
             for (int i = 0; i < Weapons.Count; i++)
             {
