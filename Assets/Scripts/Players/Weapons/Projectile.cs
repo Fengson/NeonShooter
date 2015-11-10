@@ -9,7 +9,6 @@ namespace NeonShooter.Players.Weapons
 
         private Projectile()
         {
-            // TODO: need better id-generation system?
             Id = System.DateTime.UtcNow.Ticks;
         }
 
