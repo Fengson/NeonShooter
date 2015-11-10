@@ -16,10 +16,11 @@ namespace NeonShooter.Players.Weapons
         {
             Destroy(this.gameObject);
 
-            //TODO change this - separate enemy weapon and player weapon?
             var player = ParentWeapon.Player as Player;
             if (player == null)
-                throw new System.Exception("Player type expected, but got another (this should never happen).");
+                throw new System.Exception(string.Format(
+                    "Neonshooter.Players.Player type expected, but got {0} (this should never happen).",
+                    ParentWeapon.Player == null ? "NULL" : ParentWeapon.Player.GetType().ToString()));
 
             player.enemyShot(ParentWeapon, other.gameObject, ParentWeapon.Damage, ParentWeapon.AmmoCost);
         }
