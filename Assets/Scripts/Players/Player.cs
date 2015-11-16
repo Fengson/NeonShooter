@@ -185,7 +185,17 @@ namespace NeonShooter.Players
 
         public void GainLife(int amount)
         {
-            CubeStructure.AppendCells(amount);
+			int oldRadius = this.CubeStructure.Radius;
+			CubeStructure.AppendCells(amount);
+			
+			int newRadius = this.CubeStructure.Radius;
+			
+			if (oldRadius != newRadius) 
+			{
+				gameObject.GetComponent<CharacterController>().height = newRadius;
+				gameObject.GetComponent<CharacterController>().radius = newRadius;
+			}
+
         }
 
         public void GetDamaged(Damage damage)
