@@ -34,10 +34,10 @@ namespace NeonShooter.Players.Weapons
         {
             damageLeftover = 0;
             vacuumCone = Object.Instantiate(Globals.Instance.vacuumConePrefab);
+			vacuumCone.transform.position = new Vector3 (0, -0.05f, 0);
             GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.firstPersonCharacter);
 			float xyScale = (float)(Reach * coneAngleTan);
             vacuumCone.transform.localScale = new Vector3(xyScale, xyScale, Reach);
-            vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
         }
 
         public override void Shoot(Player shooter, int paidCost)
