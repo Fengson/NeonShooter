@@ -181,5 +181,14 @@ namespace NeonShooter.Players
             cubeling.Spawner = this;
             return cubeling;
         }
+
+		protected override void RecalculateDirection()
+		{
+			base.RecalculateDirection();
+			var angles = firstPersonCharacter.transform.localEulerAngles;
+			angles.x = this.Direction.x;
+			firstPersonCharacter.transform.localEulerAngles = angles;
+			Debug.Log(this.Direction);
+		}
     }
 }
