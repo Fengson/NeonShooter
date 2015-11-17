@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
-    public class RocketLauncher : Weapon
+    public class RocketLauncher : ProjectileWeapon
     {
         public override int Id { get { return 2; } }
 
@@ -19,13 +19,13 @@ namespace NeonShooter.Players.Weapons
         public override float ProjectileSpeed { get { return 40.0f; } }
         public override float ProjectileForceModifier { get { return 2.5f; } }
         public override int LifeRequiredToOwn { get { return 300; } }
-        public override string GetWeaponName { get { return "Rocket Launcher"; } }
+        public override string Name { get { return "Rocket Launcher"; } }
 
         /**
         make sure to set Reach to whole number, so each flight part length is always 1
         */
-        public RocketLauncher()
-            : base((int)300, 25, 50)
+        public RocketLauncher(BasePlayer player)
+            : base(player, (int)300, 25, 50)
         {
             this.ExplosionReach = 5f;
         }
