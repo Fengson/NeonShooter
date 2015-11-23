@@ -53,12 +53,14 @@ namespace NeonShooter.Players
                 v => transform.position = v,
                 PropertyInterpolator.Vector3Lerp);
             rotationsLerp = new PropertyInterpolator<Vector2>(
-                () => new Vector2(vacuumConeXRotation, transform.localEulerAngles.y),
+                () => new Vector2(firstPersonCharacter.transform.localEulerAngles.x, transform.localEulerAngles.y),
                 v =>
                 {
                     var rot = transform.localEulerAngles;
                     transform.localEulerAngles = new Vector3(rot.x, v.y, rot.z);
-                    vacuumConeXRotation = v.x;
+					var coneRot = firstPersonCharacter.transform.localEulerAngles;
+					coneRot.x = v.x;
+					firstPersonCharacter.transform.localEulerAngles = coneRot;
                 },
                 PropertyInterpolator.Vector2LerpAngle);
         }
@@ -181,14 +183,5 @@ namespace NeonShooter.Players
             cubeling.Spawner = this;
             return cubeling;
         }
-
-		protected override void RecalculateDirection()
-		{
-			base.RecalculateDirection();
-			var angles = firstPersonCharacter.transform.localEulerAngles;
-			angles.x = this.Direction.x;
-			firstPersonCharacter.transform.localEulerAngles = angles;
-			Debug.Log(this.Direction);
-		}
     }
 }
