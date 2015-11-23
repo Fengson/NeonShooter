@@ -13,8 +13,6 @@ namespace NeonShooter.Players
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Vector2> rotationsLerp;
 
-        float vacuumConeXRotation;
-
         public string NetworkName { get; set; }
 
         public Player Player { get; set; }
@@ -23,8 +21,6 @@ namespace NeonShooter.Players
 
         private EnemyPlayer()
         {
-            ((VacuumWeapon)DefaultWeapon).ConeXRotation = () => vacuumConeXRotation;
-
             DontLerp = true;
 
             CellsInStructure = new NotifyingList<IVector3>();
