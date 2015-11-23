@@ -17,8 +17,6 @@ namespace NeonShooter.Players.Weapons
 
 		private readonly double coneAngleCos;
 		private readonly double coneAngleTan;
-
-        public System.Func<float> ConeXRotation { get; set; }
         
         public override int LifeRequiredToOwn { get { return int.MinValue; } }
         public override string Name { get { return "Vacuum"; } }
