@@ -119,13 +119,18 @@ namespace NeonShooter.Players
 
             SelectedWeapon.Value.RaiseCooldown();
 
+            //include all bonuses to ammo/damage cost
             int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
-            CellsIncorporator.amount -= paidCost;
-            if (CellsIncorporator.amount < 0) CellsIncorporator.amount = 0;
 
+            //pay with players life for shoot
+            CubeStructure.RetrieveCells(paidCost);
+
+            //shoot, for example create projectile
             SelectedWeapon.Value.Shoot(this, paidCost);
+
+            //crosshair rotation boost on shoot
             if (aimRotationSpeed > -1500)
-                aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
+                aimRotationSpeed -= Time.deltaTime * 100 * paidCost;
 
             //this will switch weapon if there's not enough ammo for current weapon
             if (!CanUseWeapon(SelectedWeapon.Value))
@@ -146,20 +151,11 @@ namespace NeonShooter.Players
 
         public void enemyShot(Weapon weapon, GameObject enemy, int damage, int paidCost)
         {
-            //damage bonus for being big
-            damage += (int)(8 * Mathf.Sqrt(paidCost));
-            //return lost cost and add what was taken
-            //CellsIncorporator.amount += damage + costPayed;
+            //deal damage to enemy
             EnemyPlayer enemyScript = enemy.GetComponent<EnemyPlayer>();
             DamageDealt.Invoke(new Damage(this, enemyScript, damage, weapon.DamageEffect), Access);
-            //if (weapon.DamageEffect == DamageEffect.Suction)
-            //{
-            //    Instantiate(cubelingPrefab, transform.localPosition + cell.Value, transform.rotation);
-            //}
-            //GainLife(damage); // <--- TEMP
 
             Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.Name + " for " + damage + " damage");
-            //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
         }
 
         void ChangeWeaponToNext()
