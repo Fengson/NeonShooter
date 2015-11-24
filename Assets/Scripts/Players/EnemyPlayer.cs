@@ -13,8 +13,6 @@ namespace NeonShooter.Players
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Vector2> rotationsLerp;
 
-        float vacuumConeXRotation;
-
         public string NetworkName { get; set; }
 
         public Player Player { get; set; }
@@ -23,8 +21,6 @@ namespace NeonShooter.Players
 
         private EnemyPlayer()
         {
-            ((VacuumWeapon)DefaultWeapon).ConeXRotation = () => vacuumConeXRotation;
-
             DontLerp = true;
 
             CellsInStructure = new NotifyingList<IVector3>();
@@ -53,12 +49,14 @@ namespace NeonShooter.Players
                 v => transform.position = v,
                 PropertyInterpolator.Vector3Lerp);
             rotationsLerp = new PropertyInterpolator<Vector2>(
-                () => new Vector2(vacuumConeXRotation, transform.localEulerAngles.y),
+                () => new Vector2(firstPersonCharacter.transform.localEulerAngles.x, transform.localEulerAngles.y),
                 v =>
                 {
                     var rot = transform.localEulerAngles;
                     transform.localEulerAngles = new Vector3(rot.x, v.y, rot.z);
-                    vacuumConeXRotation = v.x;
+					var coneRot = firstPersonCharacter.transform.localEulerAngles;
+					coneRot.x = v.x;
+					firstPersonCharacter.transform.localEulerAngles = coneRot;
                 },
                 PropertyInterpolator.Vector2LerpAngle);
         }

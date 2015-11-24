@@ -33,45 +33,20 @@ namespace NeonShooter.Players.Weapons
         public override void Shoot(Player shooter, int paidCost)
         {
             shootSound(shooter);
-            shooter.StartCoroutine(rocketLauncherShoot(shooter, paidCost));
+            rocketLauncherShoot(shooter, paidCost);
         }
 
         /**
         this method send [parts_number] scaled-length rays to simulate long lasting rocket flight
         when it hits something explode method invokes
         */
-        public IEnumerator rocketLauncherShoot(Player shooter, int paidCost)
+        public void rocketLauncherShoot(Player shooter, int paidCost)
         {
             Vector3 startingPosition = shooter.Position.Value + new Vector3(0, 0.8f, 0);
             Vector3 finalEndingPosition =
                 Vector3.MoveTowards(startingPosition, startingPosition + Reach * shooter.Direction, (int)Reach);
             GameObject projectile = CreateProjectileAndApplyForce(shooter, startingPosition + 2 * shooter.Direction, ProjectileColor, paidCost);
-            Vector3 endingPosition = startingPosition;
-            //this makes length=1 for every part of rocket projectile, so rocket speed = projectileSpeed()
-            int partsNumber = (int)(Reach / 2);
-            float step = Reach / partsNumber;
-
-            int rocketId = (int)(1000 * Random.value);
-            Debug.Log("Rocket " + rocketId + " launched.\nSpeed: " + step + "point/" + ProjectileSpeed + "sec. Reach point: " + finalEndingPosition);
-            for (int i = 0; i < partsNumber; i++)
-            {
-                float beforeCalc = Time.time;
-                startingPosition = endingPosition;
-                endingPosition = Vector3.MoveTowards(endingPosition, finalEndingPosition, step);
-
-                Debug.Log("Rocket " + rocketId + " position " + endingPosition);
-
-                RaycastHit hitInfo;
-                if (shootLine(startingPosition, endingPosition, out hitInfo))
-                {
-                    //explosion effect
-                    shooter.StartCoroutine(destroyProjectile(shooter, projectile));
-                    explodeMissile(shooter, hitInfo.point, hitInfo.collider, paidCost);
-                    break;
-                }
-                float minusSeconds = Time.time - beforeCalc;
-                yield return new WaitForSeconds(Mathf.Max(0.1f, step / ProjectileSpeed - minusSeconds));
-            }
+            Debug.Log("Rocket " + projectile + " launched.\nSpeed: " + "point/" + ProjectileSpeed + "sec. Reach point: " + finalEndingPosition);
         }
 
         void explodeMissile(Player shooter, Vector3 hitPoint, Collider directHitCollider, int paidCost)
