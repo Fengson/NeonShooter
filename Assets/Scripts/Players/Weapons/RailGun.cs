@@ -12,9 +12,7 @@ namespace NeonShooter.Players.Weapons
         public override float CoolDownTime { get { return 1; } }
         public override Color ProjectileColor { get { return Color.green; } }
 
-        //public override float ProjectileSpeed { get { return 100.0f; } }
-        //public override float ProjectileForceModifier { get { return 100.0f; } }
-        public override int LifeRequiredToOwn { get { return -100; } }
+        public override int LifeRequiredToOwn { get { return Mathf.Max(25, this.AmmoCost); } }
         public override string Name { get { return "Rail Gun"; } }
 
         public RailGun(BasePlayer player)
@@ -31,29 +29,33 @@ namespace NeonShooter.Players.Weapons
             RaycastHit hitInfo;
             bool enemyShot = false;
             var projectileStartPosition = startingPosition + 2 * shooter.Direction;
-            if (shootLine(startingPosition, endingPosition, out hitInfo))
+
+            bool airShot = !shootLine(startingPosition, endingPosition, out hitInfo);
+            if (!airShot)
             {
+                endingPosition = hitInfo.point;
                 foreach (GameObject target in appwarp.enemies.Values)
                 {
                     if (target.GetComponent<Collider>() == hitInfo.collider)
                     {
                         enemyShot = true;
-                        endingPosition = hitInfo.point;
                         shooter.enemyShot(this, target, paidCost);
-                        GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
-                        shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
                         break;
                     }
                 }
             }
-            if (!enemyShot)
+
+            //show line
+            GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
+            shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
+
+            //spawn cubelings payed at the end of line (or in front of player if airShot)
+            if (airShot)
             {
-                GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
-                shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
+                shooter.SpawnCubelingsInFrontOfPlayer(paidCost, DamageEffect);
             } else
             {
-                //TODO spawn cubelings here after shooting the wall
-                //shooter.SpawnCubelings(cubelingPositions, oldPosition, damage.Effect);
+                shooter.SpawnCubelingsInPosition(endingPosition, paidCost, DamageEffect);
             }
         }
 

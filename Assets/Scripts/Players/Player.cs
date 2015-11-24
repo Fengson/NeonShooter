@@ -260,5 +260,24 @@ namespace NeonShooter.Players
                     break;
             }
         }
+
+        public void SpawnCubelingsInFrontOfPlayer(int cubelingsAmount, CubelingSpawnEffect effect)
+        {
+            Vector3 cubelingsSpawnPosition = Position.Value+Direction*5;
+            for(int i=0;i<cubelingsAmount;i++)
+            {
+                SpawnCubeling(cubelingsSpawnPosition, Direction, effect);
+            }
+        }
+
+        public void SpawnCubelingsInPosition(Vector3 cubelingsSpawnPosition, int cubelingsAmount, CubelingSpawnEffect effect)
+        {
+            //assigning 0 velocity with cubelings spawned all in same position will take effect in random cubelings collisions, giving nice explosion effect
+            Vector3 velocity = new Vector3();
+            for(int i=0;i<cubelingsAmount;i++)
+            {
+                SpawnCubeling(cubelingsSpawnPosition, velocity, effect);
+            }
+        }
     }
 }
