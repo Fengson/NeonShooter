@@ -129,7 +129,7 @@ namespace NeonShooter.Players
             return Mathf.Max(0, structureRadius - 0.5f);
         }
 
-        protected void RecalculateDirection()
+        protected virtual void RecalculateDirection()
         {
             if (Rotations == null) return;
             Direction = Quaternion.Euler(Rotations.Value.x, Rotations.Value.y, 0) * Vector3.forward;
