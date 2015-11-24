@@ -120,7 +120,7 @@ namespace NeonShooter.Players
             SelectedWeapon.Value.RaiseCooldown();
 
             //include all bonuses to ammo/damage cost
-            int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
+            int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(Life / 100)));
 
             //pay with players life for shoot
             CubeStructure.RetrieveCells(paidCost);
