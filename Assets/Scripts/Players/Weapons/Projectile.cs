@@ -7,12 +7,12 @@ namespace NeonShooter.Players.Weapons
     {
         public int CubeValue { get; set; }
 
-        private Projectile()
+        protected Projectile()
         {
             Id = System.DateTime.UtcNow.Ticks;
         }
 
-        void OnTriggerEnter(Collider other)
+        protected virtual void OnTriggerEnter(Collider other)
         {
             Destroy(this.gameObject);
 

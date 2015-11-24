@@ -45,7 +45,7 @@ namespace NeonShooter.Players.Weapons
             Vector3 startingPosition = shooter.Position.Value + new Vector3(0, 0.8f, 0);
             Vector3 finalEndingPosition =
                 Vector3.MoveTowards(startingPosition, startingPosition + Reach * shooter.Direction, (int)Reach);
-            GameObject projectile = CreateProjectileAndApplyForce(shooter, startingPosition + 2 * shooter.Direction, ProjectileColor, paidCost);
+            GameObject projectile = CreateProjectileAndApplyForce<Rocket>(shooter, startingPosition + 2 * shooter.Direction, ProjectileColor, paidCost);
             Debug.Log("Rocket " + projectile + " launched.\nSpeed: " + "point/" + ProjectileSpeed + "sec. Reach point: " + finalEndingPosition);
         }
 
