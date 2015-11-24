@@ -119,11 +119,11 @@ namespace NeonShooter.Players
 
             SelectedWeapon.Value.RaiseCooldown();
 
-            int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
-            CellsIncorporator.amount -= paidCost;
-            if (CellsIncorporator.amount < 0) CellsIncorporator.amount = 0;
+            //int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
+            //CellsIncorporator.amount -= paidCost;
+            //if (CellsIncorporator.amount < 0) CellsIncorporator.amount = 0;
 
-            SelectedWeapon.Value.Shoot(this, paidCost);
+            SelectedWeapon.Value.Shoot(this, 1);//paidCost);
             if (aimRotationSpeed > -1500)
                 aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
 
@@ -181,7 +181,7 @@ namespace NeonShooter.Players
         bool CanUseWeapon(Weapon weapon)
         {
             return DEBUGCanUseAnyWeapon || weapon == DefaultWeapon ||
-                CellsIncorporator.amount >= weapon.LifeRequiredToOwn;
+                Life >= weapon.LifeRequiredToOwn;
         }
 
         public void GainLife(int amount)

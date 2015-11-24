@@ -75,7 +75,11 @@ namespace NeonShooter
             string weaponText = "";
             print("actual life:" + player.Life);
 
-            int life = player == null ? CellsIncorporator.amount : player.Life;
+            int life = //player == null ? CellsIncorporator.amount : 
+                player.Life; // print powyzej i tak by rzucil NullReferenceException,
+            // zamiast tego lepiej zrobic w metodzie Start() sprawdzanie, czy player jest nullem
+            // i rzucanie tam bledu czy jakiegos komunikatu ze nie moze byc nullem.
+
             float healthBarLenght = 0;
 
             if (life > 0 && life < tierRanges[0]) tier = 0;
