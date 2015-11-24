@@ -38,10 +38,18 @@ namespace NeonShooter.Players.Weapons
                 }
             }
 
+
+            //TODO change this ugly thing ;) move to separate class
+            var rocketLauncher = ParentWeapon as RocketLauncher;
+            if (rocketLauncher != null)
+            {
+                explodeMissile(player, hitPoint, other, baseDamage);
+            }
+
             player.SpawnCubelingsInPosition(hitPoint, CubeValue, ParentWeapon.DamageEffect);
         }
 
-        //TODO fix this method and move to separate class where it will be used
+        //TODO move to separate class where it will be used
         void explodeMissile(Player shooter, Vector3 hitPoint, Collider directHitCollider, int baseDamage)
         {
             var rocketLauncher = ParentWeapon as RocketLauncher;
@@ -56,6 +64,7 @@ namespace NeonShooter.Players.Weapons
             {
                 if (hitColliders[k] == directHitCollider)
                 {
+                    k++;
                     continue;
                 }
                 foreach (GameObject target in appwarp.enemies.Values)
