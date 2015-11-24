@@ -12,11 +12,11 @@ namespace NeonShooter.Players.Weapons
         public override float CoolDownTime { get { return 1; } }
         public override Color ProjectileColor { get { return Color.green; } }
 
-        public override int LifeRequiredToOwn { get { return Mathf.Max(25, this.AmmoCost); } }
+        public override int LifeRequiredToOwn { get { return 30; } }
         public override string Name { get { return "Rail Gun"; } }
 
         public RailGun(BasePlayer player)
-            : base(player, 150, 900, 35)
+            : base(player, 150, 900, 10)
         {
         }
 
@@ -39,7 +39,7 @@ namespace NeonShooter.Players.Weapons
                     if (target.GetComponent<Collider>() == hitInfo.collider)
                     {
                         enemyShot = true;
-                        shooter.enemyShot(this, target, paidCost);
+                        shooter.enemyShot(this, target, Damage*paidCost/AmmoCost);
                         break;
                     }
                 }

@@ -18,7 +18,7 @@ namespace NeonShooter.Players.Weapons
 
         public override float ProjectileSpeed { get { return 40.0f; } }
         public override float ProjectileForceModifier { get { return 2.5f; } }
-        public override int LifeRequiredToOwn { get { return Mathf.Max(100, this.AmmoCost); } }
+        public override int LifeRequiredToOwn { get { return 100; } }
         public override string Name { get { return "Rocket Launcher"; } }
 
         /**

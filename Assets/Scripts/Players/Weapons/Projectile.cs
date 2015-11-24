@@ -26,24 +26,23 @@ namespace NeonShooter.Players.Weapons
 
             bool enemyShot = false;
 
+            int baseDamage = ParentWeapon.Damage*CubeValue/ParentWeapon.AmmoCost;
+
             foreach (GameObject target in appwarp.enemies.Values)
             {
                 if (target.GetComponent<Collider>() == other)
                 {
                     enemyShot = true;
-                    player.enemyShot(ParentWeapon, other.gameObject, CubeValue);
+                    player.enemyShot(ParentWeapon, other.gameObject, baseDamage);
                     break;
                 }
             }
 
-            if (!enemyShot)
-            {
-                player.SpawnCubelingsInPosition(hitPoint, CubeValue, ParentWeapon.DamageEffect);
-            }
+            player.SpawnCubelingsInPosition(hitPoint, CubeValue, ParentWeapon.DamageEffect);
         }
 
         //TODO fix this method and move to separate class where it will be used
-        void explodeMissile(Player shooter, Vector3 hitPoint, Collider directHitCollider, int paidCost)
+        void explodeMissile(Player shooter, Vector3 hitPoint, Collider directHitCollider, int baseDamage)
         {
             var rocketLauncher = ParentWeapon as RocketLauncher;
             if (rocketLauncher == null)
@@ -55,23 +54,19 @@ namespace NeonShooter.Players.Weapons
             int k = 0;
             while (k < hitColliders.Length)
             {
+                if (hitColliders[k] == directHitCollider)
+                {
+                    continue;
+                }
                 foreach (GameObject target in appwarp.enemies.Values)
                 {
                     if (target.GetComponent<Collider>() == hitColliders[k].GetComponent<Collider>())
                     {
-                        if (hitColliders[k] == directHitCollider)
+                        float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
+                        Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
+                        if (distanceFromExplosion < rocketLauncher.ExplosionReach)
                         {
-                            shooter.enemyShot(ParentWeapon, target, paidCost);
-                        }
-                        else
-                        {
-                            float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
-                            Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
-                            if (distanceFromExplosion < rocketLauncher.ExplosionReach)
-                            {
-                                //only on clear shot we return shot cost
-                                shooter.enemyShot(ParentWeapon, target, (int)(paidCost * (1.0f - (distanceFromExplosion / rocketLauncher.ExplosionReach))));
-                            }
+                            shooter.enemyShot(ParentWeapon, target, (int)(baseDamage * (1.0f - (distanceFromExplosion / rocketLauncher.ExplosionReach))));
                         }
                         break;
                     }
