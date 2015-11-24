@@ -42,7 +42,7 @@ namespace NeonShooter.Players.Weapons
 
         public override void shootSound(Player player)
         {
-            if (player.sounds[3] != null) player.sounds[3].Play();
+            if (player.sounds[1] != null) player.sounds[1].Play();
         }
 
     }
