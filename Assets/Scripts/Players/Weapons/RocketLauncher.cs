@@ -61,7 +61,7 @@ namespace NeonShooter.Players.Weapons
                     {
                         if (hitColliders[k] == directHitCollider)
                         {
-                            shooter.enemyShot(this, target, this.Damage, paidCost);
+                            shooter.enemyShot(this, target, paidCost);
                         }
                         else
                         {
@@ -70,7 +70,7 @@ namespace NeonShooter.Players.Weapons
                             if (distanceFromExplosion < ExplosionReach)
                             {
                                 //only on clear shot we return shot cost
-                                shooter.enemyShot(this, target, (int)(Damage * (1.0f - (distanceFromExplosion / ExplosionReach))), 0);
+                                shooter.enemyShot(this, target, (int)(paidCost * (1.0f - (distanceFromExplosion / ExplosionReach))));
                             }
                         }
                         break;

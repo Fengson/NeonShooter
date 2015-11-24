@@ -39,7 +39,7 @@ namespace NeonShooter.Players.Weapons
                     {
                         enemyShot = true;
                         endingPosition = hitInfo.point;
-                        shooter.enemyShot(this, target, Damage, paidCost);
+                        shooter.enemyShot(this, target, paidCost);
                         GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
                         shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
                         break;
@@ -50,6 +50,10 @@ namespace NeonShooter.Players.Weapons
             {
                 GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
                 shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
+            } else
+            {
+                //TODO spawn cubelings here after shooting the wall
+                //shooter.SpawnCubelings(cubelingPositions, oldPosition, damage.Effect);
             }
         }
 

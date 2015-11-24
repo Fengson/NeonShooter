@@ -149,7 +149,7 @@ namespace NeonShooter.Players
             SelectedWeapon.Value.OnShootEnd();
         }
 
-        public void enemyShot(Weapon weapon, GameObject enemy, int damage, int paidCost)
+        public void enemyShot(Weapon weapon, GameObject enemy, int damage)
         {
             //deal damage to enemy
             EnemyPlayer enemyScript = enemy.GetComponent<EnemyPlayer>();
@@ -235,7 +235,7 @@ namespace NeonShooter.Players
             else CellsInStructure.Remove(position);
         }
 
-        private void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
+        public void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
         {
             foreach (IVector3 p in relativePositions)
                 SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect);

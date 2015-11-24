@@ -22,7 +22,7 @@ namespace NeonShooter.Players.Weapons
                     "Neonshooter.Players.Player type expected, but got {0} (this should never happen).",
                     ParentWeapon.Player == null ? "NULL" : ParentWeapon.Player.GetType().ToString()));
 
-            player.enemyShot(ParentWeapon, other.gameObject, ParentWeapon.Damage, ParentWeapon.AmmoCost);
+            player.enemyShot(ParentWeapon, other.gameObject, CubeValue);
         }
 
         protected override NotifyingProperty<Vector3> CreatePositionProperty()
