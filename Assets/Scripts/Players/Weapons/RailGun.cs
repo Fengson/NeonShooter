@@ -27,7 +27,6 @@ namespace NeonShooter.Players.Weapons
             Vector3 endingPosition =
                 Vector3.MoveTowards(startingPosition, startingPosition + this.Reach * shooter.Direction, (int)Reach);
             RaycastHit hitInfo;
-            bool enemyShot = false;
             var projectileStartPosition = startingPosition + 2 * shooter.Direction;
 
             bool airShot = !shootLine(startingPosition, endingPosition, out hitInfo);
@@ -38,7 +37,6 @@ namespace NeonShooter.Players.Weapons
                 {
                     if (target.GetComponent<Collider>() == hitInfo.collider)
                     {
-                        enemyShot = true;
                         shooter.enemyShot(this, target, Damage*paidCost/AmmoCost);
                         break;
                     }
