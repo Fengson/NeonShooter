@@ -54,9 +54,9 @@ namespace NeonShooter.Players
         {
             base.OnUpdate();
 
-            this.aim.transform.Rotate(new Vector3(0, 0, aimRotationSpeed * Time.deltaTime));
             if (aimRotationSpeed < -90)
                 aimRotationSpeed = Mathf.Min(-90, aimRotationSpeed + Time.deltaTime * 500);
+            this.aim.transform.Rotate(new Vector3(0, 0, aimRotationSpeed * Time.deltaTime));
 
             Position[Access] = transform.position;
 
@@ -119,8 +119,9 @@ namespace NeonShooter.Players
 
             SelectedWeapon.Value.RaiseCooldown();
 
-            //include all bonuses to ammo/damage cost
-            int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, 1.0f*Life / (6*SelectedWeapon.Value.AmmoCost)));
+            //include all bonuses to ammo/damage cost (being big = more powerful shot)
+            int paidCost = SelectedWeapon.Value.AmmoCost == 0 ? 0 :
+                (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, 1.0f*Life / (6*SelectedWeapon.Value.AmmoCost)));
 
             //pay with players life for shoot
             CubeStructure.RetrieveCells(paidCost);
@@ -128,9 +129,14 @@ namespace NeonShooter.Players
             //shoot, for example create projectile
             SelectedWeapon.Value.Shoot(this, paidCost);
 
-            //crosshair rotation boost on shoot
-            if (aimRotationSpeed > -1500)
-                aimRotationSpeed -= Time.deltaTime * 100 * paidCost;
+            //crosshair rotation boost on shoot - for continous fire and otherwise
+            if (SelectedWeapon.Value.AmmoCost==0)
+            {
+                aimRotationSpeed -= Time.deltaTime * 1000;
+            } else
+            {
+                aimRotationSpeed = Mathf.Max(-1500, aimRotationSpeed - Time.deltaTime * 2000 * paidCost);
+            }
 
             //this will switch weapon if there's not enough ammo for current weapon
             if (!CanUseWeapon(SelectedWeapon.Value))
