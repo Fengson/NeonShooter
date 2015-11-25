@@ -30,10 +30,10 @@ namespace NeonShooter.Players.Weapons
             return projectileObject;
         }
 
-        public GameObject CreateProjectileAndApplyForce(BasePlayer shooter, Vector3 startingPosition, Color color, int costPaid)
+        public GameObject CreateProjectileAndApplyForce<T>(BasePlayer shooter, Vector3 startingPosition, Color color, int costPaid) where T : Projectile
         {
-            var projectile = CreateProjectile<Projectile>(shooter, startingPosition, color);
-            var script = projectile.GetComponent<Projectile>();
+            var projectile = CreateProjectile<T>(shooter, startingPosition, color);
+            var script = projectile.GetComponent<T>();
             script.CubeValue = costPaid;
             projectile.GetComponent<ConstantForce>().force = shooter.Direction.normalized * (ProjectileSpeed * ProjectileForceModifier);
             projectile.GetComponent<ConstantForce>().torque = shooter.Direction * 10;
