@@ -7,7 +7,7 @@ namespace NeonShooter.Players.Weapons
 	public class Rocket : Projectile
 	{
 		float explosionReach;
-		protected override void OnTriggerEnter(Collider directHitCollider)
+		protected void OnTriggerEnter(Collider directHitCollider)
 		{
             Vector3 hitPoint = Position[Access];
             Destroy(this.gameObject);
