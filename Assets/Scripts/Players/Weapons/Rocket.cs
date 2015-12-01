@@ -7,7 +7,7 @@ namespace NeonShooter.Players.Weapons
 	public class Rocket : Projectile
 	{
 		float explosionReach;
-		protected void OnTriggerEnter(Collider directHitCollider)
+		protected override void OnTriggerEnter(Collider directHitCollider)
 		{
             Vector3 hitPoint = Position[Access];
             Destroy(this.gameObject);
@@ -27,6 +27,7 @@ namespace NeonShooter.Players.Weapons
             }
 
             player.SpawnCubelingsInPosition(hitPoint, CubeValue, ParentWeapon.DamageEffect);
+            base.OnTriggerEnter(directHitCollider);
 		}
 
 		private void explodeRocket(Player shooter, Vector3 hitPoint, Collider directHitCollider, float explosionReach, int dmg)

@@ -4,13 +4,17 @@ using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
-    public class Projectile : BaseProjectile
+    public abstract class Projectile : BaseProjectile
     {
         public int CubeValue { get; set; }
 
         protected Projectile()
         {
             Id = System.DateTime.UtcNow.Ticks;
+        }
+
+        protected virtual void OnTriggerEnter(Collider other)
+        {
         }
 
         protected override NotifyingProperty<Vector3> CreatePositionProperty()
