@@ -12,6 +12,7 @@ namespace NeonShooter
         public Text healthText;
         public Text ammoText;
         public Text tierText;
+        public Text weaponText;
         public Image healthBarGraphic;
         Image backgroundOfHud;
         public Image healthIco;
@@ -23,7 +24,8 @@ namespace NeonShooter
         private int tier;
         private int[] tierRanges;
 
-        private int lastReadedHealth;
+        private int lastReadHealth;
+        private Weapon lastChoosenWeapon;
 
         public GameObject playerObject;
 
@@ -54,30 +56,21 @@ namespace NeonShooter
             }
 
             actualColor = colorsOfHud[0];
-
             tier = 0;
-
             this.player = this.playerObject.GetComponent<Player>();
-
             UpdateHud();
-
         }
-
-
 
         void Update()
         {
-            if (lastReadedHealth != player.Life)
-            {
-                
+            if (lastReadHealth != player.Life || lastChoosenWeapon != player.SelectedWeapon.Value)
+            {                
                 this.UpdateHud();
-            }
-            
+            }            
         }
 
         void UpdateHud()
         {
-
             string weaponText = "";
             //print("actual life:" + player.Life);
 
@@ -106,13 +99,20 @@ namespace NeonShooter
             healthText.text = weaponText + " " + life;
 
             Weapon actualWeapon = player.SelectedWeapon.Value;
-                            
-            int shotsLeft = (int)(life / actualWeapon.AmmoCost);
+            
+            if (actualWeapon.AmmoCost == 0.0){
+                ammoText.text = "Infinite";
+            }else{    
+                int shotsLeft = (int)(life / actualWeapon.AmmoCost);
+                ammoText.text = shotsLeft.ToString();
+            }
 
-            ammoText.text = shotsLeft.ToString();
+            this.weaponText.text = actualWeapon.Name;
 
-            this.lastReadedHealth = life;
+            this.lastReadHealth = life;
+            this.lastChoosenWeapon = actualWeapon;
         }
+
         
     }
 
