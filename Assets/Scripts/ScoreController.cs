@@ -105,9 +105,11 @@ namespace NeonShooter
 
             healthText.text = weaponText + " " + life;
 
-            //Weapon actualWeapon = <Weapon>player.SelectedWeapon;
+            Weapon actualWeapon = player.SelectedWeapon.Value;
+                            
+            int shotsLeft = (int)(life / actualWeapon.AmmoCost);
 
-            //ammoText.text = player.SelectedWeapon.AmmoCost;
+            ammoText.text = shotsLeft.ToString();
 
             this.lastReadedHealth = life;
         }
