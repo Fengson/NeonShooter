@@ -164,7 +164,7 @@ namespace NeonShooter.Players
             Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.Name + " for " + damage + " damage");
         }
 
-        void ChangeWeaponToNext()
+        public void ChangeWeaponToNext()
         {
             this.OnShootEnd();
             var index = Weapons.IndexOf(SelectedWeapon.Value);

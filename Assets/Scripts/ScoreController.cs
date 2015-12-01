@@ -1,6 +1,7 @@
 ﻿using NeonShooter.Players;
 using UnityEngine;
 using UnityEngine.UI;
+using NeonShooter.Players.Weapons;
 
 namespace NeonShooter
 {
@@ -29,6 +30,11 @@ namespace NeonShooter
         void Start()
         {
             player = playerObject == null ? null : playerObject.GetComponent<Player>();
+
+            if (player == null)
+            {
+                Debug.LogWarning("Player in ScoreController is NULL");
+            }
 
             backgroundOfHud = GetComponent<Image>();
 
@@ -73,7 +79,7 @@ namespace NeonShooter
         {
 
             string weaponText = "";
-            print("actual life:" + player.Life);
+            //print("actual life:" + player.Life);
 
             int life = //player == null ? CellsIncorporator.amount : 
                 player.Life; // print powyzej i tak by rzucil NullReferenceException,
@@ -98,6 +104,10 @@ namespace NeonShooter
             backgroundOfHud.color = new Color(actualColor.r, actualColor.g, actualColor.b, actualColor.a / 2);
 
             healthText.text = weaponText + " " + life;
+
+            //Weapon actualWeapon = <Weapon>player.SelectedWeapon;
+
+            //ammoText.text = player.SelectedWeapon.AmmoCost;
 
             this.lastReadedHealth = life;
         }
