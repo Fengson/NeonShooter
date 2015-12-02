@@ -102,8 +102,15 @@ namespace NeonShooter
             
             if (actualWeapon.AmmoCost == 0.0){
                 ammoText.text = "Infinite";
-            }else{    
-                int shotsLeft = (int)(life / actualWeapon.AmmoCost);
+            } else {
+                int shotsLeft = 0;
+                int tempLife = life;
+                while (tempLife >= actualWeapon.LifeRequiredToOwn)
+                {
+                    shotsLeft++;
+                    tempLife-=actualWeapon.GetCalculatedAmmoCost(tempLife);
+                }
+
                 ammoText.text = shotsLeft.ToString();
             }
 
