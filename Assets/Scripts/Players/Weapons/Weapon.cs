@@ -28,7 +28,7 @@ namespace NeonShooter.Players.Weapons
 
         public int GetCalculatedAmmoCost(int life)
         {
-            return (int)(AmmoCost * Mathf.Max(1, 1.0f*life / (6*AmmoCost)));
+            return AmmoCost == 0 ? 0 : (int)(AmmoCost * Mathf.Max(1, 1.0f*life / (6*AmmoCost)));
         }
 
         public Weapon(BasePlayer player, int damage, float reach, int ammoCost)
