@@ -11,9 +11,10 @@ public class JumpPadScript : MonoBehaviour {
 	bool Jump = false;
 	Vector3 tmpDirection;
 	CharacterController controller = null;
+    	private bool touchingJumpPad = false;
 
-	// Use this for initialization
-	void Start() {
+    // Use this for initialization
+    void Start() {
 		CalculateMovement();
 	}
 
@@ -22,38 +23,68 @@ public class JumpPadScript : MonoBehaviour {
 		tmpDirection = moveDirection;
 	}
 
-	
-	// Update is called once per frame
-	void Update () {
-	
-		if (controller != null) 
-		{
-			if (controller.isGrounded)
-			{
-				isJumping = false;	
-			}
-			if (Jump)
-			{
-				isJumping = true;
-			}
-			if (isJumping)
-			{
-				Jump = false;
-				controller.Move(tmpDirection * Time.deltaTime);
-			}
 
-			if(tmpDirection.y>0)
-			{ 
-				tmpDirection.y -= gravity * Time.deltaTime;
-			}
-		}
-	}
+    void FixedUpdate()
+    {
 
-	void OnTriggerEnter(Collider other) {	
-		if(other.CompareTag("Player")){
-			 controller = other.gameObject.GetComponent<CharacterController>();
-			CalculateMovement();	
-			Jump = true;
-		}
-	}
+        if (controller != null)
+        {
+            if (Jump)
+            {             
+                isJumping = true;
+            }
+
+            if (controller.isGrounded)
+            {
+                // jumper mode
+                if (touchingJumpPad == false)
+                {
+                    controller = null;
+                    isJumping = false;
+                    return;
+                }
+
+                Jump = true;
+                isJumping = true;
+               
+              
+            }
+
+            if (isJumping )
+            {
+               
+                Jump = false;
+
+                controller.Move(tmpDirection * Time.deltaTime);
+
+                if (tmpDirection.y > 0)
+                {
+                    tmpDirection.y -= gravity * Time.deltaTime;
+                }
+            }
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (touchingJumpPad) return;
+        touchingJumpPad = true;
+
+        if (other.CompareTag("Player"))
+        {
+            Jump = true;
+            CalculateMovement();
+            
+     
+            controller = other.gameObject.GetComponent<CharacterController>();
+        }
+    }
+
+   
+
+    void OnTriggerExit(Collider other)
+    {
+        if (touchingJumpPad == false) return;
+        touchingJumpPad = false;     
+    }
 }

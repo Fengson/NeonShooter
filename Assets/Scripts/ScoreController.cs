@@ -1,6 +1,7 @@
 ﻿using NeonShooter.Players;
 using UnityEngine;
 using UnityEngine.UI;
+using NeonShooter.Players.Weapons;
 
 namespace NeonShooter
 {
@@ -11,6 +12,7 @@ namespace NeonShooter
         public Text healthText;
         public Text ammoText;
         public Text tierText;
+        public Text weaponText;
         public Image healthBarGraphic;
         Image backgroundOfHud;
         public Image healthIco;
@@ -22,13 +24,19 @@ namespace NeonShooter
         private int tier;
         private int[] tierRanges;
 
-        private int lastReadedHealth;
+        private int lastReadHealth;
+        private Weapon lastChoosenWeapon;
 
         public GameObject playerObject;
 
         void Start()
         {
             player = playerObject == null ? null : playerObject.GetComponent<Player>();
+
+            if (player == null)
+            {
+                Debug.LogWarning("Player in ScoreController is NULL");
+            }
 
             backgroundOfHud = GetComponent<Image>();
 
@@ -48,32 +56,23 @@ namespace NeonShooter
             }
 
             actualColor = colorsOfHud[0];
-
             tier = 0;
-
             this.player = this.playerObject.GetComponent<Player>();
-
             UpdateHud();
-
         }
-
-
 
         void Update()
         {
-            if (lastReadedHealth != player.Life)
-            {
-                
+            if (lastReadHealth != player.Life || lastChoosenWeapon != player.SelectedWeapon.Value)
+            {                
                 this.UpdateHud();
-            }
-            
+            }            
         }
 
         void UpdateHud()
         {
-
             string weaponText = "";
-            print("actual life:" + player.Life);
+            //print("actual life:" + player.Life);
 
             int life = //player == null ? CellsIncorporator.amount : 
                 player.Life; // print powyzej i tak by rzucil NullReferenceException,
@@ -99,8 +98,28 @@ namespace NeonShooter
 
             healthText.text = weaponText + " " + life;
 
-            this.lastReadedHealth = life;
+            Weapon actualWeapon = player.SelectedWeapon.Value;
+            
+            if (actualWeapon.AmmoCost == 0.0){
+                ammoText.text = "Infinite";
+            } else {
+                int shotsLeft = 0;
+                int tempLife = life;
+                while (tempLife >= actualWeapon.LifeRequiredToOwn)
+                {
+                    shotsLeft++;
+                    tempLife-=actualWeapon.GetCalculatedAmmoCost(tempLife);
+                }
+
+                ammoText.text = shotsLeft.ToString();
+            }
+
+            this.weaponText.text = actualWeapon.Name;
+
+            this.lastReadHealth = life;
+            this.lastChoosenWeapon = actualWeapon;
         }
+
         
     }
 

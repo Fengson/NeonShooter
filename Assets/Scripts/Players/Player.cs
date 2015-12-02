@@ -120,8 +120,7 @@ namespace NeonShooter.Players
             SelectedWeapon.Value.RaiseCooldown();
 
             //include all bonuses to ammo/damage cost (being big = more powerful shot)
-            int paidCost = SelectedWeapon.Value.AmmoCost == 0 ? 0 :
-                (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, 1.0f*Life / (6*SelectedWeapon.Value.AmmoCost)));
+            int paidCost = SelectedWeapon.Value.AmmoCost == 0 ? 0 : SelectedWeapon.Value.GetCalculatedAmmoCost(Life);
 
             //pay with players life for shoot
             CubeStructure.RetrieveCells(paidCost);
@@ -164,7 +163,7 @@ namespace NeonShooter.Players
             Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.Name + " for " + damage + " damage");
         }
 
-        void ChangeWeaponToNext()
+        public void ChangeWeaponToNext()
         {
             this.OnShootEnd();
             var index = Weapons.IndexOf(SelectedWeapon.Value);
