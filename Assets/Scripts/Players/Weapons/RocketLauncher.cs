@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
-    public class RocketLauncher : Weapon
+    public class RocketLauncher : ProjectileWeapon
     {
         public override int Id { get { return 2; } }
 
@@ -18,14 +18,14 @@ namespace NeonShooter.Players.Weapons
 
         public override float ProjectileSpeed { get { return 40.0f; } }
         public override float ProjectileForceModifier { get { return 2.5f; } }
-        public override int LifeRequiredToOwn { get { return 300; } }
-        public override string GetWeaponName { get { return "Rocket Launcher"; } }
+        public override int LifeRequiredToOwn { get { return 100; } }
+        public override string Name { get { return "Rocket Launcher"; } }
 
         /**
         make sure to set Reach to whole number, so each flight part length is always 1
         */
-        public RocketLauncher()
-            : base((int)300, 25, 50)
+        public RocketLauncher(BasePlayer player)
+            : base(player, (int)300, 25, 50)
         {
             this.ExplosionReach = 5f;
         }
@@ -33,81 +33,16 @@ namespace NeonShooter.Players.Weapons
         public override void Shoot(Player shooter, int paidCost)
         {
             shootSound(shooter);
-            shooter.StartCoroutine(rocketLauncherShoot(shooter, paidCost));
-        }
-
-        /**
-        this method send [parts_number] scaled-length rays to simulate long lasting rocket flight
-        when it hits something explode method invokes
-        */
-        public IEnumerator rocketLauncherShoot(Player shooter, int paidCost)
-        {
             Vector3 startingPosition = shooter.Position.Value + new Vector3(0, 0.8f, 0);
             Vector3 finalEndingPosition =
                 Vector3.MoveTowards(startingPosition, startingPosition + Reach * shooter.Direction, (int)Reach);
-            GameObject projectile = CreateProjectileAndApplyForce(shooter, startingPosition + 2 * shooter.Direction, ProjectileColor, paidCost);
-            Vector3 endingPosition = startingPosition;
-            //this makes length=1 for every part of rocket projectile, so rocket speed = projectileSpeed()
-            int partsNumber = (int)(Reach / 2);
-            float step = Reach / partsNumber;
-
-            int rocketId = (int)(1000 * Random.value);
-            Debug.Log("Rocket " + rocketId + " launched.\nSpeed: " + step + "point/" + ProjectileSpeed + "sec. Reach point: " + finalEndingPosition);
-            for (int i = 0; i < partsNumber; i++)
-            {
-                float beforeCalc = Time.time;
-                startingPosition = endingPosition;
-                endingPosition = Vector3.MoveTowards(endingPosition, finalEndingPosition, step);
-
-                Debug.Log("Rocket " + rocketId + " position " + endingPosition);
-
-                RaycastHit hitInfo;
-                if (shootLine(startingPosition, endingPosition, out hitInfo))
-                {
-                    //explosion effect
-                    shooter.StartCoroutine(destroyProjectile(shooter, projectile));
-                    explodeMissile(shooter, hitInfo.point, hitInfo.collider, paidCost);
-                    break;
-                }
-                float minusSeconds = Time.time - beforeCalc;
-                yield return new WaitForSeconds(Mathf.Max(0.1f, step / ProjectileSpeed - minusSeconds));
-            }
-        }
-
-        void explodeMissile(Player shooter, Vector3 hitPoint, Collider directHitCollider, int paidCost)
-        {
-            Collider[] hitColliders = Physics.OverlapSphere(hitPoint, ExplosionReach);
-            int k = 0;
-            while (k < hitColliders.Length)
-            {
-                foreach (GameObject target in appwarp.enemies.Values)
-                {
-                    if (target.GetComponent<Collider>() == hitColliders[k].GetComponent<Collider>())
-                    {
-                        if (hitColliders[k] == directHitCollider)
-                        {
-                            shooter.enemyShot(this, target, this.Damage, paidCost);
-                        }
-                        else
-                        {
-                            float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
-                            Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
-                            if (distanceFromExplosion < ExplosionReach)
-                            {
-                                //only on clear shot we return shot cost
-                                shooter.enemyShot(this, target, (int)(Damage * (1.0f - (distanceFromExplosion / ExplosionReach))), 0);
-                            }
-                        }
-                        break;
-                    }
-                }
-                k++;
-            }
+            GameObject projectile = CreateProjectileAndApplyForce<Rocket>(shooter, startingPosition + 2 * shooter.Direction, ProjectileColor, paidCost);
+            Debug.Log("Rocket " + projectile + " launched.\nSpeed: " + "point/" + ProjectileSpeed + "sec. Reach point: " + finalEndingPosition);
         }
 
         public override void shootSound(Player player)
         {
-            if (player.sounds[3] != null) player.sounds[3].Play();
+            if (player.sounds[1] != null) player.sounds[1].Play();
         }
 
     }

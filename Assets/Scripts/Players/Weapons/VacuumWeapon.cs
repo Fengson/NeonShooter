@@ -7,57 +7,35 @@ namespace NeonShooter.Players.Weapons
 {
     public class VacuumWeapon : Weapon
     {
-        private float damageLeftover;
-        private GameObject vacuumCone;
-        private BasePlayer shooter;
+        float damageLeftover;
+        GameObject vacuumCone;
 
         public override int Id { get { return 0; } }
         public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.FlyToPlayer; } }
         public override FireType FireType { get { return FireType.Continous; } }
         public override float CoolDownTime { get { return 0; } }
 
-        protected float ConeAngleRadians { get; private set; }
-        public double ConeAngleCos { get; private set; }
-
-        public System.Func<float> ConeXRotation { get; set; }
+		private readonly double coneAngleCos;
+		private readonly double coneAngleTan;
         
-        /**
-        suction speed in this case
-        */
-        public override float ProjectileSpeed { get { return 1.0f; } }
-        public override float ProjectileForceModifier { get { return 100.0f; } }
         public override int LifeRequiredToOwn { get { return int.MinValue; } }
-        public override string GetWeaponName { get { return "Vacuum"; } }
+        public override string Name { get { return "Vacuum"; } }
 
-        public VacuumWeapon()
-            : base(50, 10, 0)
-        {
-            ConeXRotation = () => shooter.Rotations.Value.x;
-
-            var cone_angle_radians = 10 * Mathf.Deg2Rad;
-
-            ConeAngleRadians = cone_angle_radians;
-            this.ConeAngleCos = Mathf.Cos(cone_angle_radians);
-        }
-
-        public override void Update()
-        {
-            base.Update();
-
-            if (shooter != null && vacuumCone != null)
-                vacuumCone.transform.localRotation = Quaternion.Euler(ConeXRotation(), 0, 0);
-        }
+        public VacuumWeapon(BasePlayer player, double coneAngle = 10)
+			: base(player, 50, 10, 0)
+		{
+			this.coneAngleCos = System.Math.Cos(MathHelper.Deg2Rad(coneAngle));
+			this.coneAngleTan = System.Math.Tan(MathHelper.Deg2Rad(coneAngle));
+		}
 
         public override void OnShootStart(BasePlayer shooter)
         {
-            this.shooter = shooter;
-
             damageLeftover = 0;
             vacuumCone = Object.Instantiate(Globals.Instance.vacuumConePrefab);
-            GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.gameObject);
-            var xyScale = Reach * Mathf.Tan(ConeAngleRadians);
+			vacuumCone.transform.position = new Vector3 (0, -0.05f, 0);
+            GameObjectHelper.SetParentDontMessUpCoords(vacuumCone, shooter.firstPersonCharacter);
+			float xyScale = (float)(Reach * coneAngleTan);
             vacuumCone.transform.localScale = new Vector3(xyScale, xyScale, Reach);
-            vacuumCone.transform.localRotation = Quaternion.Euler(shooter.Rotations.Value.x, 0, 0);
         }
 
         public override void Shoot(Player shooter, int paidCost)
@@ -71,13 +49,13 @@ namespace NeonShooter.Players.Weapons
             {
                 Vector3 heading = (target.transform.position - shooter.Position.Value).normalized;
                 double angle_cos = Vector3.Dot(heading, shooter.Direction.normalized);
-                if (angle_cos > this.ConeAngleCos)
+                if (angle_cos > this.coneAngleCos)
                 {
                     RaycastHit hit;
                     if (Physics.Raycast(shooter.Position.Value, heading, out hit, this.Reach) && hit.collider.gameObject == target)
                     {
                         Debug.Log(hit.collider.name);
-                        shooter.enemyShot(this, target, integerDamage, paidCost);
+                        shooter.enemyShot(this, target, integerDamage);
                     }
                 }
             }

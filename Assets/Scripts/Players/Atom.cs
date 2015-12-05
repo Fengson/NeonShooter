@@ -33,13 +33,12 @@ namespace NeonShooter.Players
 
         void Awake()
         {
-            gameObject.layer = Globals.AtomsLayer;
-
-            OnAwake();
+ 	       OnAwake();
         }
 
         protected virtual void OnAwake()
         {
+			gameObject.layer = Globals.AtomsLayer;
         }
 
         void Start()

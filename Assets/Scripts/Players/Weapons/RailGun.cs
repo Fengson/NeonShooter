@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
 {
-    public class RailGun : Weapon
+    public class RailGun : RayWeapon
     {
         public override int Id { get { return 1; } }
         public override CubelingSpawnEffect DamageEffect { get { return CubelingSpawnEffect.Scatter; } }
@@ -12,13 +12,11 @@ namespace NeonShooter.Players.Weapons
         public override float CoolDownTime { get { return 1; } }
         public override Color ProjectileColor { get { return Color.green; } }
 
-        public override float ProjectileSpeed { get { return 100.0f; } }
-        public override float ProjectileForceModifier { get { return 100.0f; } }
-        public override int LifeRequiredToOwn { get { return -100; } }
-        public override string GetWeaponName { get { return "Rail Gun"; } }
+        public override int LifeRequiredToOwn { get { return 30; } }
+        public override string Name { get { return "Rail Gun"; } }
 
-        public RailGun()
-            : base(150, 900, 35)
+        public RailGun(BasePlayer player)
+            : base(player, 150, 900, 10)
         {
         }
 
@@ -29,27 +27,33 @@ namespace NeonShooter.Players.Weapons
             Vector3 endingPosition =
                 Vector3.MoveTowards(startingPosition, startingPosition + this.Reach * shooter.Direction, (int)Reach);
             RaycastHit hitInfo;
-            bool enemyShot = false;
             var projectileStartPosition = startingPosition + 2 * shooter.Direction;
-            if (shootLine(startingPosition, endingPosition, out hitInfo))
+
+            bool airShot = !shootLine(startingPosition, endingPosition, out hitInfo);
+            if (!airShot)
             {
+                endingPosition = hitInfo.point;
                 foreach (GameObject target in appwarp.enemies.Values)
                 {
                     if (target.GetComponent<Collider>() == hitInfo.collider)
                     {
-                        enemyShot = true;
-                        endingPosition = hitInfo.point;
-                        shooter.enemyShot(this, target, Damage, paidCost);
-                        GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
-                        shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
+                        shooter.enemyShot(this, target, Damage*paidCost/AmmoCost);
                         break;
                     }
                 }
             }
-            if (!enemyShot)
+
+            //show line
+            GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
+            shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
+
+            //spawn cubelings payed at the end of line (or in front of player if airShot)
+            if (airShot)
             {
-                GameObject projectile = createLaserProjectile(shooter, projectileStartPosition, endingPosition);
-                shooter.StartCoroutine(destroyLaserProjectile(shooter, projectile));
+                shooter.SpawnCubelingsInFrontOfPlayer(paidCost, DamageEffect);
+            } else
+            {
+                shooter.SpawnCubelingsInPosition(endingPosition, paidCost, DamageEffect);
             }
         }
 

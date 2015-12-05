@@ -101,6 +101,15 @@ namespace NeonShooter
             }
         }
 
+		public static int CubelingsLayer
+		{
+			get
+			{
+				if (Instance == null) return ToFirstBit(LayerMask.NameToLayer("Default"));
+				return ToFirstBit(Instance.cubelingsLayer.value);
+			}
+		}
+
         public float enemyLerpFactor = DefaultLerpFactor;
         public float cubelingsSuckSpeed = DefaultCubelingSuckSpeed;
         public float cubelingsSpawnerPickDelay = DefaultCubelingSpawnerPickDelay;
@@ -114,5 +123,6 @@ namespace NeonShooter
 
         public LayerMask playersLayer;
         public LayerMask atomsLayer;
+		public LayerMask cubelingsLayer;
     }
 }

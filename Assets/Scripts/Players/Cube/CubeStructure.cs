@@ -156,9 +156,18 @@ namespace NeonShooter.Players.Cube
                 new CubeCell(this, owner, position) : null; // create or destroy cell
             if (!cellValue) oldValue.ClearSides(); // if cell is destroyed
 
-            int layerIndex = GetLayerIndex(position); // adjust layer with this cell
-            if (cellValue) cellLayers[layerIndex].AddCellSpace(position);
-            else cellLayers[layerIndex].RemoveCellSpace(position);
+            // adjust Count && layer with this cell
+            int layerIndex = GetLayerIndex(position);
+            if (cellValue)
+            {
+                Count++;
+                cellLayers[layerIndex].AddCellSpace(position);
+            }
+            else
+            {
+                Count--;
+                cellLayers[layerIndex].RemoveCellSpace(position);
+            }
 
             // update geometry
             UpdateSides(position);
