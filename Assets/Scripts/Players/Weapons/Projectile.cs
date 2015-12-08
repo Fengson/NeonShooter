@@ -1,4 +1,5 @@
-﻿using NeonShooter.Utils;
+﻿using NeonShooter.AppWarp;
+using NeonShooter.Utils;
 using UnityEngine;
 
 namespace NeonShooter.Players.Weapons
@@ -7,13 +8,14 @@ namespace NeonShooter.Players.Weapons
     {
         public int CubeValue { get; set; }
 
-        private Projectile()
+        protected Projectile()
         {
             Id = System.DateTime.UtcNow.Ticks;
         }
 
-        void OnTriggerEnter(Collider other)
+        protected virtual void OnTriggerEnter(Collider other)
         {
+            Vector3 hitPoint = Position[Access];
             Destroy(this.gameObject);
 
             var player = ParentWeapon.Player as Player;
@@ -22,7 +24,18 @@ namespace NeonShooter.Players.Weapons
                     "Neonshooter.Players.Player type expected, but got {0} (this should never happen).",
                     ParentWeapon.Player == null ? "NULL" : ParentWeapon.Player.GetType().ToString()));
 
-            player.enemyShot(ParentWeapon, other.gameObject, ParentWeapon.Damage, ParentWeapon.AmmoCost);
+            int baseDamage = ParentWeapon.Damage*CubeValue/ParentWeapon.AmmoCost;
+
+            foreach (GameObject target in appwarp.enemies.Values)
+            {
+                if (target.GetComponent<Collider>() == other)
+                {
+                    player.enemyShot(ParentWeapon, other.gameObject, baseDamage);
+                    break;
+                }
+            }
+
+            player.SpawnCubelingsInPosition(hitPoint, CubeValue, ParentWeapon.DamageEffect);
         }
 
         protected override NotifyingProperty<Vector3> CreatePositionProperty()
@@ -33,6 +46,11 @@ namespace NeonShooter.Players.Weapons
         protected override NotifyingProperty<Quaternion> CreateRotationProperty()
         {
             return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
+        }
+
+        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
+        {
+            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
         }
 
         protected override void OnUpdate()

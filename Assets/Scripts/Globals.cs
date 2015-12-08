@@ -8,6 +8,8 @@ namespace NeonShooter
         public const float DefaultCubelingSuckSpeed = 25;
         public const float DefaultCubelingSpawnerPickDelay = 2;
         public const float DefaultCubelingScatterVelocityFactor = 10;
+        public const double DefaultCubelingSyncInterval = 5;
+
 
         static Globals instance;
         public static Globals Instance
@@ -57,6 +59,15 @@ namespace NeonShooter
             {
                 if (Instance == null) return DefaultCubelingScatterVelocityFactor;
                 return Instance.cubelingScatterVelocityFactor;
+            }
+        }
+
+        public static double CubelingSyncInterval
+        {
+            get
+            {
+                if (Instance == null) return DefaultCubelingSyncInterval;
+                return Instance.cubelingSyncInterval;
             }
         }
 
@@ -114,6 +125,7 @@ namespace NeonShooter
         public float cubelingsSuckSpeed = DefaultCubelingSuckSpeed;
         public float cubelingsSpawnerPickDelay = DefaultCubelingSpawnerPickDelay;
         public float cubelingScatterVelocityFactor = DefaultCubelingScatterVelocityFactor;
+        public double cubelingSyncInterval = DefaultCubelingSyncInterval;
 
         public Material invisibleShadowCasterMaterial;
         public GameObject projectilePrefab;

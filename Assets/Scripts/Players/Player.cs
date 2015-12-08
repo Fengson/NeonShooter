@@ -54,9 +54,9 @@ namespace NeonShooter.Players
         {
             base.OnUpdate();
 
-            this.aim.transform.Rotate(new Vector3(0, 0, aimRotationSpeed * Time.deltaTime));
             if (aimRotationSpeed < -90)
                 aimRotationSpeed = Mathf.Min(-90, aimRotationSpeed + Time.deltaTime * 500);
+            this.aim.transform.Rotate(new Vector3(0, 0, aimRotationSpeed * Time.deltaTime));
 
             Position[Access] = transform.position;
 
@@ -131,13 +131,23 @@ namespace NeonShooter.Players
 
             SelectedWeapon.Value.RaiseCooldown();
 
-            int paidCost = (int)(SelectedWeapon.Value.AmmoCost * Mathf.Max(1, Mathf.Sqrt(CellsIncorporator.amount / 100)));
-            CellsIncorporator.amount -= paidCost;
-            if (CellsIncorporator.amount < 0) CellsIncorporator.amount = 0;
+            //include all bonuses to ammo/damage cost (being big = more powerful shot)
+            int paidCost = SelectedWeapon.Value.GetCalculatedAmmoCost(Life);
 
+            //pay with players life for shoot
+            CubeStructure.RetrieveCells(paidCost);
+
+            //shoot, for example create projectile
             SelectedWeapon.Value.Shoot(this, paidCost);
-            if (aimRotationSpeed > -1500)
-                aimRotationSpeed -= Time.deltaTime * 100 * SelectedWeapon.Value.Damage;
+
+            //crosshair rotation boost on shoot - for continous fire and otherwise
+            if (SelectedWeapon.Value.AmmoCost==0)
+            {
+                aimRotationSpeed -= Time.deltaTime * 1000;
+            } else
+            {
+                aimRotationSpeed = Mathf.Max(-1500, aimRotationSpeed - Time.deltaTime * 2000 * paidCost);
+            }
 
             //this will switch weapon if there's not enough ammo for current weapon
             if (!CanUseWeapon(SelectedWeapon.Value))
@@ -174,25 +184,16 @@ namespace NeonShooter.Players
 
         }
 
-        public void enemyShot(Weapon weapon, GameObject enemy, int damage, int paidCost)
+        public void enemyShot(Weapon weapon, GameObject enemy, int damage)
         {
-            //damage bonus for being big
-            damage += (int)(8 * Mathf.Sqrt(paidCost));
-            //return lost cost and add what was taken
-            //CellsIncorporator.amount += damage + costPayed;
+            //deal damage to enemy
             EnemyPlayer enemyScript = enemy.GetComponent<EnemyPlayer>();
             DamageDealt.Invoke(new Damage(this, enemyScript, damage, weapon.DamageEffect), Access);
-            //if (weapon.DamageEffect == DamageEffect.Suction)
-            //{
-            //    Instantiate(cubelingPrefab, transform.localPosition + cell.Value, transform.rotation);
-            //}
-            //GainLife(damage); // <--- TEMP
 
             Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.Name + " for " + damage + " damage");
-            //TODO destroy enemy cubes - available to collect, play sound and cast animations depending on weapon
         }
 
-        void ChangeWeaponToNext()
+        public void ChangeWeaponToNext()
         {
             this.OnShootEnd();
             var index = Weapons.IndexOf(SelectedWeapon.Value);
@@ -211,7 +212,7 @@ namespace NeonShooter.Players
         bool CanUseWeapon(Weapon weapon)
         {
             return DEBUGCanUseAnyWeapon || weapon == DefaultWeapon ||
-                CellsIncorporator.amount >= weapon.LifeRequiredToOwn;
+                Life >= weapon.LifeRequiredToOwn;
         }
 
         public void GainLife(int amount)
@@ -269,7 +270,7 @@ namespace NeonShooter.Players
             else CellsInStructure.Remove(position);
         }
 
-        private void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
+        public void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
         {
             foreach (IVector3 p in relativePositions)
                 SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect);
@@ -292,6 +293,25 @@ namespace NeonShooter.Players
                 case CubelingSpawnEffect.FlyToPlayer:
                     cubeling.SpawnerPickDelay = Globals.CubelingSpawnerPickDelay;
                     break;
+            }
+        }
+
+        public void SpawnCubelingsInFrontOfPlayer(int cubelingsAmount, CubelingSpawnEffect effect)
+        {
+            Vector3 cubelingsSpawnPosition = Position.Value+Direction*5;
+            for(int i=0;i<cubelingsAmount;i++)
+            {
+                SpawnCubeling(cubelingsSpawnPosition, Direction, effect);
+            }
+        }
+
+        public void SpawnCubelingsInPosition(Vector3 cubelingsSpawnPosition, int cubelingsAmount, CubelingSpawnEffect effect)
+        {
+            //assigning 0 velocity with cubelings spawned all in same position will take effect in random cubelings collisions, giving nice explosion effect
+            Vector3 velocity = new Vector3();
+            for(int i=0;i<cubelingsAmount;i++)
+            {
+                SpawnCubeling(cubelingsSpawnPosition, velocity, effect);
             }
         }
     }

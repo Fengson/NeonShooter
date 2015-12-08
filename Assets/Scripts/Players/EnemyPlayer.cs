@@ -170,11 +170,12 @@ namespace NeonShooter.Players
             leftGame = true;
         }
 
-        public EnemyCubeling SpawnCubeling(Vector3 position, Quaternion rotation)
+        public EnemyCubeling SpawnCubeling(Vector3 position, Quaternion rotation, Vector3 velocity)
         {
             GameObject cubelingObject = (GameObject)Instantiate(
                 Globals.Instance.enemyCubelingPrefab,
                 position, rotation);
+            cubelingObject.GetComponent<Rigidbody>().velocity = velocity;
             EnemyCubeling cubeling = cubelingObject.GetComponent<EnemyCubeling>();
             cubeling.Spawner = this;
             return cubeling;
