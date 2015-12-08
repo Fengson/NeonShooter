@@ -7,6 +7,7 @@ namespace NeonShooter.Players.Cube
     {
         PropertyInterpolator<Vector3> positionLerp;
         PropertyInterpolator<Quaternion> rotationLerp;
+        PropertyInterpolator<Vector3> velocityLerp;
 
         public override bool Pickable { get { return true; } }
 
@@ -27,6 +28,11 @@ namespace NeonShooter.Players.Cube
             return NotifyingProperty<Quaternion>.PublicBoth();
         }
 
+        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
+        {
+            return NotifyingProperty<Vector3>.PublicBoth();
+        }
+
         protected override void OnAwake()
         {
             base.OnAwake();
@@ -39,6 +45,10 @@ namespace NeonShooter.Players.Cube
                 () => transform.rotation,
                 q => transform.rotation = q,
                 PropertyInterpolator.QuaternionLerp);
+            velocityLerp = new PropertyInterpolator<Vector3>(
+                () => GetComponent<Rigidbody>().velocity,
+                v => GetComponent<Rigidbody>().velocity = v,
+                PropertyInterpolator.Vector3Lerp);
         }
 
         protected override void OnStart()
@@ -47,6 +57,7 @@ namespace NeonShooter.Players.Cube
 
             Position.ValueChanged += Position_ValueChanged;
             Rotation.ValueChanged += Rotation_ValueChanged;
+            Velocity.ValueChanged += Velocity_ValueChanged;
         }
 
         protected override void OnUpdate()
@@ -69,6 +80,11 @@ namespace NeonShooter.Players.Cube
             rotationLerp.TargetValue = newValue;
             if (DontLerp) rotationLerp.Progress = 1;
         }
-
+        
+        void Velocity_ValueChanged(Vector3 oldValue, Vector3 newValue)
+        {
+            velocityLerp.TargetValue = newValue;
+            if (DontLerp) velocityLerp.Progress = 1;
+        }
     }
 }

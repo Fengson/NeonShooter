@@ -16,15 +16,32 @@ namespace NeonShooter.AppWarp.States
         public const string DontLerpKey = "DontLerp";
         public const string PositionKey = "Position";
         public const string RotationKey = "Rotation";
+        public const string VelocityKey = "Velocity";
+
+        double cubelingSyncTimer;
+        DateTime cubelingSyncLastTime;
+        bool useSyncTimer;
 
         public bool Changed
         {
             get
             {
+                if (useSyncTimer)
+                {
+                    var now = DateTime.Now;
+                    var dt = (now - cubelingSyncLastTime).TotalSeconds;
+                    cubelingSyncTimer += dt;
+                    cubelingSyncLastTime = now;
+
+                    if (cubelingSyncTimer < Globals.DefaultCubelingSyncInterval) return false;
+                    
+                    cubelingSyncTimer %= Globals.DefaultCubelingSyncInterval;
+                }
                 return
                     DontLerp.HasValue ||
                     Position.Changed ||
-                    Rotation.Changed;
+                    Rotation.Changed ||
+                    Velocity.Changed;
             }
         }
 
@@ -37,6 +54,7 @@ namespace NeonShooter.AppWarp.States
                 if (DontLerp.HasValue) json.Append(new JsonPair(DontLerpKey, DontLerp.Value));
                 if (Position.Changed) json.Append(new JsonPair(PositionKey, Position.RelativeJson));
                 if (Rotation.Changed) json.Append(new JsonPair(RotationKey, Rotation.RelativeJson));
+                if (Velocity.Changed) json.Append(new JsonPair(VelocityKey, Velocity.RelativeJson));
                 return json;
             }
         }
@@ -50,6 +68,7 @@ namespace NeonShooter.AppWarp.States
                 json.Append(new JsonPair(DontLerpKey, true));
                 json.Append(new JsonPair(PositionKey, Position.AbsoluteJson));
                 json.Append(new JsonPair(RotationKey, Rotation.AbsoluteJson));
+                json.Append(new JsonPair(VelocityKey, Velocity.AbsoluteJson));
                 return json;
             }
         }
@@ -65,6 +84,7 @@ namespace NeonShooter.AppWarp.States
 
         public BasePropertyState<Vector3, Vector3> Position { get; private set; }
         public BasePropertyState<Quaternion, Quaternion> Rotation { get; private set; }
+        public BasePropertyState<Vector3, Vector3> Velocity { get; private set; }
 
         public CubelingState(JSONNode jsonNode, EnemyPlayer enemy)
         {
@@ -84,6 +104,10 @@ namespace NeonShooter.AppWarp.States
                 var jsonRotations = jsonNode[RotationKey];
                 Rotation = new PropertyQuaternionState<Quaternion>(
                     jsonRotations, js => js.AsQuaternion(), (p, s) => p.Value = s);
+
+                var jsonVelocity = jsonNode[VelocityKey];
+                Velocity = new PropertyVector3State<Vector3>(
+                    jsonVelocity, js => js.AsVector3(), (p, s) => p.Value = s);
             }
         }
 
@@ -110,7 +134,12 @@ namespace NeonShooter.AppWarp.States
             DontLerp = true;
 
             Position = new PropertyVector3State<Vector3>(cubeling.Position, p => p, s => s.ToJson());
+            Velocity = new PropertyVector3State<Vector3>(cubeling.Velocity, p => p, s => s.ToJson());
             Rotation = new PropertyQuaternionState<Quaternion>(cubeling.Rotation, p => p, s => s.ToJson());
+
+            cubelingSyncTimer = 0;
+            cubelingSyncLastTime = DateTime.Now;
+            useSyncTimer = true;
         }
 
         public void WriteRelativeBinaryTo(BinaryWriter bw)
@@ -144,6 +173,7 @@ namespace NeonShooter.AppWarp.States
 
             Position.ClearChanges();
             Rotation.ClearChanges();
+            Velocity.ClearChanges();
         }
 
         public void ApplyTo(object o)
@@ -157,13 +187,14 @@ namespace NeonShooter.AppWarp.States
             cubeling.DontLerp = DontLerp.HasValue && DontLerp.Value;
             if (Position.Changed) Position.ApplyTo(cubeling.Position);
             if (Rotation.Changed) Rotation.ApplyTo(cubeling.Rotation);
+            if (Velocity.Changed) Velocity.ApplyTo(cubeling.Velocity);
         }
 
         public EnemyCubeling CreateCubeling()
         {
             if (parentEnemy == null || !DontLerp.HasValue || DontLerp.Value == false) return null;
 
-            var cubelingObject = parentEnemy.SpawnCubeling(Position.Value, Rotation.Value);
+            var cubelingObject = parentEnemy.SpawnCubeling(Position.Value, Rotation.Value, Velocity.Value);
             var cubeling = cubelingObject.GetComponent<EnemyCubeling>();
             cubeling.Id = Id;
             parentEnemy.CubelingsById[Id] = cubeling;

@@ -25,6 +25,11 @@ namespace NeonShooter.Players.Weapons
             return NotifyingProperty<Quaternion>.PublicBoth();
         }
 
+        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
+        {
+            return NotifyingProperty<Vector3>.PublicBoth();
+        }
+
         protected override void OnAwake()
         {
             base.OnAwake();

@@ -12,7 +12,6 @@ namespace NeonShooter.Players.Cube
 
         private Cubeling()
         {
-            // TODO: need better id-generation system?
             Id = System.DateTime.UtcNow.Ticks;
         }
 
@@ -24,6 +23,11 @@ namespace NeonShooter.Players.Cube
         protected override NotifyingProperty<Quaternion> CreateRotationProperty()
         {
             return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
+        }
+
+        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
+        {
+            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
         }
 
         protected override void OnUpdate()
@@ -42,6 +46,7 @@ namespace NeonShooter.Players.Cube
 
             Position[Access] = transform.position;
             Rotation[Access] = transform.rotation;
+            Velocity[Access] = GetComponent<Rigidbody>().velocity;
         }
 
     }

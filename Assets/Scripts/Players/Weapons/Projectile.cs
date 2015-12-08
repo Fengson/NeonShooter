@@ -48,6 +48,11 @@ namespace NeonShooter.Players.Weapons
             return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
         }
 
+        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
+        {
+            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
+        }
+
         protected override void OnUpdate()
         {
             base.OnUpdate();

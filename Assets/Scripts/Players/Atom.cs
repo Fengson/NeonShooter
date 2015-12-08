@@ -18,6 +18,7 @@ namespace NeonShooter.Players
 
         public NotifyingProperty<Vector3> Position { get; private set; }
         public NotifyingProperty<Quaternion> Rotation { get; private set; }
+        public NotifyingProperty<Vector3> Velocity { get; private set; }
 
         protected Atom(long? id = null)
         {
@@ -26,10 +27,12 @@ namespace NeonShooter.Players
 
             Position = CreatePositionProperty();
             Rotation = CreateRotationProperty();
+            Velocity = CreateVelocityProperty();
         }
 
         protected abstract NotifyingProperty<Vector3> CreatePositionProperty();
         protected abstract NotifyingProperty<Quaternion> CreateRotationProperty();
+        protected abstract NotifyingProperty<Vector3> CreateVelocityProperty();
 
         void Awake()
         {
