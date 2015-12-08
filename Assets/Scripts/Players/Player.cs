@@ -204,7 +204,7 @@ namespace NeonShooter.Players
         {
             Vector3 oldPosition = transform.position;
             List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
-            SpawnCubelings(cubelingPositions, oldPosition, damage.Effect);
+            SpawnCubelings(cubelingPositions, oldPosition, damage.Effect, (EnemyPlayer)damage.Source);
         }
 
         public void AcknowledgePickUp(PickUp pickUp)
@@ -240,13 +240,13 @@ namespace NeonShooter.Players
             else CellsInStructure.Remove(position);
         }
 
-        public void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
+        public void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect, EnemyPlayer shooter = null)
         {
             foreach (IVector3 p in relativePositions)
-                SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect);
+                SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect, shooter);
         }
 
-        public void SpawnCubeling(Vector3 position, Vector3 scatterVelocity, CubelingSpawnEffect effect)
+        public void SpawnCubeling(Vector3 position, Vector3 scatterVelocity, CubelingSpawnEffect effect, EnemyPlayer shooter = null)
         {
             GameObject cubelingObject = (GameObject)Instantiate(
                 Globals.Instance.playerCubelingPrefab,
@@ -255,13 +255,14 @@ namespace NeonShooter.Players
             CubelingsById[cubeling.Id] = cubeling;
             cubeling.Spawner = this;
             SpawnedCubelings.Add(cubeling);
+			cubeling.SpawnerPickDelay = Globals.CubelingSpawnerPickDelay;
             switch (effect)
             {
                 case CubelingSpawnEffect.Scatter:
                     cubelingObject.GetComponent<Rigidbody>().velocity = scatterVelocity;
                     break;
                 case CubelingSpawnEffect.FlyToPlayer:
-                    cubeling.SpawnerPickDelay = Globals.CubelingSpawnerPickDelay;
+					cubeling.TargetPlayer = shooter;
                     break;
             }
         }
