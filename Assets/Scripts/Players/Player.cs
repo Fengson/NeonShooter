@@ -77,11 +77,23 @@ namespace NeonShooter.Players
                 case FireType.Continous:
                     if (Input.GetMouseButtonDown(0))
                         OnShootStart();
-                    if (Input.GetMouseButton(0))
+                    else if (Input.GetMouseButton(0))
                         OnShoot();
-                    if (Input.GetMouseButtonUp(0))
+                    else if (Input.GetMouseButtonUp(0))
                         OnShootEnd();
-                    break;
+					else {
+						UnityStandardAssets.ImageEffects.BloomOptimized lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.BloomOptimized>()[0];
+						if (lvScript.threshold > 0.0f) {
+							lvScript.threshold -= 0.05f;
+						}
+						
+						if (lvScript.intensity > 0.0f) {
+							lvScript.intensity -= 0.15f;
+						}
+					}
+					break;
+				default:
+					break;
             }
 
             if (Input.GetKeyDown(KeyCode.X))
@@ -130,18 +142,36 @@ namespace NeonShooter.Players
             //this will switch weapon if there's not enough ammo for current weapon
             if (!CanUseWeapon(SelectedWeapon.Value))
                 ChangeWeaponToNext();
+
+			UnityStandardAssets.ImageEffects.BloomOptimized lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.BloomOptimized>()[0];
+			if (lvScript.threshold <= 0.25f) {
+				lvScript.threshold += 0.05f;
+			}
+
+			if (lvScript.intensity <= 0.75f) {
+				lvScript.intensity += 0.15f;
+			}
         }
 
         void OnShootStart()
         {
             ContinousFire[Access] = true;
             SelectedWeapon.Value.OnShootStart(this);
+
+			UnityStandardAssets.ImageEffects.ScreenOverlay lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.ScreenOverlay>()[0];
+			lvScript.enabled = true;
+			//lvScript.threshold = 0;
+			//lvScript.intensity = 0;
         }
 
         void OnShootEnd()
         {
             ContinousFire[Access] = false;
             SelectedWeapon.Value.OnShootEnd();
+
+			UnityStandardAssets.ImageEffects.ScreenOverlay lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.ScreenOverlay>()[0];
+			lvScript.enabled = false;
+
         }
 
         public void enemyShot(Weapon weapon, GameObject enemy, int damage, int paidCost)
