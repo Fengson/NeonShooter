@@ -27,6 +27,7 @@ namespace NeonShooter.Players.Weapons
             }
 
             player.SpawnCubelingsInPosition(hitPoint, CubeValue, ParentWeapon.DamageEffect);
+            base.OnTriggerEnter(directHitCollider);
 		}
 
 		private void explodeRocket(Player shooter, Vector3 hitPoint, Collider directHitCollider, float explosionReach, int dmg)
