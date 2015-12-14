@@ -43,11 +43,23 @@ namespace NeonShooter.Players.Cube
                 transform.position = Vector3.MoveTowards(transform.position, TargetPlayer.transform.position, step);
                 transform.eulerAngles = new Vector3(1, 1, 1); // TODO: what is this - fixed orientation 1 deg around every axis? what's the purpose?
             }
+			else if(this.transform.position.y < -150){ this.respawn(); }
 
             Position[Access] = transform.position;
             Rotation[Access] = transform.rotation;
             Velocity[Access] = GetComponent<Rigidbody>().velocity;
         }
 
+		protected void respawn()
+		{
+			GameObject[] spawns = GameObject.FindGameObjectsWithTag("CubelingRespawn");
+			if(spawns.Length > 0)
+			{
+				int spawn_index = Mathf.RoundToInt(Random.Range(0.0f, spawns.Length-1.0f));
+				GameObject spawn = spawns[spawn_index];
+				this.transform.position = spawn.transform.position;
+			}
+			GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+		}
     }
 }
