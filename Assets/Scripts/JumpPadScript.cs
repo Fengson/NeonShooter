@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using NeonShooter.Players;
 
 public class JumpPadScript : MonoBehaviour {
 
@@ -75,7 +76,9 @@ public class JumpPadScript : MonoBehaviour {
             Jump = true;
             CalculateMovement();
             
-     
+			var player = other.GetComponent<Player>() as Player;
+			if (player.sounds[4] != null) player.sounds[4].Play();
+    
             controller = other.gameObject.GetComponent<CharacterController>();
         }
     }
