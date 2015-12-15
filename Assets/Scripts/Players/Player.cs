@@ -152,15 +152,16 @@ namespace NeonShooter.Players
         {
             ContinousFire[Access] = false;
             SelectedWeapon.Value.OnShootEnd();
-        }
+		}
 
-        public void enemyShot(Weapon weapon, GameObject enemy, int damage)
+		public override void GotHit(GameObject shooter, Weapon weapon, int damageValue)
+		{
+			throw new System.NotImplementedException ();
+		}
+
+		public void DealDamageTo(EnemyPlayer enemy, Weapon weapon, int damageValue)
         {
-            //deal damage to enemy
-            EnemyPlayer enemyScript = enemy.GetComponent<EnemyPlayer>();
-            DamageDealt.Invoke(new Damage(this, enemyScript, damage, weapon.DamageEffect), Access);
-
-            Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.Name + " for " + damage + " damage");
+            DamageDealt.Invoke(new Damage(this, enemy, damageValue, weapon.DamageEffect), Access);
         }
 
         public void ChangeWeaponToNext()

@@ -101,7 +101,14 @@ namespace NeonShooter.Players
             var collider = GetComponent<CapsuleCollider>();
             collider.radius = newRadius;
             collider.height = 2 * newRadius;
-        }
+		}
+
+		public override void GotHit(GameObject shooter, Weapon weapon, int damageValue)
+		{
+			var player = shooter.GetComponent<Player>();
+			player.DealDamageTo(this, weapon, damageValue);
+			Debug.Log(GetComponent<Collider>().name + " got hit with " + weapon.Name + " for " + damageValue + " damage");
+		}
 
         void CellsInStructure_ListChanged(NotifyingListEventArgs<IVector3> e)
         {
