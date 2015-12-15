@@ -16,6 +16,7 @@ namespace NeonShooter
         public Image healthBarGraphic;
         Image backgroundOfHud;
         public Image healthIco;
+        public Image weaponIco;
 
         public Sprite[] weapons;
         public Color[] colorsOfHud;
@@ -115,6 +116,21 @@ namespace NeonShooter
             }
 
             this.weaponText.text = actualWeapon.Name;
+
+            switch (actualWeapon.Name)
+            {
+                case "Vacuum":
+                    this.weaponIco.sprite = this.weapons[0];
+                    break;
+                case "Rail Gun":
+                    this.weaponIco.sprite = this.weapons[1];
+                    break;
+                case "Rocket Launcher":
+                    this.weaponIco.sprite = this.weapons[2];
+                    break;    
+                default:
+                    break;
+            }
 
             this.lastReadHealth = life;
             this.lastChoosenWeapon = actualWeapon;
