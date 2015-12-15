@@ -156,7 +156,7 @@ namespace NeonShooter.Players
 
 		public override void GotHit(GameObject shooter, Weapon weapon, int damageValue)
 		{
-			throw new System.NotImplementedException ();
+            GetDamaged(new Damage(shooter.GetComponent<BasePlayer>(), this, damageValue, CubelingSpawnEffect.Scatter));
 		}
 
 		public void DealDamageTo(EnemyPlayer enemy, Weapon weapon, int damageValue)
