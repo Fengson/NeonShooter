@@ -74,7 +74,7 @@ namespace NeonShooter.AppWarp.States
         }
 
         // bool (has position) + bool (has rotation) + long (id) + bool (dont lerp) + Vector3 (position) + Quaternion (rotation)
-        public int AbsoluteBinarySize { get { return 2 + 8 + 1 + 3 * 4 + 4 * 4; } }
+        //public int AbsoluteBinarySize { get { return 2 + 8 + 1 + 3 * 4 + 4 * 4; } }
 
         EnemyPlayer parentEnemy;
 
@@ -98,34 +98,34 @@ namespace NeonShooter.AppWarp.States
                 DontLerp = jsonDontLerp == null ? false : jsonDontLerp.AsBool;
 
                 var jsonPosition = jsonNode[PositionKey];
-                Position = new PropertyVector3State<Vector3>(
+                Position = new BasePropertyState<Vector3, Vector3>(
                     jsonPosition, js => js.AsVector3(), (p, s) => p.Value = s);
 
                 var jsonRotations = jsonNode[RotationKey];
-                Rotation = new PropertyQuaternionState<Quaternion>(
+                Rotation = new BasePropertyState<Quaternion, Quaternion>(
                     jsonRotations, js => js.AsQuaternion(), (p, s) => p.Value = s);
 
                 var jsonVelocity = jsonNode[VelocityKey];
-                Velocity = new PropertyVector3State<Vector3>(
+                Velocity = new BasePropertyState<Vector3, Vector3>(
                     jsonVelocity, js => js.AsVector3(), (p, s) => p.Value = s);
             }
         }
 
-        public CubelingState(BinaryReader br, EnemyPlayer enemy)
-        {
-            parentEnemy = enemy;
+        //public CubelingState(BinaryReader br, EnemyPlayer enemy)
+        //{
+        //    parentEnemy = enemy;
 
-            bool hasPosition = br.ReadBoolean();
-            bool hasRotation = br.ReadBoolean();
+        //    bool hasPosition = br.ReadBoolean();
+        //    bool hasRotation = br.ReadBoolean();
 
-            Id = br.ReadInt64();
-            DontLerp = br.ReadBoolean();
+        //    Id = br.ReadInt64();
+        //    DontLerp = br.ReadBoolean();
 
-            Position = new PropertyVector3State<Vector3>(hasPosition,
-                br, _br => _br.ReadVector3(), (p, s) => p.Value = s);
-            Rotation = new PropertyQuaternionState<Quaternion>(hasRotation,
-                br, _br => _br.ReadQuaternion(), (p, s) => p.Value = s);
-        }
+        //    Position = new PropertyState<Vector3, Vector3>(hasPosition,
+        //        br, _br => _br.ReadVector3(), (p, s) => p.Value = s);
+        //    Rotation = new PropertyState<Quaternion, Quaternion>(hasRotation,
+        //        br, _br => _br.ReadQuaternion(), (p, s) => p.Value = s);
+        //}
 
         public CubelingState(Cubeling cubeling)
         {
@@ -133,39 +133,39 @@ namespace NeonShooter.AppWarp.States
 
             DontLerp = true;
 
-            Position = new PropertyVector3State<Vector3>(cubeling.Position, p => p, s => s.ToJson());
-            Velocity = new PropertyVector3State<Vector3>(cubeling.Velocity, p => p, s => s.ToJson());
-            Rotation = new PropertyQuaternionState<Quaternion>(cubeling.Rotation, p => p, s => s.ToJson());
+            Position = new BasePropertyState<Vector3, Vector3>(cubeling.Position, p => p, s => s.ToJson());
+            Velocity = new BasePropertyState<Vector3, Vector3>(cubeling.Velocity, p => p, s => s.ToJson());
+            Rotation = new BasePropertyState<Quaternion, Quaternion>(cubeling.Rotation, p => p, s => s.ToJson());
 
             cubelingSyncTimer = 0;
             cubelingSyncLastTime = DateTime.Now;
             useSyncTimer = true;
         }
 
-        public void WriteRelativeBinaryTo(BinaryWriter bw)
-        {
-            bool hasPosition = Position.Changed;
-            bool hasRotation = Rotation.Changed;
+        //public void WriteRelativeBinaryTo(BinaryWriter bw)
+        //{
+        //    bool hasPosition = Position.Changed;
+        //    bool hasRotation = Rotation.Changed;
 
-            bw.Write(hasPosition);
-            bw.Write(hasRotation);
+        //    bw.Write(hasPosition);
+        //    bw.Write(hasRotation);
 
-            bw.Write(Id);
-            bw.Write(DontLerp.HasValue && DontLerp.Value);
-            if (hasPosition) bw.WriteRelative(Position);
-            if (hasRotation) bw.WriteRelative(Rotation);
-        }
+        //    bw.Write(Id);
+        //    bw.Write(DontLerp.HasValue && DontLerp.Value);
+        //    if (hasPosition) bw.WriteRelative(Position);
+        //    if (hasRotation) bw.WriteRelative(Rotation);
+        //}
 
-        public void WriteAbsoluteBinaryTo(BinaryWriter bw)
-        {
-            bw.Write(true);
-            bw.Write(true);
+        //public void WriteAbsoluteBinaryTo(BinaryWriter bw)
+        //{
+        //    bw.Write(true);
+        //    bw.Write(true);
 
-            bw.Write(Id);
-            bw.Write(true);
-            bw.WriteAbsolute(Position);
-            bw.WriteAbsolute(Rotation);
-        }
+        //    bw.Write(Id);
+        //    bw.Write(true);
+        //    bw.WriteAbsolute(Position);
+        //    bw.WriteAbsolute(Rotation);
+        //}
 
         public void ClearChanges()
         {

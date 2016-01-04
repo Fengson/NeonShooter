@@ -9,10 +9,10 @@ namespace NeonShooter.AppWarp.States
         IJsonObject RelativeJson { get; }
         IJsonObject AbsoluteJson { get; }
 
-        int AbsoluteBinarySize { get; }
+        //int AbsoluteBinarySize { get; }
 
-        void WriteRelativeBinaryTo(BinaryWriter bw);
-        void WriteAbsoluteBinaryTo(BinaryWriter bw);
+        //void WriteRelativeBinaryTo(BinaryWriter bw);
+        //void WriteAbsoluteBinaryTo(BinaryWriter bw);
 
         void ClearChanges();
         void ApplyTo(object o);

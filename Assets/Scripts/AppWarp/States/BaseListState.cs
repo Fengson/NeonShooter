@@ -8,7 +8,7 @@ using System;
 
 namespace NeonShooter.AppWarp.States
 {
-    public abstract class BaseListState<TList, TState> : IState
+    public class BaseListState<TList, TState> : IState
         where TState : class, IState
     {
         public const string AddedKey = "Added";
@@ -81,7 +81,7 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
-        public abstract int AbsoluteBinarySize { get; }
+        //public abstract int AbsoluteBinarySize { get; }
 
         private Func<TList, TState> stateFactory;
 
@@ -98,7 +98,7 @@ namespace NeonShooter.AppWarp.States
             RemovedItems = new Dictionary<TList, TState>();
         }
 
-        protected BaseListState(JSONNode jsonNode, Func<JSONNode, TState> toStateConverter,
+        public BaseListState(JSONNode jsonNode, Func<JSONNode, TState> toStateConverter,
             Func<TState, TList> objectCreator, Func<TState, TList> objectSelector)
             : this()
         //protected BaseListState(JSONNode jsonNode, Func<BinaryReader, TState> toStateReader,
@@ -150,36 +150,36 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
-        protected BaseListState(bool valueInReader, BinaryReader br, Func<BinaryReader, TState> toStateReader,
-            Func<TState, TList> objectCreator, Func<TState, TList> objectSelector)
-            : this()
-        {
-            if (valueInReader)
-            {
-                int count = br.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    var item = toStateReader(br);
-                    AddedItems[objectCreator(item)] = item;
-                }
+        //protected BaseListState(bool valueInReader, BinaryReader br, Func<BinaryReader, TState> toStateReader,
+        //    Func<TState, TList> objectCreator, Func<TState, TList> objectSelector)
+        //    : this()
+        //{
+        //    if (valueInReader)
+        //    {
+        //        int count = br.ReadInt32();
+        //        for (int i = 0; i < count; i++)
+        //        {
+        //            var item = toStateReader(br);
+        //            AddedItems[objectCreator(item)] = item;
+        //        }
 
-                count = br.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    var item = toStateReader(br);
-                    ObservedItems[objectSelector(item)] = item;
-                }
+        //        count = br.ReadInt32();
+        //        for (int i = 0; i < count; i++)
+        //        {
+        //            var item = toStateReader(br);
+        //            ObservedItems[objectSelector(item)] = item;
+        //        }
 
-                count = br.ReadInt32();
-                for (int i = 0; i < count; i++)
-                {
-                    var item = toStateReader(br);
-                    RemovedItems[objectSelector(item)] = item;
-                }
-            }
-        }
+        //        count = br.ReadInt32();
+        //        for (int i = 0; i < count; i++)
+        //        {
+        //            var item = toStateReader(br);
+        //            RemovedItems[objectSelector(item)] = item;
+        //        }
+        //    }
+        //}
 
-        protected BaseListState(INotifyingList<TList> list, Func<TList, TState> stateFactory)
+        public BaseListState(INotifyingList<TList> list, Func<TList, TState> stateFactory)
             : this()
         {
             this.stateFactory = stateFactory;
@@ -189,8 +189,8 @@ namespace NeonShooter.AppWarp.States
             list.ListChanged += list_ListChanged;
         }
 
-        public abstract void WriteRelativeBinaryTo(BinaryWriter bw);
-        public abstract void WriteAbsoluteBinaryTo(BinaryWriter bw);
+        //public abstract void WriteRelativeBinaryTo(BinaryWriter bw);
+        //public abstract void WriteAbsoluteBinaryTo(BinaryWriter bw);
 
         public void ClearChanges()
         {

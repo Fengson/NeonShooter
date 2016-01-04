@@ -5,7 +5,7 @@ using System.IO;
 
 namespace NeonShooter.AppWarp.States
 {
-    public abstract class BaseReadOnlyState<TPropertyOwner, TState> : IState
+    public class BaseReadOnlyState<TPropertyOwner, TState> : IState
     {
         Action<TPropertyOwner, TState> stateApplier;
 
@@ -13,7 +13,7 @@ namespace NeonShooter.AppWarp.States
         public IJsonObject RelativeJson { get { return Changed ? AbsoluteJson : new JsonNull(); } }
         public IJsonObject AbsoluteJson { get { return new JsonValue(Value); } }
 
-        public int AbsoluteBinarySize { get { throw new NotImplementedException(); } }
+        //public int AbsoluteBinarySize { get { throw new NotImplementedException(); } }
 
         public TState Value { get; private set; }
 
@@ -22,7 +22,7 @@ namespace NeonShooter.AppWarp.States
             this.stateApplier = stateApplier;
         }
 
-        protected BaseReadOnlyState(
+        public BaseReadOnlyState(
             JSONNode jsonNode, Func<JSONNode, TState> toStateConverter,
             Action<TPropertyOwner, TState> stateApplier)
             : this(stateApplier)
@@ -34,26 +34,26 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
-        protected BaseReadOnlyState(bool valueInReader,
-            BinaryReader br, Func<BinaryReader, TState> toStateReader,
-            Action<TPropertyOwner, TState> stateApplier)
-            : this(stateApplier)
-        {
-            if (valueInReader)
-            {
-                Value = toStateReader(br);
-                Changed = true;
-            }
-        }
+        //protected BaseReadOnlyState(bool valueInReader,
+        //    BinaryReader br, Func<BinaryReader, TState> toStateReader,
+        //    Action<TPropertyOwner, TState> stateApplier)
+        //    : this(stateApplier)
+        //{
+        //    if (valueInReader)
+        //    {
+        //        Value = toStateReader(br);
+        //        Changed = true;
+        //    }
+        //}
 
-        protected BaseReadOnlyState(TState value)
+        public BaseReadOnlyState(TState value)
         {
             Value = value;
             Changed = true;
         }
 
-        public abstract void WriteRelativeBinaryTo(BinaryWriter bw);
-        public abstract void WriteAbsoluteBinaryTo(BinaryWriter bw);
+        //public abstract void WriteRelativeBinaryTo(BinaryWriter bw);
+        //public abstract void WriteAbsoluteBinaryTo(BinaryWriter bw);
 
         public void ClearChanges()
         {

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace NeonShooter.AppWarp.States
 {
-    public abstract class BasePropertyState<TProperty, TState> : IState
+    public class BasePropertyState<TProperty, TState> : IState
     {
         Func<TProperty, TState> stateSelector;
         Func<TState, IJsonObject> converter;
@@ -17,7 +17,7 @@ namespace NeonShooter.AppWarp.States
         public IJsonObject RelativeJson { get { return Changed ? AbsoluteJson : new JsonNull(); } }
         public IJsonObject AbsoluteJson { get { return converter(Value); } }
 
-        public int AbsoluteBinarySize { get { throw new NotImplementedException(); } }
+        //public int AbsoluteBinarySize { get { throw new NotImplementedException(); } }
 
         TState value;
         public TState Value
@@ -32,7 +32,7 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
-        protected BasePropertyState(
+        public BasePropertyState(
             JSONNode jsonNode, Func<JSONNode, TState> toStateConverter,
             Action<NotifyingProperty<TProperty>, TState> stateApplier)
         {
@@ -45,20 +45,20 @@ namespace NeonShooter.AppWarp.States
             }
         }
 
-        protected BasePropertyState(bool valueInReader,
-            BinaryReader br, Func<BinaryReader, TState> toStateReader,
-            Action<NotifyingProperty<TProperty>, TState> stateApplier)
-        {
-            this.stateApplier = stateApplier;
+        //public BasePropertyState(bool valueInReader,
+        //    BinaryReader br, Func<BinaryReader, TState> toStateReader,
+        //    Action<NotifyingProperty<TProperty>, TState> stateApplier)
+        //{
+        //    this.stateApplier = stateApplier;
 
-            if (valueInReader)
-            {
-                value = toStateReader(br);
-                Changed = true;
-            }
-        }
+        //    if (valueInReader)
+        //    {
+        //        value = toStateReader(br);
+        //        Changed = true;
+        //    }
+        //}
 
-        protected BasePropertyState(NotifyingProperty<TProperty> property,
+        public BasePropertyState(NotifyingProperty<TProperty> property,
             Func<TProperty, TState> stateSelector,
             Func<TState, IJsonObject> toJsonConverter)
         {
@@ -70,8 +70,8 @@ namespace NeonShooter.AppWarp.States
             property.ValueChanged += property_ValueChanged;
         }
 
-        public abstract void WriteRelativeBinaryTo(BinaryWriter bw);
-        public abstract void WriteAbsoluteBinaryTo(BinaryWriter bw);
+        //public abstract void WriteRelativeBinaryTo(BinaryWriter bw);
+        //public abstract void WriteAbsoluteBinaryTo(BinaryWriter bw);
 
         public void ClearChanges()
         {

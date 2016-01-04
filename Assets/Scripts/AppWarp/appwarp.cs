@@ -12,6 +12,7 @@ using NeonShooter.AppWarp.States;
 using NeonShooter.AppWarp.Events;
 using System.Text;
 using System.IO;
+using NeonShooter.AppWarp.Serializing.Json;
 //using com.shephertz.app42.gaming.multiplayer.client.events;
 //using com.shephertz.app42.gaming.multiplayer.client.listener;
 //using com.shephertz.app42.gaming.multiplayer.client.command;
@@ -40,8 +41,10 @@ namespace NeonShooter.AppWarp
         Player player;
         PlayerState playerState;
         PlayerEvents playerEvents;
+        PlayerStateJsonSerializer playerSerializer;
 
         public static Vector3 newPos = new Vector3(0, 0, 0);
+
         void Start()
         {
             listener.appwarp = GetComponent<appwarp>();
@@ -53,6 +56,8 @@ namespace NeonShooter.AppWarp
             player = GetComponent<Player>();
             playerState = new PlayerState(player);
             playerEvents = new PlayerEvents(this, player);
+
+            playerSerializer = new PlayerStateJsonSerializer(new JsonSerializationDict());
         }
 
         public static ArrayList playerNames = new ArrayList();
@@ -79,7 +84,9 @@ namespace NeonShooter.AppWarp
                     //bw.Write((byte)0); // type of msg
                     lock (playerState)
                     {
-                        var json = playerState.AbsoluteJson as JsonObject;
+                        var json = playerSerializer.SerializeAbsolute(playerState)
+                            //playerState.AbsoluteJson
+                            as JsonObject;
                         json.Append(new JsonPair("Type", "PlayerState")); // TODO: this leads to json with doubled Type : PlayerState. Is there any purpose?
                         SendPlayerState(json, playerName);
 
@@ -110,7 +117,9 @@ namespace NeonShooter.AppWarp
                 //bw.Write((byte)0); // type of msg
                 lock (playerState)
                 {
-                    var json = playerState.RelativeJson as JsonObject;
+                    var json = playerSerializer.SerializeRelative(playerState)
+                        //playerState.RelativeJson
+                        as JsonObject;
                     playerState.ClearChanges();
                     SendPlayerState(json);
 
@@ -221,21 +230,21 @@ namespace NeonShooter.AppWarp
 
         private void InterpretBinaryMessage(string sender, string message)
         {
-            var enemy = enemies[sender].GetComponent<EnemyPlayer>();
+            //var enemy = enemies[sender].GetComponent<EnemyPlayer>();
 
-            byte[] bytes = System.Convert.FromBase64String(message);
-            Debug.Log(System.BitConverter.ToString(bytes).Replace('-', ' '));
-            var ms = new MemoryStream(bytes);
-            var br = new BinaryReader(ms);
+            //byte[] bytes = System.Convert.FromBase64String(message);
+            //Debug.Log(System.BitConverter.ToString(bytes).Replace('-', ' '));
+            //var ms = new MemoryStream(bytes);
+            //var br = new BinaryReader(ms);
 
-            int type = br.ReadByte();
+            //int type = br.ReadByte();
 
-            // PlayerState
-            if (type == 0)
-            {
-                var enemyState = new PlayerState(br, enemy);
-                enemyState.ApplyTo(enemy);
-            }
+            //// PlayerState
+            //if (type == 0)
+            //{
+            //    var enemyState = new PlayerState(br, enemy);
+            //    enemyState.ApplyTo(enemy);
+            //}
             // NOT IMPLEMENTED
             //else if (type.Value == "PlayerEvent")
             //{
