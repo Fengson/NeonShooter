@@ -19,7 +19,7 @@ namespace NeonShooter.Players.Weapons
             if (!color.HasValue) color = ProjectileColor;
 
             var projectileObject = Object.Instantiate(Globals.Instance.projectilePrefab);
-            projectileObject.transform.position = startingPosition;
+            projectileObject.transform.position = startingPosition+shooter.Direction.normalized*(shooter.GetComponent<CapsuleCollider>().radius+0.1f);
             projectileObject.GetComponent<Renderer>().material.color = color.Value;
             var projectile = projectileObject.AddComponent<T>();
             projectile.ParentWeapon = this;
