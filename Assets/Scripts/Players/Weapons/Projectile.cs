@@ -15,6 +15,7 @@ namespace NeonShooter.Players.Weapons
 
         protected virtual void OnTriggerEnter(Collider other)
         {
+			Destroy(this.gameObject);
         }
 
         protected override NotifyingProperty<Vector3> CreatePositionProperty()

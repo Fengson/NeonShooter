@@ -10,8 +10,6 @@ namespace NeonShooter.Players.Weapons
 		protected override void OnTriggerEnter(Collider directHitCollider)
 		{
             Vector3 hitPoint = Position[Access];
-            Destroy(this.gameObject);
-
 
             var player = ParentWeapon.Player as Player;
             if (player == null)
