@@ -30,6 +30,11 @@ namespace NeonShooter.Players.Weapons
             return NotifyingProperty<Vector3>.PublicBoth();
         }
 
+		protected override InvokableAction<ProjectileHit> CreateProjectileHitAction()
+		{
+			return InvokableAction<ProjectileHit>.Public();
+		}
+
         protected override void OnAwake()
         {
             base.OnAwake();

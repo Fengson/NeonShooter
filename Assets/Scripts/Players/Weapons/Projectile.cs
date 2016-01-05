@@ -33,6 +33,11 @@ namespace NeonShooter.Players.Weapons
             return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
         }
 
+		protected override InvokableAction<ProjectileHit> CreateProjectileHitAction()
+		{
+			return InvokableAction<ProjectileHit>.Private(Access);
+		}
+
         protected override void OnUpdate()
         {
             base.OnUpdate();
