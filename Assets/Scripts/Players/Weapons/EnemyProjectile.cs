@@ -55,6 +55,8 @@ namespace NeonShooter.Players.Weapons
             
             Position.ValueChanged += Position_ValueChanged;
             Rotation.ValueChanged += Rotation_ValueChanged;
+
+			ProjectileHit.Action += ProjectileHit_Action;
         }
         
         protected override void OnUpdate()
@@ -77,5 +79,10 @@ namespace NeonShooter.Players.Weapons
             rotationLerp.TargetValue = newValue;
             if (DontLerp) rotationLerp.Progress = 1;
         }
+
+		void ProjectileHit_Action(ProjectileHit hit)
+		{
+			if(hit.Id == this.Id){ Destroy(this.gameObject); }
+		}
     }
 }
