@@ -109,6 +109,8 @@ namespace NeonShooter.Players
         {
         }
 
+		public abstract void GotHit(GameObject shooter, Weapon weapon, int damage);
+
         protected void ChangeSize(int currentRadius, int newRadius)
         {
             var currentR = CalculateColliderRadius(currentRadius);

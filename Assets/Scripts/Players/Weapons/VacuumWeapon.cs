@@ -55,7 +55,7 @@ namespace NeonShooter.Players.Weapons
                     if (Physics.Raycast(shooter.Position.Value, heading, out hit, this.Reach) && hit.collider.gameObject == target)
                     {
                         Debug.Log(hit.collider.name);
-                        shooter.enemyShot(this, target, integerDamage);
+                        target.GetComponent<BasePlayer>().GotHit(shooter.gameObject, this, integerDamage);
                     }
                 }
             }

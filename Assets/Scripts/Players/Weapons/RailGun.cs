@@ -37,7 +37,7 @@ namespace NeonShooter.Players.Weapons
                 {
                     if (target.GetComponent<Collider>() == hitInfo.collider)
                     {
-                        shooter.enemyShot(this, target, Damage*paidCost/AmmoCost);
+						target.GetComponent<BasePlayer>().GotHit(shooter.gameObject, this, Damage*paidCost/AmmoCost);
                         break;
                     }
                 }
