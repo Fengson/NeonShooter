@@ -15,21 +15,6 @@ namespace NeonShooter.Players.Weapons
             DontLerp = true;
         }
 
-        protected override NotifyingProperty<Vector3> CreatePositionProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicBoth();
-        }
-
-        protected override NotifyingProperty<Quaternion> CreateRotationProperty()
-        {
-            return NotifyingProperty<Quaternion>.PublicBoth();
-        }
-
-        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicBoth();
-        }
-
         protected override void OnAwake()
         {
             base.OnAwake();

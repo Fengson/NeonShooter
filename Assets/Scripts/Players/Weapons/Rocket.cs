@@ -9,7 +9,7 @@ namespace NeonShooter.Players.Weapons
 		float explosionReach;
 		protected override void OnTriggerEnter(Collider directHitCollider)
 		{
-            Vector3 hitPoint = Position[Access];
+            Vector3 hitPoint = Position.Value;
             Destroy(this.gameObject);
 
 

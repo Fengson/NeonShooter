@@ -17,27 +17,12 @@ namespace NeonShooter.Players.Weapons
         {
         }
 
-        protected override NotifyingProperty<Vector3> CreatePositionProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Quaternion> CreateRotationProperty()
-        {
-            return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
         protected override void OnUpdate()
         {
             base.OnUpdate();
 
-            Position[Access] = transform.position;
-            Rotation[Access] = transform.rotation;
+            Position.Value = transform.position;
+            Rotation.Value = transform.rotation;
         }
     }
 }

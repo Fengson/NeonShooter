@@ -25,19 +25,19 @@ namespace NeonShooter.Players
 
             CellsInStructure = new NotifyingList<IVector3>();
 
-            Position = NotifyingProperty<Vector3>.PublicBoth();
-            Rotations = NotifyingProperty<Vector2>.PublicBoth();
+            Position = new NotifyingProperty<Vector3>();
+            Rotations = new NotifyingProperty<Vector2>();
             Rotations.ValueChanged += (oldVal, newVal) => RecalculateDirection();
 
-            ContinousFire = NotifyingProperty<bool>.PublicBoth();
-            SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth(DefaultWeapon);
+            ContinousFire = new NotifyingProperty<bool>();
+            SelectedWeapon = new NotifyingProperty<Weapon>(DefaultWeapon);
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
             SpawnedCubelings = new NotifyingList<BaseCubeling>();
 
-            DamageDealt = InvokableAction<Damage>.Public();
-            CubelingPickedUp = InvokableAction<PickUp>.Public();
-            CubelingPickUpAcknowledged = InvokableAction<PickUpAcknowledge>.Public();
+            DamageDealt = new InvokableAction<Damage>();
+            CubelingPickedUp = new InvokableAction<PickUp>();
+            CubelingPickUpAcknowledged = new InvokableAction<PickUpAcknowledge>();
         }
 
         protected override void OnAwake()

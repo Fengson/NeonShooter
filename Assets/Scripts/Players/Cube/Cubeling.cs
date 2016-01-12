@@ -15,21 +15,6 @@ namespace NeonShooter.Players.Cube
             Id = System.DateTime.UtcNow.Ticks;
         }
 
-        protected override NotifyingProperty<Vector3> CreatePositionProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Quaternion> CreateRotationProperty()
-        {
-            return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
         protected override void OnUpdate()
         {
             base.OnUpdate();
@@ -45,9 +30,9 @@ namespace NeonShooter.Players.Cube
             }
 			else if(this.transform.position.y < -150){ this.respawn(); }
 
-            Position[Access] = transform.position;
-            Rotation[Access] = transform.rotation;
-            Velocity[Access] = GetComponent<Rigidbody>().velocity;
+            Position.Value = transform.position;
+            Rotation.Value = transform.rotation;
+            Velocity.Value = GetComponent<Rigidbody>().velocity;
         }
 
 		protected void respawn()
