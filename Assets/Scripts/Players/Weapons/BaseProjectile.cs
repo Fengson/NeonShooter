@@ -7,11 +7,10 @@ namespace NeonShooter.Players.Weapons
     {
         public Weapon ParentWeapon { get; set; }
 		public InvokableAction<ProjectileHit> ProjectileHit { get; protected set; }
-		protected abstract InvokableAction<ProjectileHit> CreateProjectileHitAction();
 
 		public BaseProjectile()
 		{
-			ProjectileHit = CreateProjectileHitAction();
+			ProjectileHit = new InvokableAction<ProjectileHit>();
 		}
     }
 }

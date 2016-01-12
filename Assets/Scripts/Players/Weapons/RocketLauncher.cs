@@ -25,7 +25,7 @@ namespace NeonShooter.Players.Weapons
         make sure to set Reach to whole number, so each flight part length is always 1
         */
         public RocketLauncher(BasePlayer player)
-            : base(player, (int)300, 25, 50)
+            : base(player, (int)300, 25, 1)
         {
             this.ExplosionReach = 5f;
         }

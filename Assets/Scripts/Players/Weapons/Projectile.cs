@@ -15,36 +15,16 @@ namespace NeonShooter.Players.Weapons
 
         protected virtual void OnTriggerEnter(Collider other)
         {
-			this.ProjectileHit.Invoke(new ProjectileHit(this.ParentWeapon.Player, this.Id), this.Access);
+			this.ProjectileHit.Invoke(new ProjectileHit(this.ParentWeapon.Player, this.Id));
 			Destroy(this.gameObject);
         }
-
-        protected override NotifyingProperty<Vector3> CreatePositionProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Quaternion> CreateRotationProperty()
-        {
-            return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
-		protected override InvokableAction<ProjectileHit> CreateProjectileHitAction()
-		{
-			return InvokableAction<ProjectileHit>.Private(Access);
-		}
-
+		
         protected override void OnUpdate()
         {
             base.OnUpdate();
 
-            Position[Access] = transform.position;
-            Rotation[Access] = transform.rotation;
+            Position.Value = transform.position;
+            Rotation.Value = transform.rotation;
         }
 
     }

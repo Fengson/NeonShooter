@@ -9,8 +9,8 @@ namespace NeonShooter.Players.Weapons
 		float explosionReach;
 		protected override void OnTriggerEnter(Collider directHitCollider)
 		{
-            Vector3 hitPoint = Position[Access];
-
+            Vector3 hitPoint = Position.Value;
+            Destroy(this.gameObject);
             var player = ParentWeapon.Player as Player;
             if (player == null)
                 throw new System.Exception(string.Format(
@@ -20,7 +20,7 @@ namespace NeonShooter.Players.Weapons
             var rocketLauncher = ParentWeapon as RocketLauncher;
             if (rocketLauncher != null)
             {
-				int dmg = this.ParentWeapon.Damage*this.CubeValue/this.ParentWeapon.AmmoCost;
+				int dmg = 50; //this.ParentWeapon.Damage*this.CubeValue/this.ParentWeapon.AmmoCost;
                 explodeRocket(player, hitPoint, directHitCollider, rocketLauncher.ExplosionReach, dmg);
             }
 
@@ -33,24 +33,23 @@ namespace NeonShooter.Players.Weapons
 			Collider[] hitColliders = Physics.OverlapSphere(hitPoint, explosionReach);
 			for(int k = 0; k < hitColliders.Length; ++k)
 			{
-				foreach (GameObject target in appwarp.enemies.Values)
+				var c = hitColliders[k];
+				var targetPlayer = c.gameObject.GetComponent<BasePlayer>();
+				if (targetPlayer == null) continue;
+
+				var target = c.gameObject;
+
+				if (hitColliders[k] == directHitCollider)
 				{
-					if (target.GetComponent<Collider>() == hitColliders[k].GetComponent<Collider>())
+					targetPlayer.GotHit(shooter.gameObject, ParentWeapon, dmg);
+				}
+				else
+				{
+					float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
+					Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
+					if (distanceFromExplosion < explosionReach)
 					{
-						if (hitColliders[k] == directHitCollider)
-						{
-							shooter.enemyShot(ParentWeapon, target, dmg);
-						}
-						else
-						{
-							float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
-							Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
-							if (distanceFromExplosion < explosionReach)
-							{
-								shooter.enemyShot(ParentWeapon, target, (int)(dmg * (1.0f - (distanceFromExplosion / explosionReach))));
-							}
-						}
-						break;
+						targetPlayer.GotHit(shooter.gameObject, ParentWeapon, (int)(dmg * (1.0f - (distanceFromExplosion / explosionReach))));
 					}
 				}
 			}

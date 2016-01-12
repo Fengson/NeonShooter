@@ -21,20 +21,20 @@ namespace NeonShooter.Players
         {
             CellsInStructure = new NotifyingList<IVector3>();
 
-            Position = NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-            Rotations = NotifyingProperty<Vector2>.PublicGetPrivateSet(Access);
+            Position = new NotifyingProperty<Vector3>();
+            Rotations = new NotifyingProperty<Vector2>();
             Rotations.ValueChanged += (oldVal, newVal) => RecalculateDirection();
 
-            SelectedWeapon = NotifyingProperty<Weapon>.PublicGetPrivateSet(Access, DefaultWeapon);
-            SelectedWeapon.ValueChanged += (oldVal, newVal) => ContinousFire[Access] = false;
-            ContinousFire = NotifyingProperty<bool>.PublicGetPrivateSet(Access);
+            SelectedWeapon = new NotifyingProperty<Weapon>(DefaultWeapon);
+            SelectedWeapon.ValueChanged += (oldVal, newVal) => ContinousFire.Value = false;
+            ContinousFire = new NotifyingProperty<bool>();
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
             SpawnedCubelings = new NotifyingList<BaseCubeling>();
 
-            DamageDealt = InvokableAction<Damage>.Private(Access);
-            CubelingPickedUp = InvokableAction<PickUp>.Private(Access);
-            CubelingPickUpAcknowledged = InvokableAction<PickUpAcknowledge>.Private(Access);
+            DamageDealt = new InvokableAction<Damage>();
+            CubelingPickedUp = new InvokableAction<PickUp>();
+            CubelingPickUpAcknowledged = new InvokableAction<PickUpAcknowledge>();
         }
 
         protected override void OnAwake()
@@ -58,10 +58,10 @@ namespace NeonShooter.Players
                 aimRotationSpeed = Mathf.Min(-90, aimRotationSpeed + Time.deltaTime * 500);
             this.aim.transform.Rotate(new Vector3(0, 0, aimRotationSpeed * Time.deltaTime));
 
-            Position[Access] = transform.position;
+            Position.Value = transform.position;
 
             var cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
-            Rotations[Access] = new Vector2(
+            Rotations.Value = new Vector2(
                 cameraObject.transform.eulerAngles.x,
                 cameraObject.transform.eulerAngles.y);
 
@@ -107,7 +107,7 @@ namespace NeonShooter.Players
                     }
                     else if (cubeling is EnemyCubeling)
                     {
-                        CubelingPickedUp.Invoke(new PickUp(cubeling.Spawner, this, cubeling.Id), Access);
+                        CubelingPickedUp.Invoke(new PickUp(cubeling.Spawner, this, cubeling.Id));
                     }
                 }
             }
@@ -144,23 +144,24 @@ namespace NeonShooter.Players
 
         void OnShootStart()
         {
-            ContinousFire[Access] = true;
+            ContinousFire.Value = true;
             SelectedWeapon.Value.OnShootStart(this);
         }
 
         void OnShootEnd()
         {
-            ContinousFire[Access] = false;
+            ContinousFire.Value = false;
             SelectedWeapon.Value.OnShootEnd();
-        }
+		}
 
-        public void enemyShot(Weapon weapon, GameObject enemy, int damage)
+		public override void GotHit(GameObject shooter, Weapon weapon, int damageValue)
+		{
+            GetDamaged(new Damage(shooter.GetComponent<BasePlayer>(), this, damageValue, CubelingSpawnEffect.Scatter));
+		}
+
+		public void DealDamageTo(EnemyPlayer enemy, Weapon weapon, int damageValue)
         {
-            //deal damage to enemy
-            EnemyPlayer enemyScript = enemy.GetComponent<EnemyPlayer>();
-            DamageDealt.Invoke(new Damage(this, enemyScript, damage, weapon.DamageEffect), Access);
-
-            Debug.Log(enemy.GetComponent<Collider>().name + " got shot with " + weapon.Name + " for " + damage + " damage");
+            DamageDealt.Invoke(new Damage(this, enemy, damageValue, weapon.DamageEffect));
         }
 
         public void ChangeWeaponToNext()
@@ -173,7 +174,7 @@ namespace NeonShooter.Players
                 var candidate = Weapons[index];
                 if (CanUseWeapon(candidate))
                 {
-                    SelectedWeapon[Access] = candidate;
+                    SelectedWeapon.Value = candidate;
                     break;
                 }
             }
@@ -221,7 +222,7 @@ namespace NeonShooter.Players
                     accepted = true;
                 }
             }
-            CubelingPickUpAcknowledged.Invoke(new PickUpAcknowledge(pickUp, accepted), Access);
+            CubelingPickUpAcknowledged.Invoke(new PickUpAcknowledge(pickUp, accepted));
         }
 
         protected override void ChangeSizeDetails(float oldRadius, float newRadius)

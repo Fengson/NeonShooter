@@ -25,19 +25,19 @@ namespace NeonShooter.Players
 
             CellsInStructure = new NotifyingList<IVector3>();
 
-            Position = NotifyingProperty<Vector3>.PublicBoth();
-            Rotations = NotifyingProperty<Vector2>.PublicBoth();
+            Position = new NotifyingProperty<Vector3>();
+            Rotations = new NotifyingProperty<Vector2>();
             Rotations.ValueChanged += (oldVal, newVal) => RecalculateDirection();
 
-            ContinousFire = NotifyingProperty<bool>.PublicBoth();
-            SelectedWeapon = NotifyingProperty<Weapon>.PublicBoth(DefaultWeapon);
+            ContinousFire = new NotifyingProperty<bool>();
+            SelectedWeapon = new NotifyingProperty<Weapon>(DefaultWeapon);
 
             LaunchedProjectiles = new NotifyingList<BaseProjectile>();
             SpawnedCubelings = new NotifyingList<BaseCubeling>();
 
-            DamageDealt = InvokableAction<Damage>.Public();
-            CubelingPickedUp = InvokableAction<PickUp>.Public();
-            CubelingPickUpAcknowledged = InvokableAction<PickUpAcknowledge>.Public();
+            DamageDealt = new InvokableAction<Damage>();
+            CubelingPickedUp = new InvokableAction<PickUp>();
+            CubelingPickUpAcknowledged = new InvokableAction<PickUpAcknowledge>();
         }
 
         protected override void OnAwake()
@@ -101,7 +101,14 @@ namespace NeonShooter.Players
             var collider = GetComponent<CapsuleCollider>();
             collider.radius = newRadius;
             collider.height = 2 * newRadius;
-        }
+		}
+
+		public override void GotHit(GameObject shooter, Weapon weapon, int damageValue)
+		{
+			var player = shooter.GetComponent<Player>();
+			player.DealDamageTo(this, weapon, damageValue);
+			Debug.Log(GetComponent<Collider>().name + " got hit with " + weapon.Name + " for " + damageValue + " damage");
+		}
 
         void CellsInStructure_ListChanged(NotifyingListEventArgs<IVector3> e)
         {
