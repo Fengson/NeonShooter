@@ -130,6 +130,9 @@ namespace NeonShooter
         public Material invisibleShadowCasterMaterial;
         public GameObject projectilePrefab;
         public GameObject playerCubelingPrefab;
+		public GameObject playerCubelingPrefabSize5;
+		public GameObject playerCubelingPrefabSize15;
+		public GameObject playerCubelingPrefabSize25;
         public GameObject enemyCubelingPrefab;
         public GameObject vacuumConePrefab;
 

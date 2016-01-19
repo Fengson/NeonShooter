@@ -82,14 +82,14 @@ namespace NeonShooter.Players
                     else if (Input.GetMouseButtonUp(0))
                         OnShootEnd();
 					else {
-						UnityStandardAssets.ImageEffects.BloomOptimized lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.BloomOptimized>()[0];
-						if (lvScript.threshold > 0.0f) {
-							lvScript.threshold -= 0.05f;
-						}
+//						UnityStandardAssets.ImageEffects.BloomOptimized lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.BloomOptimized>()[0];
+//						if (lvScript.threshold > 0.0f) {
+//							lvScript.threshold -= 0.05f;
+//						}
 						
-						if (lvScript.intensity > 0.0f) {
-							lvScript.intensity -= 0.15f;
-						}
+//						if (lvScript.intensity > 0.0f) {
+//							lvScript.intensity -= 0.15f;
+//						}
 					}
 					break;
 				default:
@@ -112,8 +112,9 @@ namespace NeonShooter.Players
                     // TODO: polymorphic
                     if (cubeling is Cubeling)
                     {
+						Cubeling lvCubeling = other.GetComponent<Cubeling> ();
                         Destroy(other.gameObject);
-                        GainLife(1);
+						GainLife(lvCubeling.size);
                         if (sounds[0] != null)
                             GetComponent<AudioSource>().PlayOneShot(sounds[0].clip);
                     }
@@ -153,14 +154,14 @@ namespace NeonShooter.Players
             if (!CanUseWeapon(SelectedWeapon.Value))
                 ChangeWeaponToNext();
 
-			UnityStandardAssets.ImageEffects.BloomOptimized lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.BloomOptimized>()[0];
-			if (lvScript.threshold <= 0.25f) {
-				lvScript.threshold += 0.05f;
-			}
+			//UnityStandardAssets.ImageEffects.BloomOptimized lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.BloomOptimized>()[0];
+			//if (lvScript.threshold <= 0.25f) {
+			//	lvScript.threshold += 0.05f;
+			//}
 
-			if (lvScript.intensity <= 0.75f) {
-				lvScript.intensity += 0.15f;
-			}
+			//if (lvScript.intensity <= 0.75f) {
+			//	lvScript.intensity += 0.15f;
+			//}
         }
 
         void OnShootStart()
@@ -168,8 +169,8 @@ namespace NeonShooter.Players
             ContinousFire[Access] = true;
             SelectedWeapon.Value.OnShootStart(this);
 
-			UnityStandardAssets.ImageEffects.ScreenOverlay lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.ScreenOverlay>()[0];
-			lvScript.enabled = true;
+			//UnityStandardAssets.ImageEffects.ScreenOverlay lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.ScreenOverlay>()[0];
+			//lvScript.enabled = true;
 			//lvScript.threshold = 0;
 			//lvScript.intensity = 0;
         }
@@ -179,8 +180,8 @@ namespace NeonShooter.Players
             ContinousFire[Access] = false;
             SelectedWeapon.Value.OnShootEnd();
 
-			UnityStandardAssets.ImageEffects.ScreenOverlay lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.ScreenOverlay>()[0];
-			lvScript.enabled = false;
+			//UnityStandardAssets.ImageEffects.ScreenOverlay lvScript = GetComponentsInChildren<UnityStandardAssets.ImageEffects.ScreenOverlay>()[0];
+			//lvScript.enabled = false;
 
         }
 
@@ -272,15 +273,43 @@ namespace NeonShooter.Players
 
         public void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
         {
-            foreach (IVector3 p in relativePositions)
-                SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect);
+            //foreach (IVector3 p in relativePositions)
+            //    SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect);
+
+			SpawnCubelingsInFrontOfPlayer(relativePositions.Capacity, effect);
         }
 
-        public void SpawnCubeling(Vector3 position, Vector3 scatterVelocity, CubelingSpawnEffect effect)
+        public void SpawnCubeling(Vector3 position, Vector3 scatterVelocity, CubelingSpawnEffect effect, int pmSize)
         {
-            GameObject cubelingObject = (GameObject)Instantiate(
-                Globals.Instance.playerCubelingPrefab,
-                position, transform.rotation);
+			GameObject cubelingObject;
+
+			switch (pmSize) 
+			{
+				case 5:
+					cubelingObject = (GameObject)Instantiate(
+					Globals.Instance.playerCubelingPrefabSize5,
+					position, transform.rotation);
+					break;
+				case 15:
+				cubelingObject = (GameObject)Instantiate(
+					Globals.Instance.playerCubelingPrefabSize15,
+					position, transform.rotation);
+					break;
+				case 25:
+					cubelingObject = (GameObject)Instantiate(
+					Globals.Instance.playerCubelingPrefabSize25,
+					position, transform.rotation);
+					break;
+				case 1:
+				default:
+				cubelingObject = (GameObject)Instantiate(
+					Globals.Instance.playerCubelingPrefab,
+					position, transform.rotation);
+				break;
+				break;
+			}
+
+            
             Cubeling cubeling = cubelingObject.GetComponent<Cubeling>();
             CubelingsById[cubeling.Id] = cubeling;
             cubeling.Spawner = this;
@@ -299,20 +328,75 @@ namespace NeonShooter.Players
         public void SpawnCubelingsInFrontOfPlayer(int cubelingsAmount, CubelingSpawnEffect effect)
         {
             Vector3 cubelingsSpawnPosition = Position.Value+Direction*5;
-            for(int i=0;i<cubelingsAmount;i++)
-            {
-                SpawnCubeling(cubelingsSpawnPosition, Direction, effect);
-            }
+ 
+			SpawnChunkCubelings (cubelingsSpawnPosition, Direction, cubelingsAmount, effect);
         }
 
         public void SpawnCubelingsInPosition(Vector3 cubelingsSpawnPosition, int cubelingsAmount, CubelingSpawnEffect effect)
         {
             //assigning 0 velocity with cubelings spawned all in same position will take effect in random cubelings collisions, giving nice explosion effect
             Vector3 velocity = new Vector3();
-            for(int i=0;i<cubelingsAmount;i++)
-            {
-                SpawnCubeling(cubelingsSpawnPosition, velocity, effect);
-            }
+
+			SpawnChunkCubelings (cubelingsSpawnPosition, velocity, cubelingsAmount, effect);
         }
+
+		public void SpawnChunkCubelings(Vector3 pmCubelingsSpawnPosition, Vector3 pmVelocity, int pmCubelingsAmount, CubelingSpawnEffect pmEffect)
+		{
+			int lvCubelingsAmount = pmCubelingsAmount;
+			int lvCubes25Amount = calculateCubelingsAmount (lvCubelingsAmount, 25);
+
+			// pomniejszamy ogolna liczbe kostek o kostki, ktore weszly do puli kostek o wartosci 25
+			lvCubelingsAmount -= lvCubes25Amount * 25;
+
+			if (lvCubelingsAmount == 0 && lvCubes25Amount > 0) {
+				lvCubes25Amount --;
+				lvCubelingsAmount += 25;
+			}
+
+			int lvCubes15Amount = calculateCubelingsAmount (lvCubelingsAmount, 15);
+
+			// pomniejszamy ogolna liczbe kostek o kostki, ktore weszly do puli kostek o wartosci 15
+			lvCubelingsAmount -= lvCubes15Amount * 15;
+
+			if (lvCubelingsAmount == 0 && lvCubes15Amount > 0) {
+				lvCubes15Amount --;
+				lvCubelingsAmount += 15;
+			}
+
+
+			int lvCubes5Amount = calculateCubelingsAmount (lvCubelingsAmount, 5);
+
+			// pomniejszamy ogolna liczbe kostek o kostki, ktore weszly do puli kostek o wartosci 15
+			lvCubelingsAmount -= lvCubes5Amount * 5;
+
+			if (lvCubelingsAmount == 0 && lvCubes5Amount > 0) {
+				lvCubes5Amount --;
+				lvCubelingsAmount += 5;
+			}
+
+			for (int i = 0; i < lvCubes25Amount; i++) {
+				SpawnCubeling (pmCubelingsSpawnPosition, pmVelocity, pmEffect,25);
+			}
+
+			for (int i = 0; i < lvCubes15Amount; i++) {
+				SpawnCubeling (pmCubelingsSpawnPosition, pmVelocity, pmEffect,15);
+			}
+
+			for (int i = 0; i < lvCubes5Amount; i++) {
+				SpawnCubeling (pmCubelingsSpawnPosition, pmVelocity, pmEffect,5);
+			}
+
+			for (int i = 0; i < lvCubelingsAmount; i++) {
+				SpawnCubeling (pmCubelingsSpawnPosition, pmVelocity, pmEffect,1);
+			}
+		}
+
+		/*
+		 * Metoda oblicza ile kostek danej wielkosci mozna stworzyc z danej liczby kostek
+		 */
+		private int calculateCubelingsAmount(int pmCubelingAmount, int pmCubelingSize)
+		{
+			return (pmCubelingAmount - (pmCubelingAmount % pmCubelingSize))/pmCubelingSize;
+		}
     }
 }

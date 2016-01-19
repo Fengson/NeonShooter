@@ -10,6 +10,8 @@ namespace NeonShooter.Players.Cube
 
         public override bool Pickable { get { return SpawnerPickDelay == 0; } }
 
+		public int size;
+
         private Cubeling()
         {
             Id = System.DateTime.UtcNow.Ticks;
