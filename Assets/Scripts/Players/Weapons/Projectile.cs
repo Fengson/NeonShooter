@@ -15,8 +15,10 @@ namespace NeonShooter.Players.Weapons
 
         protected virtual void OnTriggerEnter(Collider other)
         {
+			this.ProjectileHit.Invoke(new ProjectileHit(this.ParentWeapon.Player, this.Id));
+			Destroy(this.gameObject);
         }
-
+		
         protected override void OnUpdate()
         {
             base.OnUpdate();
@@ -24,5 +26,6 @@ namespace NeonShooter.Players.Weapons
             Position.Value = transform.position;
             Rotation.Value = transform.rotation;
         }
+
     }
 }

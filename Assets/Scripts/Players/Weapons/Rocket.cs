@@ -11,8 +11,6 @@ namespace NeonShooter.Players.Weapons
 		{
             Vector3 hitPoint = Position.Value;
             Destroy(this.gameObject);
-
-
             var player = ParentWeapon.Player as Player;
             if (player == null)
                 throw new System.Exception(string.Format(
@@ -47,8 +45,6 @@ namespace NeonShooter.Players.Weapons
 				}
 				else
 				{
-					// i <3 mono... -.-
-
 					float distanceFromExplosion = Vector3.Distance(hitPoint, hitColliders[k].ClosestPointOnBounds(hitPoint));
 					Debug.Log("Explosion distance from " + hitColliders[k].name + " is " + distanceFromExplosion);
 					if (distanceFromExplosion < explosionReach)
