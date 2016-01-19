@@ -28,12 +28,17 @@ namespace NeonShooter.Players.Cube
                 transform.position = Vector3.MoveTowards(transform.position, TargetPlayer.transform.position, step);
                 transform.eulerAngles = new Vector3(1, 1, 1); // TODO: what is this - fixed orientation 1 deg around every axis? what's the purpose?
             }
-			else if(this.transform.position.y < -150){ this.respawn(); }
 
             Position.Value = transform.position;
             Rotation.Value = transform.rotation;
             Velocity.Value = GetComponent<Rigidbody>().velocity;
         }
+
+		void OnCollisionEnter(Collision collision)
+		{
+			var other = collision.collider;
+			if(other.CompareTag("SkyBox")){ this.respawn(); }
+		}
 
 		protected void respawn()
 		{
