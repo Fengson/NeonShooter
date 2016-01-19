@@ -235,7 +235,7 @@ namespace NeonShooter.Players
         {
             Vector3 oldPosition = transform.position;
             List<IVector3> cubelingPositions = CubeStructure.RetrieveCells(damage.Amount);
-            SpawnCubelings(cubelingPositions, oldPosition, damage.Effect);
+            SpawnCubelings(cubelingPositions, oldPosition, damage.Effect, (EnemyPlayer)damage.Source);
         }
 
         public void AcknowledgePickUp(PickUp pickUp)
@@ -271,11 +271,8 @@ namespace NeonShooter.Players
             else CellsInStructure.Remove(position);
         }
 
-        public void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect)
+        public void SpawnCubelings(List<IVector3> relativePositions, Vector3 absolutePosition, CubelingSpawnEffect effect, EnemyPlayer shooter = null)
         {
-            //foreach (IVector3 p in relativePositions)
-            //    SpawnCubeling(p + absolutePosition, p * Globals.CubelingScatterVelocityFactor, effect);
-
 			SpawnCubelingsInFrontOfPlayer(relativePositions.Capacity, effect);
         }
 
