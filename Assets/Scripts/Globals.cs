@@ -139,7 +139,7 @@ namespace NeonShooter
 
         public GameObject TEMP_selectedMap;
 
-        void Awake()
+        void Start()
         {
             if (TEMP_selectedMap == null)
                 throw new System.Exception("Globals: MAP IS NOT SELECTED.");
