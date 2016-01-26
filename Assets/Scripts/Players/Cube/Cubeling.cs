@@ -17,21 +17,6 @@ namespace NeonShooter.Players.Cube
             Id = System.DateTime.UtcNow.Ticks;
         }
 
-        protected override NotifyingProperty<Vector3> CreatePositionProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Quaternion> CreateRotationProperty()
-        {
-            return NotifyingProperty<Quaternion>.PublicGetPrivateSet(Access);
-        }
-
-        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicGetPrivateSet(Access);
-        }
-
         protected override void OnUpdate()
         {
             base.OnUpdate();
@@ -46,10 +31,27 @@ namespace NeonShooter.Players.Cube
                 transform.eulerAngles = new Vector3(1, 1, 1); // TODO: what is this - fixed orientation 1 deg around every axis? what's the purpose?
             }
 
-            Position[Access] = transform.position;
-            Rotation[Access] = transform.rotation;
-            Velocity[Access] = GetComponent<Rigidbody>().velocity;
+            Position.Value = transform.position;
+            Rotation.Value = transform.rotation;
+            Velocity.Value = GetComponent<Rigidbody>().velocity;
         }
 
+		void OnCollisionEnter(Collision collision)
+		{
+			var other = collision.collider;
+			if(other.CompareTag("SkyBox")){ this.respawn(); }
+		}
+
+		protected void respawn()
+		{
+			GameObject[] spawns = GameObject.FindGameObjectsWithTag("CubelingRespawn");
+			if(spawns.Length > 0)
+			{
+				int spawn_index = Mathf.RoundToInt(Random.Range(0.0f, spawns.Length-1.0f));
+				GameObject spawn = spawns[spawn_index];
+				this.transform.position = spawn.transform.position;
+			}
+			GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+		}
     }
 }

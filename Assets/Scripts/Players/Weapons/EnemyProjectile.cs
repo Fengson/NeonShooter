@@ -15,21 +15,6 @@ namespace NeonShooter.Players.Weapons
             DontLerp = true;
         }
 
-        protected override NotifyingProperty<Vector3> CreatePositionProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicBoth();
-        }
-
-        protected override NotifyingProperty<Quaternion> CreateRotationProperty()
-        {
-            return NotifyingProperty<Quaternion>.PublicBoth();
-        }
-
-        protected override NotifyingProperty<Vector3> CreateVelocityProperty()
-        {
-            return NotifyingProperty<Vector3>.PublicBoth();
-        }
-
         protected override void OnAwake()
         {
             base.OnAwake();
@@ -50,6 +35,8 @@ namespace NeonShooter.Players.Weapons
             
             Position.ValueChanged += Position_ValueChanged;
             Rotation.ValueChanged += Rotation_ValueChanged;
+
+			ProjectileHit.Action += ProjectileHit_Action;
         }
         
         protected override void OnUpdate()
@@ -72,5 +59,10 @@ namespace NeonShooter.Players.Weapons
             rotationLerp.TargetValue = newValue;
             if (DontLerp) rotationLerp.Progress = 1;
         }
+
+		void ProjectileHit_Action(ProjectileHit hit)
+		{
+			if(hit.Id == this.Id){ Destroy(this.gameObject); }
+		}
     }
 }

@@ -25,14 +25,10 @@ namespace NeonShooter.Players
             Access = new object();
             this.id = id;
 
-            Position = CreatePositionProperty();
-            Rotation = CreateRotationProperty();
-            Velocity = CreateVelocityProperty();
+            Position = new NotifyingProperty<Vector3>();
+            Rotation = new NotifyingProperty<Quaternion>();
+            Velocity = new NotifyingProperty<Vector3>();
         }
-
-        protected abstract NotifyingProperty<Vector3> CreatePositionProperty();
-        protected abstract NotifyingProperty<Quaternion> CreateRotationProperty();
-        protected abstract NotifyingProperty<Vector3> CreateVelocityProperty();
 
         void Awake()
         {

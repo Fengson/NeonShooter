@@ -139,5 +139,17 @@ namespace NeonShooter
         public LayerMask playersLayer;
         public LayerMask atomsLayer;
 		public LayerMask cubelingsLayer;
+
+        public GameObject TEMP_selectedMap;
+
+        void Start()
+        {
+            if (TEMP_selectedMap == null)
+                throw new System.Exception("Globals: MAP IS NOT SELECTED.");
+            if (TEMP_selectedMap.tag != "Map")
+                throw new System.Exception("Globals: SELECTED MAP'S TAG IS NOT \"Map\"");
+
+            GameObject.Instantiate(TEMP_selectedMap, Vector3.zero, Quaternion.identity);
+        }
     }
 }

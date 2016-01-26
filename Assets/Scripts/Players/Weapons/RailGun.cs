@@ -16,7 +16,7 @@ namespace NeonShooter.Players.Weapons
         public override string Name { get { return "Rail Gun"; } }
 
         public RailGun(BasePlayer player)
-            : base(player, 150, 900, 10)
+            : base(player, 48, 900, 10)
         {
         }
 
@@ -37,7 +37,7 @@ namespace NeonShooter.Players.Weapons
                 {
                     if (target.GetComponent<Collider>() == hitInfo.collider)
                     {
-                        shooter.enemyShot(this, target, Damage*paidCost/AmmoCost);
+						target.GetComponent<BasePlayer>().GotHit(shooter.gameObject, this, Damage*paidCost/AmmoCost);
                         break;
                     }
                 }

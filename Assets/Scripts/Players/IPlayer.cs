@@ -2,6 +2,7 @@
 using NeonShooter.Utils;
 using System.Collections.Generic;
 using UnityEngine;
+using NeonShooter.Players.Cube;
 
 namespace NeonShooter.Players
 {
@@ -18,5 +19,7 @@ namespace NeonShooter.Players
         INotifyingList<BaseProjectile> LaunchedProjectiles { get; }
 
         InvokableAction<Damage> DamageDealt { get; }
+        InvokableAction<PickUp> CubelingPickedUp { get; }
+        InvokableAction<PickUpAcknowledge> CubelingPickUpAcknowledged { get; }
     }
 }
