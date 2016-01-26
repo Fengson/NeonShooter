@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using NeonShooter.Players;
 
 namespace NeonShooter
 {
@@ -129,6 +130,7 @@ namespace NeonShooter
 
         public Material invisibleShadowCasterMaterial;
         public GameObject projectilePrefab;
+		public GameObject playerPrefab;
         public GameObject playerCubelingPrefab;
 		public GameObject playerCubelingPrefabSize5;
 		public GameObject playerCubelingPrefabSize15;
@@ -148,8 +150,14 @@ namespace NeonShooter
                 throw new System.Exception("Globals: MAP IS NOT SELECTED.");
             if (TEMP_selectedMap.tag != "Map")
                 throw new System.Exception("Globals: SELECTED MAP'S TAG IS NOT \"Map\"");
+			if (playerPrefab == null)
+				throw new System.Exception("Globals: MISSING PLAYER PREFAB.");
+			else if (playerPrefab.tag != "Player")
+				throw new System.Exception("Globals: SELECTED PLAYER'S TAG IS NOT \"Player\"");
 
             GameObject.Instantiate(TEMP_selectedMap, Vector3.zero, Quaternion.identity);
+			Player p = ((GameObject)GameObject.Instantiate(playerPrefab, Vector3.zero, Quaternion.identity)).GetComponent<Player>();
+			p.respawn();
         }
     }
 }
