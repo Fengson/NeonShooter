@@ -392,5 +392,21 @@ namespace NeonShooter.Players
 		{
 			return (pmCubelingAmount - (pmCubelingAmount % pmCubelingSize))/pmCubelingSize;
 		}
+
+		void OnTriggerEnter(Collider other)
+		{
+			if(other.CompareTag("SkyBox")){ this.respawn(); }
+		}
+
+		protected void respawn()
+		{
+			GameObject[] spawns = GameObject.FindGameObjectsWithTag("PlayerRespawn");
+			if(spawns.Length > 0)
+			{
+				int spawn_index = Mathf.RoundToInt(Random.Range(0.0f, spawns.Length-1.0f));
+				GameObject spawn = spawns[spawn_index];
+				this.transform.position = spawn.transform.position;
+			}
+		}
     }
 }
