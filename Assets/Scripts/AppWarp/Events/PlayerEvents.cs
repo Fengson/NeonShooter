@@ -1,6 +1,7 @@
 ﻿using NeonShooter.Players;
 using NeonShooter.Utils;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace NeonShooter.AppWarp.Events
 {
@@ -16,6 +17,7 @@ namespace NeonShooter.AppWarp.Events
         public DamageDealtEvent DamageDealt { get; private set; }
         public CubelingPickedUpEvent CubelingPickedUp { get; private set; }
         public CubelingPickUpAcknowledgedEvent CubelingPickUpAcknowledged { get; private set; }
+        public ProjectileHitEvent ProjectileHitEvent { get; private set; }
 
         public PlayerEvents(appwarp appwarp, Player player)
         {
